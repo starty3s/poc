@@ -2,62 +2,35 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<title>Video Stabil</title>
+<title>Autoplay Video + Redirect</title>
 
 <style>
 body{
+    margin:0;
+    background:#111;
     display:flex;
     justify-content:center;
     align-items:center;
     height:100vh;
-    background:#111;
-}
-
-button{
-    padding:20px 40px;
-    font-size:20px;
-    border-radius:12px;
-    cursor:pointer;
-}
-
-.putar{
-    animation: putar 1s linear infinite;
-}
-
-@keyframes putar{
-    from{transform:rotate(0deg);}
-    to{transform:rotate(360deg);}
 }
 
 video{
-    display:none;
+    width:100%;
+    height:100%;
+    object-fit:cover;
 }
 </style>
 </head>
 <body>
 
-<button id="btn" onclick="mulai()">
-    Klik Saya
-</button>
-
-<!-- ganti audio jadi video -->
-<video id="video" src="vide0.mp4" loop></video>
+<video autoplay muted loop playsinline>
+    <source src="vide0.mp4" type="video/mp4">
+</video>
 
 <script>
-function mulai(){
-
-    document.getElementById("btn").classList.add("putar");
-
-    const video = document.getElementById("video");
-    video.play();
-
-    history.pushState({}, "", "/redirected");
-
-    // Google dibuka di tab baru
-    window.open("https://google.com", "_blank");
-
-    // halaman ini tetap hidup → video tetap jalan
-}
+setTimeout(() => {
+    window.location.href = "https://google.com";
+}, 5000); // 5000 ms = 5 detik
 </script>
 
 </body>
