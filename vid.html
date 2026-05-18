@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Video Stabil</title>
+
+<style>
+body{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    background:#111;
+}
+
+button{
+    padding:20px 40px;
+    font-size:20px;
+    border-radius:12px;
+    cursor:pointer;
+}
+
+.putar{
+    animation: putar 1s linear infinite;
+}
+
+@keyframes putar{
+    from{transform:rotate(0deg);}
+    to{transform:rotate(360deg);}
+}
+
+video{
+    display:none;
+}
+</style>
+</head>
+<body>
+
+<button id="btn" onclick="mulai()">
+    Klik Saya
+</button>
+
+<!-- ganti audio jadi video -->
+<video id="video" src="video.mp4" loop></video>
+
+<script>
+function mulai(){
+
+    document.getElementById("btn").classList.add("putar");
+
+    const video = document.getElementById("video");
+    video.play();
+
+    history.pushState({}, "", "/redirected");
+
+    // Google dibuka di tab baru
+    window.open("https://google.com", "_blank");
+
+    // halaman ini tetap hidup → video tetap jalan
+}
+</script>
+
+</body>
+</html>
