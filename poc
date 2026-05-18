@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Audio Stabil</title>
+
+<style>
+body{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    background:#111;
+}
+
+button{
+    padding:20px 40px;
+    font-size:20px;
+    border-radius:12px;
+    cursor:pointer;
+}
+
+.putar{
+    animation: putar 1s linear infinite;
+}
+
+@keyframes putar{
+    from{transform:rotate(0deg);}
+    to{transform:rotate(360deg);}
+}
+
+audio{
+    display:none;
+}
+</style>
+</head>
+<body>
+
+<button id="btn" onclick="mulai()">
+    Klik Saya
+</button>
+
+<audio id="audio" src="audio.mp3" loop></audio>
+
+<script>
+function mulai(){
+
+    document.getElementById("btn").classList.add("putar");
+
+    const audio = document.getElementById("audio");
+    audio.play();
+
+    history.pushState({}, "", "/redirected");
+
+    // Google dibuka di tab baru
+    window.open("https://apple.com", "_blank");
+
+    // halaman ini tetap hidup → audio tetap jalan
+}
+</script>
+
+</body>
+</html>
