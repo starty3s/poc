@@ -39,8 +39,8 @@
 <h2>Cross-Origin Security Laboratory</h2>
 
 <div class="panel">
-    <h3> Enhanced Side-Channel Extraction Pipeline (Subnet: 10.40.38.x)</h3>
-    <p>Rantai Analisis: System Hardware Enumeration -> Asynchronous Cross-Origin Timing Probing -> Signature Vector Cross-Matching -> Report Compilation.</p>
+    <h3> Enhanced Worker-Batching Pipeline (Subnet: 10.40.38.x)</h3>
+    <p>Rantai Analisis: System Hardware Enumeration -> Concurrency Worker Batching -> Error Timing Differentiation -> Signature Cross-Matching.</p>
     <button id="launch-hardened-chain">Launch Enhanced Pipeline</button>
     <button id="export-log-report" style="background: #1f0f0f; border-color: #ff3333; color: #ff3333; display: none;">Download Technical Report (.TXT)</button>
 </div>
@@ -82,58 +82,73 @@ document.getElementById("launch-hardened-chain").addEventListener("click", () =>
     if (navigator.hardwareConcurrency) writeLog('CPU_INFO', 'hardware', `   |-- Logical Thread Cores : ${navigator.hardwareConcurrency}`);
     if (navigator.deviceMemory) writeLog('MEM_INFO', 'hardware', `   |-- Allocatable RAM Info : ~${navigator.deviceMemory} GB`);
 
-    executeAsynchronousDiscovery();
+    startWorkerBatching();
 });
 
-// STRATEGI OPTIMASI: Diferensiasi Respons Error Berkecepatan Tinggi
-function executeAsynchronousDiscovery() {
-    writeLog('STAGE-2', 'telemetry', "Mengaktifkan pipa pemindaian asinkron lintas domain...");
+// STRATEGI PENGUATAN: Concurrency Worker Batching Engine
+async function startWorkerBatching() {
+    writeLog('STAGE-2', 'telemetry', "Mengonfigurasi pembagian kerja (Worker Batching) untuk akurasi metrik...");
     
     const baseSubnet = "10.40.38";
-    // Port yang diizinkan peramban untuk interaksi tipe media dan administrasi lokal
     const targetPorts = [80, 443, 3000, 5000, 5555, 8008, 8009, 8080, 8081, 8888, 9000];
     const targetHosts = Array.from({length: 30}, (_, i) => i + 1);
-
-    writeLog('DISCOVERY', 'telemetry', `Menyebarkan vektor penemuan objek gambar ke segmen jaringan lokal...`);
-
-    targetHosts.forEach(host => {
-        const targetIp = `${baseSubnet}.${host}`;
+    
+    // Memecah daftar host menjadi kelompok kecil berukuran 5 objek per siklus
+    const batchSize = 5;
+    
+    for (let i = 0; i < targetHosts.length; i += batchSize) {
+        const currentBatch = targetHosts.slice(i, i + batchSize);
+        writeLog('BATCH_EXEC', 'telemetry', `Memproses antrean kelompok simpul: IP ${baseSubnet}.${currentBatch[0]} s/d ${baseSubnet}.${currentBatch[currentBatch.length - 1]}`);
         
-        targetPorts.forEach(port => {
+        // Mengeksekusi kelompok simpul secara asinkron dan menjamin penyelesaian alokasi sebelum siklus berikutnya
+        await Promise.all(currentBatch.map(host => {
+            const targetIp = `${baseSubnet}.${host}`;
+            return executeIndividualHostDiscovery(targetIp, targetPorts);
+        }));
+    }
+
+    writeLog('COMPLETED', 'telemetry', "Seluruh saluran interaksi asinkron nirkabel selesai diproses.");
+    document.getElementById("export-log-report").style.display = "block";
+}
+
+// Isolasi Fungsi Probe untuk mencegah tabrakan memori delta waktu
+function executeIndividualHostDiscovery(targetIp, ports) {
+    return new Promise((resolve) => {
+        let completedPorts = 0;
+        
+        ports.forEach(port => {
             const startTime = performance.now();
             const img = new Image();
             
-            // Mengukur perbedaan durasi respons kesalahan (Error Timing Differentiation)
             const evaluateNetworkState = () => {
                 const elapsed = performance.now() - startTime;
                 
-                // Respons di bawah 250ms mengonfirmasi interaksi aktif (Reset/Refused paket dari host)
-                if (elapsed < 250) {
-                    writeLog(`ACTIVE_SIMPUL`, 'telemetry', `Respons jaringan terdeteksi pada -> ${targetIp}:${port} [${Math.round(elapsed)}ms]`);
+                // Rentang kalibrasi diperketat (<200ms) karena manajemen antrean batch memotong latensi browser
+                if (elapsed < 200) {
+                    writeLog(`ACTIVE_SIMPUL`, 'telemetry', `Respons aktif terdeteksi -> ${targetIp}:${port} [${Math.round(elapsed)}ms]`);
                     executeSignatureCrossMatch(targetIp, port);
                 }
+                
+                completedPorts++;
+                if (completedPorts === ports.length) resolve();
             };
 
             img.onload = () => {
                 writeLog(`OPEN_RESOURCE`, 'telemetry', `Sumber daya web lintas domain merespons sukses -> ${targetIp}:${port}`);
                 executeSignatureCrossMatch(targetIp, port);
+                
+                completedPorts++;
+                if (completedPorts === ports.length) resolve();
             };
             
             img.onerror = evaluateNetworkState;
             
             const protocol = port === 443 ? 'https' : 'http';
-            // Pemuatan objek gambar aset standar untuk memicu penanganan kesalahan TCP
-            img.src = `${protocol}://${targetIp}:${port}/favicon.ico?cache_bust=${Math.random()}`;
+            img.src = `${protocol}://${targetIp}:${port}/favicon.ico?cb=${Math.random()}`;
         });
     });
-
-    setTimeout(() => {
-        writeLog('COMPLETED', 'telemetry', "Seluruh saluran interaksi asinkron nirkabel selesai diproses.");
-        document.getElementById("export-log-report").style.display = "block";
-    }, 2000);
 }
 
-// STRATEGI RANTAI AKHIR: Pemetaan Vektor Aset Firmware Vendor
 function executeSignatureCrossMatch(ip, port) {
     const serviceVectors = [
         { identity: "MikroTik RouterOS Interface", assetPath: "/webfig/img/logo.png" },
@@ -151,7 +166,6 @@ function executeSignatureCrossMatch(ip, port) {
         const protocol = port === 443 ? 'https' : 'http';
         
         fingerprintImg.onload = () => {
-            // Pemanggilan aset gambar unik vendor sukses mengonfirmasi klasifikasi firmware perangkat target
             writeLog('MATCH_FOUND', 'fingerprint', `[SIGNATURE MATCH] Endpoint ${ip}:${port} terkonfirmasi sebagai: ${vector.identity}`);
         };
         
@@ -159,7 +173,6 @@ function executeSignatureCrossMatch(ip, port) {
     });
 }
 
-// KOMPONEN PELAPORAN DATA (BLOB DOWNLOADER)
 document.getElementById("export-log-report").addEventListener("click", () => {
     if (auditReports.length === 0) return;
     
