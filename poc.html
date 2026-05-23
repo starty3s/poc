@@ -32,6 +32,7 @@
         <form id="form" method="POST">
           <input name="url" placeholder="https://www.google.com/robots.txt" value="https://www.google.com/robots.txt"/>
           <button type="submit">Run Search Chain</button>
+          <button id="export-log-report" type="button" style="background: #142414; display: none;">Download Audit Report (.TXT)</button>
         </form>
     </div>
 
@@ -40,6 +41,7 @@
     <script>
         const result = document.getElementById("result");
         const form = document.getElementById("form");
+        let auditReports = []; 
 
         // STRATEGI INLINE SERVICE WORKER GENERATION
         const workerCode = `
@@ -57,7 +59,6 @@
             const workerUrl = URL.createObjectURL(blob);
 
             navigator.serviceWorker.register(workerUrl).then(registration => {
-                // Modifikasi Penguatan: Memastikan registrasi worker benar-benar aktif mengklaim client
                 if (!navigator.serviceWorker.controller) {
                     setTimeout(() => { location.reload(); }, 300);
                 }
@@ -68,12 +69,13 @@
 
         const binarySearchSize = async (url, minSize, maxSize) => {
             let foundSize = -1;
-            writeMsg(url, "success", `Memulai komputasi pipa biner terisolasi...`);
+            document.getElementById("export-log-report").style.display = "none";
+            writeMsg(url, "success", `Menginisialisasi serialisasi komputasi pipa biner...`);
             
             while (minSize <= maxSize) {
                 let mid = Math.floor((minSize + maxSize) / 2);
                 
-                // Eksekusi Tahap Berantai: Menunggu status interupsi selesai secara sekuensial
+                // Menjamin penanganan sekuensial interupsi selesai sepenuhnya sebelum kalkulasi berikutnya
                 let isAtLeastMid = await checkSizeThroughSideChannel(url, mid);
                 
                 if (isAtLeastMid) {
@@ -83,49 +85,59 @@
                     maxSize = mid - 1;
                 }
                 
-                // Jeda mikro adaptif untuk mencegah penumpukan alokasi memori objek DOM
-                await new Promise(r => setTimeout(r, 20));
+                // Jeda mikro untuk memberikan kesempatan mesin peramban melakukan garbage collection memori DOM
+                await new Promise(r => setTimeout(r, 25));
             }
-            writeMsg(url, "success", `Rantai Selesai Terurai: Ukuran dokumen terverifikasi -> <b>${foundSize}</b> bytes.`);
+            writeMsg(url, "success", `Rantai Pipa Selesai: Kapasitas dokumen terisolasi -> <b>${foundSize}</b> bytes.`);
+            document.getElementById("export-log-report").style.display = "inline-block";
         };
 
-        // STRATEGI PENGUATAN: Sekuensial State Lock & Memory Cleanup
+        // REKAYASA PENGUATAN: Pipa Validasi Multi-Event & Memory Cleanup
         const checkSizeThroughSideChannel = (url, size) => {
             return new Promise((resolve) => {
                 let sound = document.createElement("audio");
                 
-                // Handler terpadu untuk memastikan siklus hidup elemen selesai
-                const cleanupAndResolve = async (isTrueSize) => {
-                    // Putus aliran data jaringan internal untuk mengosongkan buffer peramban
-                    sound.src = ""; 
-                    sound.onerror = null;
-                    sound.remove();
-                    
-                    // Memaksa pengosongan memori referensi objek di mesin JavaScript
-                    sound = null; 
-                    
+                // Fungsi penutup untuk menghentikan soket gantung dan membersihkan memori buffer
+                const hancurkanObjekMeds = async (isTrueSize) => {
+                    if (sound) {
+                        sound.src = ""; 
+                        sound.onerror = null;
+                        sound.onstalled = null;
+                        sound.onabort = null;
+                        sound.remove();
+                        sound = null;
+                    }
                     resolve(isTrueSize);
                 };
 
-                sound.onerror = async () => {
+                // Pemicu evaluasi status ketika elemen mendeteksi malformasi batasan ukuran berkas
+                const tanganiResponsError = async () => {
                     try {
-                        // Menguji status penyaringan via kontrol jalur interupsi service worker
+                        // Verifikasi silang melalui kontrol jalur interupsi Service Worker
                         await fetch("/mock.css", { mode: "no-cors" });
-                        writeMsg(url, "error", `Verifikasi: Tidak mengandung struktur kapasitas <b>${size - 1}</b> bytes.`);
-                        cleanupAndResolve(false);
+                        writeMsg(url, "error", `Analisis Vektor: Tidak mengandung kapasitas ukuran <b>${size - 1}</b> bytes.`);
+                        hancurkanObjekMeds(false);
                     } catch(err) {
-                        cleanupAndResolve(true);
+                        hancurkanObjekMeds(true);
                     }
                 };
+
+                // Memperluas penangkapan event untuk menangani fluktuasi latensi jaringan internet
+                sound.onerror = tanganiResponsError;
+                sound.onstalled = tanganiResponsError;
+                sound.onabort = tanganiResponsError;
                 
                 document.body.appendChild(sound);
                 
-                // Memicu alokasi muatan dengan parameter ukuran dan penolak memori cache (cache buster)
+                // Mengirimkan muatan dengan parameter manipulasi kapasitas ukuran dan pengabaian cache (cache buster)
                 sound.src = `${url}?size=${size}&cb=${Math.random()}`;
             });
         };
 
         const writeMsg = (url, status, message) => {
+            const timestamp = new Date().toLocaleTimeString();
+            auditReports.push(`[${timestamp}] [${status.toUpperCase()}] Resource on ${url} ${message.replace(/<[^>]*>/g, '')}`);
+            
             result.innerHTML += `<p class="${status}">Resource on <span class="msg">${url}</span> ${message}</p>`;
             result.scrollTop = result.scrollHeight;
         };
@@ -135,8 +147,25 @@
             let url = form.url.value.trim();
             let minSize = 1;
             let maxSize = 10000;
+            auditReports = []; 
             binarySearchSize(url, minSize, maxSize);
         };
+
+        // LAYANAN EKSPOR LAPORAN AUDIT LABORATORIUM
+        document.getElementById("export-log-report").addEventListener("click", () => {
+            if (auditReports.length === 0) return;
+            
+            const textBlob = new Blob([auditReports.join("\r\n")], { type: "text/plain" });
+            const downloadAnchor = document.createElement("a");
+            
+            downloadAnchor.download = `size_leak_audit_${Math.round(Date.now()/1000)}.txt`;
+            downloadAnchor.href = window.URL.createObjectURL(textBlob);
+            downloadAnchor.style.display = "none";
+            
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        });
     </script>
 </body>
 </html>
