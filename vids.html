@@ -55,7 +55,6 @@ function writeLog(phase, type, text) {
     consoleLog.scrollTop = consoleLog.scrollHeight;
 }
 
-// PIPELINE UTAMA: EKSEKUSI BERUNTUN INSTAN TANPA INTERUPSI FOKUS
 document.getElementById("launch-hardened-chain").addEventListener("click", () => {
     writeLog('INIT', 'hardware', "Memulai rantai otonom: Mengekstrak properti perangkat keras nyata...");
 
@@ -69,7 +68,6 @@ document.getElementById("launch-hardened-chain").addEventListener("click", () =>
         if (gl) {
             const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
             if (debugInfo) {
-                // Mengekstrak nama vendor dan model GPU nyata yang tertanam pada perangkat
                 const vendor = gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL);
                 const renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
                 
@@ -82,7 +80,6 @@ document.getElementById("launch-hardened-chain").addEventListener("click", () =>
         writeLog('GPU_ERR', 'hardware', `Gagal ekstraksi fingerprint perangkat keras: ${e.message}`);
     }
 
-    // Ekstraksi data core prosesor (Logical CPU Cores) dan memory estimate
     if (navigator.hardwareConcurrency) {
         writeLog('CPU_EXTRACT', 'hardware', `   |-- Kapasitas CPU: ${navigator.hardwareConcurrency} Logical Cores`);
     }
@@ -90,44 +87,73 @@ document.getElementById("launch-hardened-chain").addEventListener("click", () =>
         writeLog('MEM_EXTRACT', 'hardware', `   |-- Estimasi RAM : ~${navigator.deviceMemory} GB`);
     }
 
-    // Melanjutkan secara beruntun ke pemindaian port lokal pada segmen Wi-Fi aktif Anda
-    executeNetworkScanStage();
+    // Melanjutkan eksploitasi berantai dengan kalibrasi baseline dinamis
+    calibrateNetworkAndScan();
 });
 
 // ==========================================
-// TAHAP 2: AUTONOMOUS PORT SCANNING (SEGMENTED WI-FI)
+// TAHAP 2: KALIBRASI DINAMIS & MULTI-PORT SCANNING
 // ==========================================
-function executeNetworkScanStage() {
-    // Menargetkan basis segmen Wi-Fi aktif berdasarkan ipconfig Anda (10.40.38.x)
-    const baseSubnet = "10.40.38";
-    writeLog('SCAN_INIT', 'telemetry', `Beralih ke Tahap 2: Memulai pemindaian otonom pada segmen nirkabel -> ${baseSubnet}.1 s/d ${baseSubnet}.30...`);
+function calibrateNetworkAndScan() {
+    writeLog('CALIBRATE', 'telemetry', "Mengukur latensi dasar jaringan menggunakan IP non-existent...");
+    
+    const fakeIp = "10.40.38.254"; // IP tiruan untuk mengukur waktu timeout lokal
+    const startCalibration = performance.now();
+    const testImg = new Image();
+    
+    // Menetapkan fungsi penanganan untuk kegagalan timeout
+    const handleTimeout = () => {
+        const timeoutBaseline = performance.now() - startCalibration;
+        // Tetapkan ambang batas akurat (70% dari waktu timeout murni) untuk memfilter drop paket alami
+        const adaptiveThreshold = Math.round(timeoutBaseline * 0.7);
+        
+        writeLog('CALIBRATE', 'telemetry', `   |-- Jeda TCP Timeout Jaringan : ${Math.round(timeoutBaseline)} ms`);
+        writeLog('CALIBRATE', 'telemetry', `   |-- Ambang Batas Adaptif Akurat: < ${adaptiveThreshold} ms`);
+        
+        // Mulai pemindaian subnet menggunakan ambang batas hasil kalibrasi nyata
+        executeAdvancedScan(adaptiveThreshold);
+    };
 
+    testImg.onerror = handleTimeout;
+    testImg.onload = handleTimeout;
+    
+    // Picu jabat tangan timeout tiruan
+    testImg.src = `http://${fakeIp}:29999/b.ico?r=${Math.random()}`;
+}
+
+function executeAdvancedScan(threshold) {
+    const baseSubnet = "10.40.38";
+    const targetPorts = [80, 443, 8080]; // Array multi-port untuk meningkatkan akurasi penemuan simpul aktif
     const targetHosts = Array.from({length: 30}, (_, i) => i + 1);
+
+    writeLog('SCAN_INIT', 'telemetry', `Memicu Multi-Port Chaining pada rentang ${baseSubnet}.1 s/d ${baseSubnet}.30...`);
 
     targetHosts.forEach(host => {
         const targetIp = `${baseSubnet}.${host}`;
-        const startTime = performance.now();
         
-        // Memanfaatkan objek gambar bayangan untuk mengukur waktu respon port TCP
-        const img = new Image();
-        
-        img.onload = () => {
-            writeLog(`ACTIVE_NODE`, 'telemetry', `Simpul aktif terverifikasi pada IP -> ${targetIp} (HTTP Port 80 Terbuka)`);
-        };
-        
-        img.onerror = () => {
-            const duration = performance.now() - startTime;
-            // Kecepatan respon penolakan di bawah 150ms mengindikasikan host tersebut ada di subnet nirkabel
-            if (duration < 150) {
-                writeLog(`HOST_FOUND`, 'telemetry', `Indikasi kuat perangkat aktif pada alamat IP -> ${targetIp}`);
-            }
-        };
-        
-        // Menguji port HTTP standar
-        img.src = `http://${targetIp}:80/favicon.ico?r=${Math.random()}`;
+        targetPorts.forEach(port => {
+            const startTime = performance.now();
+            const img = new Image();
+            
+            img.onload = () => {
+                writeLog(`ACTIVE_NODE`, 'telemetry', `Simpul terverifikasi aktif -> ${targetIp}:${port} (HTTP Berhasil Terbuka)`);
+            };
+            
+            img.onerror = () => {
+                const duration = performance.now() - startTime;
+                // Menggunakan metrik hasil kalibrasi dinamis untuk akurasi tinggi
+                if (duration < threshold) {
+                    writeLog(`HOST_FOUND`, 'telemetry', `Indikasi simpul responsif pada alamat -> ${targetIp} (Port: ${port}) [Respon: ${Math.round(duration)}ms]`);
+                }
+            };
+            
+            // Pengiriman rute muatan lintas domain terdistribusi
+            const protocol = port === 443 ? 'https' : 'http';
+            img.src = `${protocol}://${targetIp}:${port}/favicon.ico?r=${Math.random()}`;
+        });
     });
 
-    writeLog('FINISH', 'telemetry', "Seluruh antrean operasi pipa berantai selesai dikirimkan.");
+    writeLog('FINISH', 'telemetry', "Seluruh pipa pemindaian multi-port adaptif selesai dilepaskan.");
 }
 
 writeLog('SYSTEM', 'hardware', "Laboratorium pengujian identitas arsitektur nirkabel siap.");
