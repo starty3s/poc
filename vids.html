@@ -3,50 +3,138 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Intent Navigation Test (Strict Standards)</title>
+  <title>Intent Navigation Test (Comprehensive Settings Matrix)</title>
   <style>
     body {
       font-family: monospace;
       padding: 20px;
       background-color: #ffffff;
       color: #000000;
+      line-height: 1.5;
     }
-    .test-container {
-      border: 1px solid #000000;
-      padding: 20px;
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 15px;
       margin-top: 20px;
     }
+    .card {
+      border: 1px solid #000000;
+      padding: 15px;
+      background-color: #f9f9f9;
+    }
+    .card h3 {
+      margin-top: 0;
+      border-bottom: 1px solid #000000;
+      padding-bottom: 5px;
+    }
     button {
-      padding: 10px 20px;
+      padding: 8px 15px;
       font-family: monospace;
       cursor: pointer;
+      width: 100%;
+      background-color: #ffffff;
+      border: 1px solid #000000;
+    }
+    button:hover {
+      background-color: #e0e0e0;
+    }
+    .log-box {
+      margin-top: 30px;
+      padding: 10px;
+      background-color: #f0f0f0;
+      border: 1px dashed #000000;
+      max-height: 150px;
+      overflow-y: auto;
     }
   </style>
 </head>
 <body>
 
-  <h1>Intent Schema Security Verification</h1>
-  <p>Pengujian kepatuhan peramban terhadap pembatasan skema eksternal Android Intent menggunakan format spesifikasi penuh standar Chromium.</p>
+  <h1>Android Settings Intent Verification Matrix</h1>
+  <p>Matriks komprehensif untuk menguji kepatuhan parser peramban terhadap pemanggilan konstanta aksi standard internal <code>android.provider.Settings</code>.</p>
 
-  <div class="test-container">
-    <button onclick="triggerIntent()">Uji Navigasi Intent (Bluetooth Settings)</button>
+  <div id="consoleLog" class="log-box">Console output initialized...</div>
+
+  <div class="grid-container">
+
+    <!-- Jaringan & Konektivitas -->
+    <div class="card">
+      <h3>Konektivitas & Nirkabel</h3>
+      <button onclick="executeIntent('android.settings.SETTINGS')">Main Settings</button><br><br>
+      <button onclick="executeIntent('android.settings.WIRELESS_SETTINGS')">Wireless / Network</button><br><br>
+      <button onclick="executeIntent('android.settings.WIFI_SETTINGS')">Wi-Fi Settings</button><br><br>
+      <button onclick="executeIntent('android.settings.BLUETOOTH_SETTINGS')">Bluetooth Settings</button><br><br>
+      <button onclick="executeIntent('android.settings.NFC_SETTINGS')">NFC Settings</button><br><br>
+      <button onclick="executeIntent('android.settings.AIRPLANE_MODE_SETTINGS')">Airplane Mode</button>
+    </div>
+
+    <!-- Aplikasi & Notifikasi -->
+    <div class="card">
+      <h3>Manajemen Aplikasi</h3>
+      <button onclick="executeIntent('android.settings.APPLICATION_SETTINGS')">Application Manager</button><br><br>
+      <button onclick="executeIntent('android.settings.MANAGE_ALL_APPLICATIONS_SETTINGS')">Manage All Apps</button><br><br>
+      <button onclick="executeIntent('android.settings.NOTIFICATION_SETTINGS')">Notification Settings</button><br><br>
+      <button onclick="executeIntent('android.settings.USAGE_ACCESS_SETTINGS')">Usage Access Apps</button>
+    </div>
+
+    <!-- Privasi & Keamanan -->
+    <div class="card">
+      <h3>Privasi & Keamanan</h3>
+      <button onclick="executeIntent('android.settings.SECURITY_SETTINGS')">Security Settings</button><br><br>
+      <button onclick="executeIntent('android.settings.LOCATION_SOURCE_SETTINGS')">Location Settings</button><br><br>
+      <button onclick="executeIntent('android.settings.PRIVACY_SETTINGS')">Privacy Settings</button><br><br>
+      <button onclick="executeIntent('android.settings.BIOMETRIC_ENROLL')">Biometric / Face / PIN</button>
+    </div>
+
+    <!-- Tampilan & Suara -->
+    <div class="card">
+      <h3>Antarmuka & Perangkat Hardik</h3>
+      <button onclick="executeIntent('android.settings.DISPLAY_SETTINGS')">Display Settings</button><br><br>
+      <button onclick="executeIntent('android.settings.SOUND_SETTINGS')">Sound & Vibration</button><br><br>
+      <button onclick="executeIntent('android.settings.ACCESSIBILITY_SETTINGS')">Accessibility</button>
+    </div>
+
+    <!-- Penyimpanan & Sistem -->
+    <div class="card">
+      <h3>Sistem & Penyimpanan</h3>
+      <button onclick="executeIntent('android.settings.INTERNAL_STORAGE_SETTINGS')">Storage Settings</button><br><br>
+      <button onclick="executeIntent('android.settings.DATE_SETTINGS')">Date & Time</button><br><br>
+      <button onclick="executeIntent('android.settings.LOCALE_SETTINGS')">Language & Input</button><br><br>
+      <button onclick="executeIntent('android.settings.DEVICE_INFO_SETTINGS')">About Phone</button>
+    </div>
+
+    <!-- Fitur Pengembang & Daya -->
+    <div class="card">
+      <h3>Spesifik & Pengembang</h3>
+      <button onclick="executeIntent('android.settings.APPLICATION_DEVELOPMENT_SETTINGS')">Developer Options</button><br><br>
+      <button onclick="executeIntent('android.settings.BATTERY_SAVER_SETTINGS')">Battery Optimizer</button><br><br>
+      <button onclick="executeIntent('android.settings.CAST_SETTINGS')">Cast Screen</button>
+    </div>
+
   </div>
 
   <script>
-    function triggerIntent() {
-      // Menggunakan sintaksis skema intent dengan deklarasi komponen dan fallback eksplisit
-      // Sesuai dengan standar dokumentasi pengembang Chromium untuk intent URI Android
+    function logMessage(msg) {
+      const logger = document.getElementById('consoleLog');
+      logger.innerHTML += "<br>[" + new Date().toLocaleTimeString() + "] " + msg;
+      logger.scrollTop = logger.scrollHeight;
+    }
+
+    function executeIntent(actionString) {
+      // Konstruksi URI skema intent standar berbasis string aksi dinamis
       const intentUrl = "intent:#Intent;" +
-                        "action=android.settings.BLUETOOTH_SETTINGS;" +
+                        "action=" + actionString + ";" +
                         "category=android.intent.category.DEFAULT;" +
-                        "component=com.android.settings/.bluetooth.BluetoothSettings;" +
                         "end";
       
+      logMessage("Menguji rute penanganan untuk aksi: " + actionString);
+      
       try {
-        // Melakukan penugasan lokasi secara langsung pada window top-level
+        // Melakukan penugasan lokasi secara eksplisit pada jendela teratas
         window.top.location = intentUrl;
       } catch (e) {
-        console.error("Navigation blocked by browser security policy:", e.message);
+        logMessage("Akses diblokir oleh kebijakan keamanan runtime: " + e.message);
       }
     }
   </script>
