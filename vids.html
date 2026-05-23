@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Hardened Device & Network Telemetry Lab</title>
+<title>Hardened Multi-Port Service Fingerprinting Lab</title>
 <style>
     body {
         font-family: 'Courier New', monospace; 
@@ -25,12 +25,13 @@
     }
     #console-log {
         margin-top: 20px; border: 1px solid #00ffaa; padding: 12px; 
-        height: 520px; overflow: auto; white-space: pre-wrap; 
+        height: 550px; overflow: auto; white-space: pre-wrap; 
         background: #000; font-size: 11px; color: #00ff55;
     }
     .role-tag { font-weight: bold; padding: 2px 6px; border-radius: 3px; font-size: 10px; color: #000; }
     .hardware { background: #ffaa00; }
     .telemetry { background: #00ffaa; }
+    .fingerprint { background: #ff3333; color: #fff; }
 </style>
 </head>
 <body>
@@ -38,9 +39,9 @@
 <h2>Device & Network Security Laboratory</h2>
 
 <div class="panel">
-    <h3> Hardened Automated Pipeline (Subnet: 10.40.38.x)</h3>
-    <p>Mengeksekusi rangkaian inspeksi identitas perangkat keras (WebGL Fingerprinting) dan pemindaian port nirkabel lokal secara beruntun.</p>
-    <button id="launch-hardened-chain">Execute Hardened Chain</button>
+    <h3> Hardened Fingerprinting Chain (Subnet: 10.40.38.x)</h3>
+    <p>Eksekusi beruntun: WebGL Driver Inspection -> Dynamic Baseline Calibration -> Multi-Port Port Scanning -> Cross-Origin Service Fingerprinting.</p>
+    <button id="launch-hardened-chain">Execute Advanced Chain</button>
 </div>
 
 <div id="console-log"></div>
@@ -56,77 +57,58 @@ function writeLog(phase, type, text) {
 }
 
 document.getElementById("launch-hardened-chain").addEventListener("click", () => {
-    writeLog('INIT', 'hardware', "Memulai rantai otonom: Mengekstrak properti perangkat keras nyata...");
+    writeLog('STAGE-1', 'hardware', "Memulai Rantai 1: Inspeksi Driver Grafis & Perangkat Keras Lokal...");
 
-    // ==========================================
-    // TAHAP 1: WEBGL GPU IDENTIFICATION (HARDWARE IDENTITY)
-    // ==========================================
     try {
         const canvas = document.createElement('canvas');
         const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-        
         if (gl) {
             const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
             if (debugInfo) {
-                const vendor = gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL);
-                const renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
-                
-                writeLog('GPU_EXTRACT', 'hardware', "Hardware Driver Signature Detected:");
-                writeLog('GPU_EXTRACT', 'hardware', `   |-- GPU Vendor  : ${vendor}`);
-                writeLog('GPU_EXTRACT', 'hardware', `   |-- GPU Renderer: ${renderer}`);
+                writeLog('GPU_EXTRACT', 'hardware', `   |-- GPU Vendor  : ${gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL)}`);
+                writeLog('GPU_EXTRACT', 'hardware', `   |-- GPU Renderer: ${gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL)}`);
             }
         }
     } catch (e) {
-        writeLog('GPU_ERR', 'hardware', `Gagal ekstraksi fingerprint perangkat keras: ${e.message}`);
+        writeLog('GPU_ERR', 'hardware', `Gagal fingerprint hardware: ${e.message}`);
     }
 
-    if (navigator.hardwareConcurrency) {
-        writeLog('CPU_EXTRACT', 'hardware', `   |-- Kapasitas CPU: ${navigator.hardwareConcurrency} Logical Cores`);
-    }
-    if (navigator.deviceMemory) {
-        writeLog('MEM_EXTRACT', 'hardware', `   |-- Estimasi RAM : ~${navigator.deviceMemory} GB`);
-    }
+    if (navigator.hardwareConcurrency) writeLog('CPU_EXTRACT', 'hardware', `   |-- CPU Cores   : ${navigator.hardwareConcurrency} Logical Cores`);
+    if (navigator.deviceMemory) writeLog('MEM_EXTRACT', 'hardware', `   |-- RAM Estimate: ~${navigator.deviceMemory} GB`);
 
-    // Melanjutkan eksploitasi berantai dengan kalibrasi baseline dinamis
+    // Pindah otomatis ke tahap berikutnya dalam rantai serangan
     calibrateNetworkAndScan();
 });
 
-// ==========================================
-// TAHAP 2: KALIBRASI DINAMIS & MULTI-PORT SCANNING
-// ==========================================
 function calibrateNetworkAndScan() {
-    writeLog('CALIBRATE', 'telemetry', "Mengukur latensi dasar jaringan menggunakan IP non-existent...");
+    writeLog('STAGE-2', 'telemetry', "Memulai Rantai 2: Kalibrasi Ambang Batas Waktu Jaringan...");
     
-    const fakeIp = "10.40.38.254"; // IP tiruan untuk mengukur waktu timeout lokal
+    const fakeIp = "10.40.38.254";
     const startCalibration = performance.now();
     const testImg = new Image();
     
-    // Menetapkan fungsi penanganan untuk kegagalan timeout
     const handleTimeout = () => {
         const timeoutBaseline = performance.now() - startCalibration;
-        // Tetapkan ambang batas akurat (70% dari waktu timeout murni) untuk memfilter drop paket alami
         const adaptiveThreshold = Math.round(timeoutBaseline * 0.7);
         
-        writeLog('CALIBRATE', 'telemetry', `   |-- Jeda TCP Timeout Jaringan : ${Math.round(timeoutBaseline)} ms`);
-        writeLog('CALIBRATE', 'telemetry', `   |-- Ambang Batas Adaptif Akurat: < ${adaptiveThreshold} ms`);
+        writeLog('CALIBRATE', 'telemetry', `   |-- Base TCP Timeout : ${Math.round(timeoutBaseline)} ms`);
+        writeLog('CALIBRATE', 'telemetry', `   |-- Adaptive Limit   : < ${adaptiveThreshold} ms`);
         
-        // Mulai pemindaian subnet menggunakan ambang batas hasil kalibrasi nyata
+        // Pindah otomatis ke tahap pemindaian
         executeAdvancedScan(adaptiveThreshold);
     };
 
     testImg.onerror = handleTimeout;
     testImg.onload = handleTimeout;
-    
-    // Picu jabat tangan timeout tiruan
     testImg.src = `http://${fakeIp}:29999/b.ico?r=${Math.random()}`;
 }
 
 function executeAdvancedScan(threshold) {
+    writeLog('STAGE-3', 'telemetry', "Memulai Rantai 3: Meluncurkan Multi-Port Active Reconnaissance...");
+    
     const baseSubnet = "10.40.38";
-    const targetPorts = [80, 443, 8080]; // Array multi-port untuk meningkatkan akurasi penemuan simpul aktif
+    const targetPorts = [80, 443, 8080];
     const targetHosts = Array.from({length: 30}, (_, i) => i + 1);
-
-    writeLog('SCAN_INIT', 'telemetry', `Memicu Multi-Port Chaining pada rentang ${baseSubnet}.1 s/d ${baseSubnet}.30...`);
 
     targetHosts.forEach(host => {
         const targetIp = `${baseSubnet}.${host}`;
@@ -136,27 +118,53 @@ function executeAdvancedScan(threshold) {
             const img = new Image();
             
             img.onload = () => {
-                writeLog(`ACTIVE_NODE`, 'telemetry', `Simpul terverifikasi aktif -> ${targetIp}:${port} (HTTP Berhasil Terbuka)`);
+                writeLog(`ACTIVE_PORT`, 'telemetry', `Simpul terverifikasi aktif -> ${targetIp}:${port}`);
+                // Rantai Lanjutan: Jika port terbuka, lakukan pencarian sidik jari identitas perangkat
+                inspectServiceFingerprint(targetIp, port);
             };
             
             img.onerror = () => {
                 const duration = performance.now() - startTime;
-                // Menggunakan metrik hasil kalibrasi dinamis untuk akurasi tinggi
                 if (duration < threshold) {
-                    writeLog(`HOST_FOUND`, 'telemetry', `Indikasi simpul responsif pada alamat -> ${targetIp} (Port: ${port}) [Respon: ${Math.round(duration)}ms]`);
+                    writeLog(`HOST_RESP`, 'telemetry', `Respons cepat terdeteksi pada -> ${targetIp}:${port} [${Math.round(duration)}ms]`);
+                    // Rantai Lanjutan: Respons cepat menandakan port aktif/menolak, lakukan fingerprinting signature
+                    inspectServiceFingerprint(targetIp, port);
                 }
             };
             
-            // Pengiriman rute muatan lintas domain terdistribusi
             const protocol = port === 443 ? 'https' : 'http';
             img.src = `${protocol}://${targetIp}:${port}/favicon.ico?r=${Math.random()}`;
         });
     });
-
-    writeLog('FINISH', 'telemetry', "Seluruh pipa pemindaian multi-port adaptif selesai dilepaskan.");
 }
 
-writeLog('SYSTEM', 'hardware', "Laboratorium pengujian identitas arsitektur nirkabel siap.");
+// ==========================================
+// TAHAP 4: SERVICE FINGERPRINTING (RANTAI TERAKHIR)
+// ==========================================
+function inspectServiceFingerprint(ip, port) {
+    // Basis data signature berkas unik untuk menebak jenis perangkat infrastruktur di jaringan
+    const signatures = [
+        { name: "MikroTik RouterOS WebFig", path: "/webfig/img/logo.png" },
+        { name: "TP-Link Admin Panel", path: "/images/logo.jpg" },
+        { name: "Linksys Smart Wi-Fi Interface", path: "/ui/1.0.0/dynamic/images/logo.png" },
+        { name: "Generic IP Camera / Printer WebUI", path: "/localui/hp/images/hp-logo.gif" }
+    ];
+
+    signatures.forEach(sig => {
+        const checkImg = new Image();
+        const protocol = port === 443 ? 'https' : 'http';
+        
+        checkImg.onload = () => {
+            // Jika berkas gambar spesifik vendor berhasil dimuat, identitas perangkat terkonfirmasi rentan terpetakan
+            writeLog('IDENTIFIED', 'fingerprint', `[FINGERPRINT MATCH] Perangkat pada ${ip}:${port} teridentifikasi sebagai: ${sig.name}`);
+        };
+        
+        // Mengarahkan ke jalur berkas privat milik firmware vendor
+        checkImg.src = `${protocol}://${ip}:${port}${sig.path}?r=${Math.random()}`;
+    });
+}
+
+writeLog('SYSTEM', 'telemetry', "Laboratorium otomatisasi rantai pengenal aset nirkabel aktif.");
 </script>
 </body>
 </html>
