@@ -3,50 +3,45 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Automated Subnet Scanner Laboratory</title>
+<title>Advanced Wireless Packet Decapsulation Lab</title>
 <style>
     body {
         font-family: 'Courier New', monospace; 
         padding: 20px; 
-        background: #050508; 
+        background: #040406; 
         color: #00ffaa;
     }
     h2, h3 { text-transform: uppercase; letter-spacing: 1px; color: #00ffaa; }
     button {
         width: 100%; padding: 18px; margin-top: 12px; 
-        background: #0d1a1a; color: #00ffaa; 
+        background: #0a1414; color: #00ffaa; 
         border: 1px solid #00ffaa; font-weight: bold; 
         cursor: pointer; font-size: 13px; text-transform: uppercase;
     }
     button:hover { background: #00ffaa; color: #000; box-shadow: 0 0 15px #00ffaa; }
     .panel {
         border: 1px solid #00ffaa; padding: 15px; 
-        margin-bottom: 15px; background: #020c0c;
+        margin-bottom: 15px; background: #010808;
     }
     #console-log {
         margin-top: 20px; border: 1px solid #00ffaa; padding: 12px; 
-        height: 380px; overflow: auto; white-space: pre-wrap; 
+        height: 450px; overflow: auto; white-space: pre-wrap; 
         background: #000; font-size: 11px; color: #00ff55;
     }
     .role-tag { font-weight: bold; padding: 2px 6px; border-radius: 3px; font-size: 10px; color: #000; }
-    .network { background: #00ffaa; }
-    .location { background: #ffaa00; }
+    .capture { background: #ffaa00; }
+    .layer { background: #00ffaa; }
+    .alert { background: #ff3333; color: #fff; }
 </style>
 </head>
 <body>
 
-<h2>Automated Subnet Scanner Laboratory</h2>
+<h2>Advanced Wireless Packet Laboratory</h2>
 
 <div class="panel">
-    <h3>[1] Public Network Geolocation Lookup</h3>
-    <p>Mengidentifikasi estimasi wilayah pusat jaringan berdasarkan pemetaan IP Publik eksternal Gateway.</p>
-    <button id="lookup-public-location">Analyze Gateway ISP Location</button>
-</div>
-
-<div class="panel">
-    <h3>[2] Autonomous Local Subnet Discovery</h3>
-    <p>Melakukan pemindaian otonom pada segmen IP lokal aktif menggunakan teknik asinkron Resource Fetching.</p>
-    <button id="scan-local-subnet">Scan Active Subnet Nodes</button>
+    <h3> Wi-Fi Frame Encapsulation Model</h3>
+    <p>Simulasi interaktif tingkat lanjut mengenai de-enkapsulasi paket data nirkabel (IEEE 802.11) untuk kebutuhan analisis audit.</p>
+    <button id="start-capture-simulation">Start Frame Decapsulation</button>
 </div>
 
 <div id="console-log"></div>
@@ -61,58 +56,80 @@ function writeLog(phase, type, text) {
     consoleLog.scrollTop = consoleLog.scrollHeight;
 }
 
-// 1. RESOLUSI GEOLOCATION IP PUBLIK ROUTER VIA API EKSTERNAL
-document.getElementById("lookup-public-location").addEventListener("click", () => {
-    writeLog('API_INIT', 'location', "Menghubungi endpoint resolusi IP eksternal...");
-    
-    fetch('https://ipapi.co')
-        .then(response => response.json())
-        .then(data => {
-            writeLog('GEO_DATA', 'location', `Analisis IP Publik Selesai (${data.ip})`);
-            writeLog('GEO_DATA', 'location', `   |-- ISP/Provider : ${data.org}`);
-            writeLog('GEO_DATA', 'location', `   |-- Kota/Wilayah : ${data.city}, ${data.region}`);
-            writeLog('GEO_DATA', 'location', `   |-- Estimasi Pusat: Lat ${data.latitude}, Lon ${data.longitude}`);
-            writeLog('GEO_DATA', 'location', "Catatan: Hasil koordinat di atas merupakan area titik infrastruktur ISP terdekat, bukan koordinat instan GPS pengguna.");
-        })
-        .catch(err => {
-            writeLog('GEO_ERR', 'location', `Gagal mengambil data lokasi publik: ${err.message}`);
-        });
-});
+// EKSEKUSI PIPELINE DE-ENKAPSULASI PROTOKOL INTEGRAL
+document.getElementById("start-capture-simulation").addEventListener("click", () => {
+    writeLog('PROMISC', 'capture', "Mengaktifkan Virtual Interface Monitor Mode (wlan0mon)...");
+    writeLog('FILTER', 'capture', "Menerapkan Berkeley Packet Filter (BPF): subnet 172.30.200.0/24");
 
-// 2. PEMINDAIAN SUB-NET OTONOM (Web-Based Port Scanning Engine)
-document.getElementById("scan-local-subnet").addEventListener("click", () => {
-    // Menargetkan basis segmen IP yang Anda gunakan (172.30.200.x)
-    const baseSubnet = "172.30.200";
-    writeLog('SCAN_INIT', 'network', `Memulai pemindaian otonom pada rentang segmen -> ${baseSubnet}.1 hingga ${baseSubnet}.30...`);
+    // Struktur data multi-protokol diperluas untuk mensimulasikan berbagai lapisan OSI
+    const advancedFrames = [
+        {
+            proto: "DNS (Domain Name System)",
+            src: "172.30.200.5", dst: "172.30.200.1", mac: "A4:C3:F0:11:22:33",
+            details: [
+                "Layer 4 -> UDP (Port Asal: 56123, Port Tujuan: 53)",
+                "Payload  -> Query: target-internal-service.local",
+                "Flags    -> Standard query (0x0100)"
+            ]
+        },
+        {
+            proto: "TCP Handshake Synchronization",
+            src: "172.30.200.12", dst: "172.30.200.24", mac: "00:1A:11:44:55:66",
+            details: [
+                "Layer 4 -> TCP (Port Asal: 49212, Port Tujuan: 443)",
+                "Flags    -> [SYN] Seq=0, Win=65535, Len=0",
+                "Analysis -> Menginisialisasi jabat tangan tiga arah (Three-Way Handshake)"
+            ]
+        },
+        {
+            proto: "TLS Cryptographic Client Hello",
+            src: "172.30.200.12", dst: "172.30.200.24", mac: "00:1A:11:44:55:66",
+            details: [
+                "Layer 7 -> TLSv1.3 Record Layer: Handshake Protocol: Client Hello",
+                "Payload  -> Extension: server_name (SNI): secure-auth.internal",
+                "Analysis -> Negosiasi algoritma enkripsi cipher suite dimulai"
+            ]
+        },
+        {
+            proto: "HTTP Plaintext Authentication",
+            src: "172.30.200.15", dst: "172.30.200.1", mac: "E4:A2:A1:77:88:99",
+            details: [
+                "Layer 7 -> HTTP/1.1 (Aplikasi Tanpa TLS / Tidak Terenkripsi)",
+                "Payload  -> POST /login.php HTTP/1.1 \\r\\n Authorization: Basic YWRtaW46cGFzc3dvcmQxMjM=",
+                "Decoded  -> Hasil konversi Base64 terdeteksi -> admin:password123"
+            ],
+            warn: true
+        }
+    ];
 
-    // Sampel indeks host untuk simulasi respons audit waktu nyata di browser
-    const targetHosts = Array.from({length: 30}, (_, i) => i + 1);
+    let currentInterval = 0;
 
-    targetHosts.forEach(host => {
-        const targetIp = `${baseSubnet}.${host}`;
-        const startTime = performance.now();
-        
-        // Memanfaatkan elemen gambar bayangan untuk mengukur kecepatan respons muatan port web
-        const img = new Image();
-        
-        img.onload = () => {
-            writeLog(`ACTIVE`, 'network', `Simpul aktif terdeteksi pada -> ${targetIp} (HTTP Port Responsif)`);
-        };
-        
-        img.onerror = () => {
-            const duration = performance.now() - startTime;
-            // Jika penolakan koneksi terjadi sangat cepat, indikasi kuat port atau IP tersebut ada/aktif
-            if (duration < 150) {
-                writeLog(`FOUND`, 'network', `Indikasi perangkat aktif pada alamat IP -> ${targetIp}`);
+    advancedFrames.forEach((frame, index) => {
+        currentInterval += 1200;
+        setTimeout(() => {
+            writeLog(`FRAME-${index+1}`, 'capture', `Paket data nirkabel berhasil ditangkap di udara.`);
+            writeLog(`L2-LINK`, 'layer', `   |-- Data Link Layer -> MAC Asal: ${frame.mac}`);
+            writeLog(`L3-NET`, 'layer', `   |-- Network Layer   -> IP Asal: ${frame.src} | IP Tujuan: ${frame.dst}`);
+            writeLog(`L7-APP`, 'layer', `   |-- Application     -> Protokol Terurai: ${frame.proto}`);
+            
+            frame.details.forEach(detail => {
+                writeLog(`DECAP`, 'layer', `   |   [Sub-Header] ${detail}`);
+            });
+
+            if (frame.warn) {
+                writeLog('ALERT', 'alert', "RISIKO AUDIT: Data sensitif dikirim dalam bentuk teks biasa (HTTP Tanpa Enkripsi TLS).");
             }
-        };
-        
-        // Menguji ketersediaan port HTTP standar pada perangkat target
-        img.src = `http://${targetIp}:80/favicon.ico?r=${Math.random()}`;
+            
+            writeLog(`STATE`, 'capture', `Frame-${index+1} selesai diproses oleh komponen penganalisis.\n`);
+            
+            if (index === advancedFrames.length - 1) {
+                writeLog('FINISH', 'capture', "Seluruh de-enkapsulasi aliran data simulasi selesai.");
+            }
+        }, currentInterval);
     });
 });
 
-writeLog('SYSTEM', 'network', "Mesin pemindai topologi otonom berhasil diinisialisasi.");
+writeLog('SYSTEM', 'layer', "Mesin visualisasi de-enkapsulasi laboratorium siap.");
 </script>
 </body>
 </html>
