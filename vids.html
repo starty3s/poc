@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Network Location & Topology Laboratory</title>
+<title>Automated Subnet Scanner Laboratory</title>
 <style>
     body {
         font-family: 'Courier New', monospace; 
@@ -35,18 +35,18 @@
 </head>
 <body>
 
-<h2>Network Location & Topology Laboratory</h2>
+<h2>Automated Subnet Scanner Laboratory</h2>
 
 <div class="panel">
     <h3>[1] Public Network Geolocation Lookup</h3>
-    <p>Mengidentifikasi estimasi lokasi geografis pusat jaringan (Wired Gateway) berdasarkan pemetaan IP Publik tanpa izin GPS perangkat.</p>
-    <button id="lookup-public-location">Analyze Network Gateway Location</button>
+    <p>Mengidentifikasi estimasi wilayah pusat jaringan berdasarkan pemetaan IP Publik eksternal Gateway.</p>
+    <button id="lookup-public-location">Analyze Gateway ISP Location</button>
 </div>
 
 <div class="panel">
-    <h3>[2] Local Topology & Proximity Audit</h3>
-    <p>Melakukan analisis kedekatan relatif simpul nirkabel berdasarkan estimasi pelemahan sinyal radio (RSSI Approximation).</p>
-    <button id="scan-local-topology">Analyze Proximity Metrics</button>
+    <h3>[2] Autonomous Local Subnet Discovery</h3>
+    <p>Melakukan pemindaian otonom pada segmen IP lokal aktif menggunakan teknik asinkron Resource Fetching.</p>
+    <button id="scan-local-subnet">Scan Active Subnet Nodes</button>
 </div>
 
 <div id="console-log"></div>
@@ -61,50 +61,58 @@ function writeLog(phase, type, text) {
     consoleLog.scrollTop = consoleLog.scrollHeight;
 }
 
-// 1. ANALISIS LOKASI JARINGAN PUBLIK (Mengecek Geolocation IP Publik Router)
+// 1. RESOLUSI GEOLOCATION IP PUBLIK ROUTER VIA API EKSTERNAL
 document.getElementById("lookup-public-location").addEventListener("click", () => {
     writeLog('API_INIT', 'location', "Menghubungi endpoint resolusi IP eksternal...");
     
-    // Menggunakan API publik gratis untuk melihat estimasi lokasi geografis koneksi internet Wi-Fi
     fetch('https://ipapi.co')
         .then(response => response.json())
         .then(data => {
             writeLog('GEO_DATA', 'location', `Analisis IP Publik Selesai (${data.ip})`);
-            writeLog('GEO_DATA', 'location', `   |-- Negara   : ${data.country_name}`);
-            writeLog('GEO_DATA', 'location', `   |-- Wilayah  : ${data.region}`);
-            writeLog('GEO_DATA', 'location', `   |-- Kota     : ${data.city}`);
-            writeLog('GEO_DATA', 'location', `   |-- ISP      : ${data.org}`);
-            writeLog('GEO_DATA', 'location', `   |-- Koordinat: Lat ${data.latitude}, Lon ${data.longitude} (Akurasi Radius ISP)`);
-            writeLog('GEO_DATA', 'location', "Catatan: Lokasi ini adalah lokasi infrastruktur ISP penyedia Wi-Fi, bukan posisi GPS individu.");
+            writeLog('GEO_DATA', 'location', `   |-- ISP/Provider : ${data.org}`);
+            writeLog('GEO_DATA', 'location', `   |-- Kota/Wilayah : ${data.city}, ${data.region}`);
+            writeLog('GEO_DATA', 'location', `   |-- Estimasi Pusat: Lat ${data.latitude}, Lon ${data.longitude}`);
+            writeLog('GEO_DATA', 'location', "Catatan: Hasil koordinat di atas merupakan area titik infrastruktur ISP terdekat, bukan koordinat instan GPS pengguna.");
         })
         .catch(err => {
             writeLog('GEO_ERR', 'location', `Gagal mengambil data lokasi publik: ${err.message}`);
         });
 });
 
-// 2. ANALISIS METRIK KEDEKATAN LOKAL (RSSI & Proximity)
-document.getElementById("scan-local-topology").addEventListener("click", () => {
-    writeLog('PROC_INIT', 'network', "Mengekstrak data metrik nirkabel dari tumpukan frame lokal...");
-    
-    // Basis data konseptual untuk menunjukkan metrik kekuatan sinyal (RSSI) yang mengindikasikan jarak perangkat ke router
-    const localTopology = [
-        { ip: "172.30.200.1", dev: "Gateway Router", rssi: "-30 dBm", prox: "Sangat Dekat (Akses Poin)" },
-        { ip: "172.30.200.5", dev: "Android Node", rssi: "-55 dBm", prox: "Sedang (~5-10 meter dari AP)" },
-        { ip: "172.30.200.12", dev: "iOS Node", rssi: "-85 dBm", prox: "Jauh / Batas Jangkauan Sinyal" }
-    ];
+// 2. PEMINDAIAN SUB-NET OTONOM (Web-Based Port Scanning Engine)
+document.getElementById("scan-local-subnet").addEventListener("click", () => {
+    // Menargetkan basis segmen IP yang Anda gunakan (172.30.200.x)
+    const baseSubnet = "172.30.200";
+    writeLog('SCAN_INIT', 'network', `Memulai pemindaian otonom pada rentang segmen -> ${baseSubnet}.1 hingga ${baseSubnet}.30...`);
 
-    let currentDelay = 0;
-    localTopology.forEach((node, idx) => {
-        currentDelay += 600;
-        setTimeout(() => {
-            writeLog(`NODE-${idx+1}`, 'network', `Node terdeteksi di subnet: ${node.ip} (${node.dev})`);
-            writeLog(`METRIC-${idx+1}`, 'network', `   |-- Kekuatan Sinyal Radio: ${node.rssi}`);
-            writeLog(`METRIC-${idx+1}`, 'network', `   |-- Estimasi Jarak Ruang : ${node.prox}`);
-        }, currentDelay);
+    // Sampel indeks host untuk simulasi respons audit waktu nyata di browser
+    const targetHosts = Array.from({length: 30}, (_, i) => i + 1);
+
+    targetHosts.forEach(host => {
+        const targetIp = `${baseSubnet}.${host}`;
+        const startTime = performance.now();
+        
+        // Memanfaatkan elemen gambar bayangan untuk mengukur kecepatan respons muatan port web
+        const img = new Image();
+        
+        img.onload = () => {
+            writeLog(`ACTIVE`, 'network', `Simpul aktif terdeteksi pada -> ${targetIp} (HTTP Port Responsif)`);
+        };
+        
+        img.onerror = () => {
+            const duration = performance.now() - startTime;
+            // Jika penolakan koneksi terjadi sangat cepat, indikasi kuat port atau IP tersebut ada/aktif
+            if (duration < 150) {
+                writeLog(`FOUND`, 'network', `Indikasi perangkat aktif pada alamat IP -> ${targetIp}`);
+            }
+        };
+        
+        // Menguji ketersediaan port HTTP standar pada perangkat target
+        img.src = `http://${targetIp}:80/favicon.ico?r=${Math.random()}`;
     });
 });
 
-writeLog('SYSTEM', 'network', "Laboratorium analisis lokasi dan topologi terpadu aktif.");
+writeLog('SYSTEM', 'network', "Mesin pemindai topologi otonom berhasil diinisialisasi.");
 </script>
 </body>
 </html>
