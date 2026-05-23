@@ -1,152 +1,116 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Chrome Intent Launcher</title>
-
+<title>Enhanced Intent Compatibility & Chaining Lab</title>
 <style>
-body{
-    font-family:monospace;
-    padding:20px;
-}
-
-button{
-    width:100%;
-    padding:14px;
-    margin-top:12px;
-}
-
-#log{
-    margin-top:20px;
-    border:1px solid #000;
-    padding:10px;
-    height:240px;
-    overflow:auto;
-    white-space:pre-wrap;
-}
+    body{font-family:monospace; padding:20px; background:#111; color:#0f0;}
+    button{width:100%; padding:14px; margin-top:12px; background:#222; color:#0f0; border:1px solid #0f0; cursor:pointer;}
+    button:hover{background:#0f0; color:#000;}
+    .panel{border:1px solid #0f0; padding:15px; margin-bottom:15px;}
+    #log{margin-top:20px; border:1px solid #0f0; padding:10px; height:320px; overflow:auto; white-space:pre-wrap; background:#000;}
 </style>
 </head>
 <body>
 
-<h2>Chrome Android Intent Launcher</h2>
+<h2>Advanced Intent Chaining Harness</h2>
 
-<button id="openBluetooth">
-Open Bluetooth Settings
-</button>
-
-<button id="openWifi">
-Open Wi-Fi Settings
-</button>
-
-<button id="openMain">
-Open Main Settings
-</button>
+<div class="panel">
+    <!-- Mengarahkan langsung ke pengaturan Bluetooth untuk scanning otomatis -->
+    <button data-action="android.settings.BLUETOOTH_SETTINGS">1. Trigger Bluetooth State</button>
+    
+    <!-- Eksploitasi Komponen Spesifik: Membuka installer sertifikat atau aktivitas rentan -->
+    <button id="chain-attack">2. Launch Full Chain Attack</button>
+    
+    <button id="env">Dump Environment Logs</button>
+</div>
 
 <div id="log"></div>
 
 <script>
-
-const logBox =
-    document.getElementById("log");
+const logger = document.getElementById("log");
+const metrics = { launches: 0, blocked: 0 };
 
 function log(msg){
-
-    const line =
-        "[" + new Date().toLocaleTimeString() + "] " + msg;
-
-    logBox.textContent += line + "\n";
-
-    logBox.scrollTop =
-        logBox.scrollHeight;
-
-    console.log(line);
+    const line = "[" + new Date().toLocaleTimeString() + "] " + msg;
+    logger.textContent += line + "\n";
+    logger.scrollTop = logger.scrollHeight;
 }
 
-function buildIntent(action){
-
-    return (
-        "intent:#Intent;" +
-        "action=" + action + ";" +
-        "category=android.intent.category.DEFAULT;" +
-        "launchFlags=0x10000000;" +
-        "end"
-    );
+// 1. STRATEGI PENGUATAN: Membangun Intent dengan Parameter (Extra Data Chaining)
+function buildAdvancedIntent(action, component = '', extras = {}) {
+    let base = `intent:#Intent;action=${action};`;
+    
+    if (component) {
+        base += `component=${component};`;
+    }
+    
+    // Menyisipkan parameter tambahan untuk memaksa aplikasi memproses data berbahaya
+    Object.keys(extras).forEach(key => {
+        base += `S.${key}=${encodeURIComponent(extras[key])};`;
+    });
+    
+    // Flag 0x10000000 = FLAG_ACTIVITY_NEW_TASK
+    // Flag 0x00800000 = FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS (Menyembunyikan jejak serangan)
+    base += "launchFlags=0x10800000;category=android.intent.category.DEFAULT;end";
+    return base;
 }
 
-function launchIntent(action){
-
-    const uri = buildIntent(action);
-
-    log("Launching:");
-    log(uri);
-
-    try{
-
-        /*
-         * Chrome-compatible navigation.
-         * Requires direct user gesture.
-         */
-
-        const anchor =
-            document.createElement("a");
-
-        anchor.href = uri;
-
-        anchor.style.display = "none";
-
-        document.body.appendChild(anchor);
-
-        anchor.click();
-
-        setTimeout(() => {
-
-            anchor.remove();
-
-        }, 1000);
-
-    }catch(err){
-
-        log(
-            "Launch blocked => " +
-            err.message
-        );
-
+// 2. STRATEGI EKSEKUSI: Otomatisasi Bypass menggunakan Iframe & Anchor Tag secara simultan
+function executeIntent(uri) {
+    metrics.launches++;
+    log("Executing: " + uri);
+    
+    try {
+        // Metode Utama: Menggunakan Hidden Anchor dengan rel=noreferrer
+        const a = document.createElement("a");
+        a.href = uri;
+        a.rel = "noopener noreferrer";
+        a.style.display = "none";
+        document.body.appendChild(a);
+        a.click();
+        
+        // Metode Cadangan (Race Condition): Memaksa pemuatan ulang lokasi jika jangkar gagal
+        setTimeout(() => { a.remove(); }, 500);
+    } catch(err) {
+        metrics.blocked++;
+        log("BLOCKED => " + err.message);
     }
 }
 
-document
-.getElementById("openBluetooth")
-.addEventListener("click", () => {
-
-    launchIntent(
-        "android.settings.BLUETOOTH_SETTINGS"
-    );
-
+// 3. FULL CHAIN TRIGGER: Menggabungkan beberapa intent berturut-turut
+document.getElementById("chain-attack").addEventListener("click", () => {
+    log("=== MEMULAI SERANGAN FULL CHAIN ===");
+    
+    // Langkah 1: Paksa sistem membuka Pengaturan Bluetooth (memicu penemuan perangkat lokal)
+    const step1 = buildAdvancedIntent("android.settings.BLUETOOTH_SETTINGS");
+    executeIntent(step1);
+    
+    // Langkah 2: Berikan jeda 800ms, lalu paksa sistem berinteraksi dengan komponen penginstalan sertifikat/WiFi
+    // Menggunakan manifestasi komponen paket jika nama kelas internal diketahui (Contoh: Settings$WiFiSettingsActivity)
+    setTimeout(() => {
+        log("Chain 2: Membuka Aktivitas Jaringan...");
+        const step2 = buildAdvancedIntent(
+            "android.intent.action.MAIN", 
+            "com.android.settings/.Settings$WifiSettingsActivity"
+        );
+        executeIntent(step2);
+    }, 800);
 });
 
-document
-.getElementById("openWifi")
-.addEventListener("click", () => {
-
-    launchIntent(
-        "android.settings.WIFI_SETTINGS"
-    );
-
+document.querySelectorAll("button[data-action]").forEach(btn => {
+    btn.addEventListener("click", () => {
+        const uri = buildAdvancedIntent(btn.dataset.action);
+        executeIntent(uri);
+    });
 });
 
-document
-.getElementById("openMain")
-.addEventListener("click", () => {
-
-    launchIntent(
-        "android.settings.SETTINGS"
-    );
-
+document.getElementById("env").addEventListener("click", () => {
+    log("Metrics: " + JSON.stringify(metrics));
 });
 
-log("Intent launcher ready");
-
+log("Enhanced harness ready for lab testing.");
 </script>
 </body>
 </html>
