@@ -49,13 +49,6 @@
       max-height: 250px;
       overflow-y: auto;
     }
-    .badge {
-      font-size: 10px;
-      background: #000;
-      color: #fff;
-      padding: 2px 5px;
-      float: right;
-    }
   </style>
 </head>
 <body>
@@ -131,28 +124,28 @@
     }
 
     function executeChainedIntent(actionString) {
-      logMessage("<b>[START TEST]</b> Memicu matriks eskalasi untuk: " + actionString);
+      logMessage("<b>[START]</b> Memulai pengujian skema untuk aksi: " + actionString);
       
-      // 1. Konstruksi URI Intent Android Standar (Sintaks intent:// yang valid)
+      // Konstruksi URI skema intent standar Android yang valid secara sintaksis
       const targetIntent = "intent://#Intent;" +
                            "action=" + actionString + ";" +
                            "category=android.intent.category.DEFAULT;" +
                            "LAUNCH_FLAGS=0x10000000;" + 
                            "end";
 
-      // --- STRATEGI 1: Top-Level Direct Location Mutation ---
+      // METODE 1: Pengalihan Objek Lokasi Jendela Utama (Top-Level Location Mutation)
       try {
-        logMessage("[TRY STAGE 1] Mutasi langsung window.top.location.href");
+        logMessage("[METODE 1] Mencoba mutasi objek window.top.location.href");
         window.top.location.href = targetIntent;
       } catch (e) {
-        logMessage("[STAGE 1 BLOCKED] Gagal mutasi langsung: " + e.message);
+        logMessage("[METODE 1 GAGAL] Diblokir oleh konteks eksekusi peramban: " + e.message);
       }
 
-      // --- STRATEGI 2: DOM Anchor Click Simulation (User Gesture Enforcement) ---
-      // Beberapa browser memblokir mutasi location langsung tetapi lolos jika lewat elemen jangkar <a>
+      // METODE 2: Simulasi Elemen Jangkar HTML5 (DOM Anchor Click Injection)
+      // Beberapa mekanisme internal peramban memblokir manipulasi lokasi langsung tetapi memperbolehkan navigasi elemen tautan formal.
       setTimeout(() => {
         try {
-          logMessage("[TRY STAGE 2] Simulasi interaksi DOM via Elemen Jangkar");
+          logMessage("[METODE 2] Mencoba simulasi klik pada elemen tautan dinamik");
           const anchor = document.createElement('a');
           anchor.href = targetIntent;
           anchor.rel = 'noreferrer';
@@ -160,15 +153,15 @@
           anchor.click();
           document.body.removeChild(anchor);
         } catch (e) {
-          logMessage("[STAGE 2 BLOCKED] Gagal via elemen jangkar: " + e.message);
+          logMessage("[METODE 2 GAGAL] Galat pada injeksi elemen jangkar: " + e.message);
         }
-      }, 300);
+      }, 250);
 
-      // --- STRATEGI 3: Iframe Source Escalation ---
-      // Menguji apakah bypass skema bisa dipicu melalui pemuatan senyap di dalam sub-konteks (iframe)
+      // METODE 3: Pemuatan Sub-Konteks Terisolasi (Iframe Source Loading)
+      // Berguna untuk menguji apakah parser menangani skema eksternal di dalam lingkungan bersarang.
       setTimeout(() => {
         try {
-          logMessage("[TRY STAGE 3] Pengalihan sub-konteks menggunakan Invisible Iframe");
+          logMessage("[METODE 3] Mencoba pemuatan skema melalui elemen iframe tersembunyi");
           let iframe = document.getElementById('testIframe');
           if (!iframe) {
             iframe = document.createElement('iframe');
@@ -178,9 +171,9 @@
           }
           iframe.src = targetIntent;
         } catch (e) {
-          logMessage("[STAGE 3 BLOCKED] Gagal via iframe: " + e.message);
+          logMessage("[METODE 3 GAGAL] Alokasi sumber iframe ditolak: " + e.message);
         }
-      }, 600);
+      }, 500);
     }
   </script>
 
