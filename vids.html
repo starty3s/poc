@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Advanced Wireless Packet Decapsulation Lab</title>
+<title>Live Web Telemetry Security Lab</title>
 <style>
     body {
         font-family: 'Courier New', monospace; 
@@ -29,19 +29,24 @@
         background: #000; font-size: 11px; color: #00ff55;
     }
     .role-tag { font-weight: bold; padding: 2px 6px; border-radius: 3px; font-size: 10px; color: #000; }
-    .capture { background: #ffaa00; }
-    .layer { background: #00ffaa; }
-    .alert { background: #ff3333; color: #fff; }
+    .telemetry { background: #ffaa00; }
+    .network { background: #00ffaa; }
 </style>
 </head>
 <body>
 
-<h2>Advanced Wireless Packet Laboratory</h2>
+<h2>Live Web Telemetry Security Laboratory</h2>
 
 <div class="panel">
-    <h3> Wi-Fi Frame Encapsulation Model</h3>
-    <p>Simulasi interaktif tingkat lanjut mengenai de-enkapsulasi paket data nirkabel (IEEE 802.11) untuk kebutuhan analisis audit.</p>
-    <button id="start-capture-simulation">Start Frame Decapsulation</button>
+    <h3> [1] Generate Live Network Traffic</h3>
+    <p>Picu lalu lintas data nyata dengan menghubungi endpoint API eksternal untuk menghasilkan log aktivitas jaringan.</p>
+    <button id="trigger-traffic">Generate Network Traffic</button>
+</div>
+
+<div class="panel">
+    <h3> [2] Capture Live Resource Timing Telemetry</h3>
+    <p>Ekstrak dan bongkar data lalu lintas jaringan nyata dari memori browser Anda sendiri menggunakan Resource Timing API.</p>
+    <button id="capture-live-telemetry">Capture & Inspect Live Data</button>
 </div>
 
 <div id="console-log"></div>
@@ -56,80 +61,58 @@ function writeLog(phase, type, text) {
     consoleLog.scrollTop = consoleLog.scrollHeight;
 }
 
-// EKSEKUSI PIPELINE DE-ENKAPSULASI PROTOKOL INTEGRAL
-document.getElementById("start-capture-simulation").addEventListener("click", () => {
-    writeLog('PROMISC', 'capture', "Mengaktifkan Virtual Interface Monitor Mode (wlan0mon)...");
-    writeLog('FILTER', 'capture', "Menerapkan Berkeley Packet Filter (BPF): subnet 172.30.200.0/24");
-
-    // Struktur data multi-protokol diperluas untuk mensimulasikan berbagai lapisan OSI
-    const advancedFrames = [
-        {
-            proto: "DNS (Domain Name System)",
-            src: "172.30.200.5", dst: "172.30.200.1", mac: "A4:C3:F0:11:22:33",
-            details: [
-                "Layer 4 -> UDP (Port Asal: 56123, Port Tujuan: 53)",
-                "Payload  -> Query: target-internal-service.local",
-                "Flags    -> Standard query (0x0100)"
-            ]
-        },
-        {
-            proto: "TCP Handshake Synchronization",
-            src: "172.30.200.12", dst: "172.30.200.24", mac: "00:1A:11:44:55:66",
-            details: [
-                "Layer 4 -> TCP (Port Asal: 49212, Port Tujuan: 443)",
-                "Flags    -> [SYN] Seq=0, Win=65535, Len=0",
-                "Analysis -> Menginisialisasi jabat tangan tiga arah (Three-Way Handshake)"
-            ]
-        },
-        {
-            proto: "TLS Cryptographic Client Hello",
-            src: "172.30.200.12", dst: "172.30.200.24", mac: "00:1A:11:44:55:66",
-            details: [
-                "Layer 7 -> TLSv1.3 Record Layer: Handshake Protocol: Client Hello",
-                "Payload  -> Extension: server_name (SNI): secure-auth.internal",
-                "Analysis -> Negosiasi algoritma enkripsi cipher suite dimulai"
-            ]
-        },
-        {
-            proto: "HTTP Plaintext Authentication",
-            src: "172.30.200.15", dst: "172.30.200.1", mac: "E4:A2:A1:77:88:99",
-            details: [
-                "Layer 7 -> HTTP/1.1 (Aplikasi Tanpa TLS / Tidak Terenkripsi)",
-                "Payload  -> POST /login.php HTTP/1.1 \\r\\n Authorization: Basic YWRtaW46cGFzc3dvcmQxMjM=",
-                "Decoded  -> Hasil konversi Base64 terdeteksi -> admin:password123"
-            ],
-            warn: true
-        }
-    ];
-
-    let currentInterval = 0;
-
-    advancedFrames.forEach((frame, index) => {
-        currentInterval += 1200;
-        setTimeout(() => {
-            writeLog(`FRAME-${index+1}`, 'capture', `Paket data nirkabel berhasil ditangkap di udara.`);
-            writeLog(`L2-LINK`, 'layer', `   |-- Data Link Layer -> MAC Asal: ${frame.mac}`);
-            writeLog(`L3-NET`, 'layer', `   |-- Network Layer   -> IP Asal: ${frame.src} | IP Tujuan: ${frame.dst}`);
-            writeLog(`L7-APP`, 'layer', `   |-- Application     -> Protokol Terurai: ${frame.proto}`);
-            
-            frame.details.forEach(detail => {
-                writeLog(`DECAP`, 'layer', `   |   [Sub-Header] ${detail}`);
-            });
-
-            if (frame.warn) {
-                writeLog('ALERT', 'alert', "RISIKO AUDIT: Data sensitif dikirim dalam bentuk teks biasa (HTTP Tanpa Enkripsi TLS).");
-            }
-            
-            writeLog(`STATE`, 'capture', `Frame-${index+1} selesai diproses oleh komponen penganalisis.\n`);
-            
-            if (index === advancedFrames.length - 1) {
-                writeLog('FINISH', 'capture', "Seluruh de-enkapsulasi aliran data simulasi selesai.");
-            }
-        }, currentInterval);
-    });
+// TAHAP 1: PEMICUAN LALU LINTAS DATA NYATA (LIVE TRAFFIC GENERATOR)
+document.getElementById("trigger-traffic").addEventListener("click", () => {
+    writeLog('TRAFFIC', 'network', "Mengirimkan permintaan HTTPS nyata ke endpoint eksternal...");
+    
+    // Memicu koneksi jaringan nyata ke API publik
+    fetch('https://ipify.org')
+        .then(res => res.json())
+        .then(data => {
+            writeLog('TRAFFIC', 'network', `Koneksi berhasil. Alamat IP Publik Anda terdeteksi: ${data.ip}`);
+        })
+        .catch(err => {
+            writeLog('TRAFFIC_ERR', 'network', `Gagal memicu lalu lintas: ${err.message}`);
+        });
 });
 
-writeLog('SYSTEM', 'layer', "Mesin visualisasi de-enkapsulasi laboratorium siap.");
+// TAHAP 2: EKSTRAKSI DATA KONEKSI NYATA (RESOURCE TIMING ENGINE)
+document.getElementById("capture-live-telemetry").addEventListener("click", () => {
+    writeLog('CAPTURE', 'telemetry', "Mengekstrak entri Resource Performance dari memori peramban...");
+    
+    // Mengambil data jaringan nyata yang tercatat di dalam runtime browser Anda sendiri
+    const resources = performance.getEntriesByType("resource");
+    
+    if (resources.length === 0) {
+        writeLog('EMPTY', 'telemetry', "Belum ada lalu lintas data yang tercatat. Ketuk tombol 'Generate Network Traffic' terlebih dahulu.");
+        return;
+    }
+
+    resources.forEach((resource, index) => {
+        writeLog(`CONN-${index + 1}`, 'telemetry', `Membongkar metadata koneksi untuk: ${resource.name.substring(0, 70)}...`);
+        writeLog(`METRIC-${index + 1}`, 'telemetry', `   |-- Tipe Inisiator : ${resource.initiatorType}`);
+        writeLog(`METRIC-${index + 1}`, 'telemetry', `   |-- Protokol Web   : ${resource.nextHopProtocol || "N/A (Cached/Blocked)"}`);
+        
+        // Menghitung waktu pemrosesan TCP & DNS nyata dalam milidetik
+        const dnsTime = Math.round(resource.domainLookupEnd - resource.domainLookupStart);
+        const tcpTime = Math.round(resource.connectEnd - resource.connectStart);
+        const responseTime = Math.round(resource.responseEnd - resource.responseStart);
+        
+        writeLog(`TIMING-${index + 1}`, 'telemetry', `   |-- Waktu Resolusi DNS : ${dnsTime} ms`);
+        writeLog(`TIMING-${index + 1}`, 'telemetry', `   |-- Waktu Jabat Tangan TCP : ${tcpTime} ms`);
+        writeLog(`TIMING-${index + 1}`, 'telemetry', `   |-- Waktu Respons Data   : ${responseTime} ms`);
+        
+        // Memeriksa ukuran transfer data nyata (jika didukung oleh server CORS)
+        if (resource.transferSize > 0) {
+            writeLog(`SIZE-${index + 1}`, 'telemetry', `   |-- Volume Data Ditransfer: ${resource.transferSize} bytes`);
+        }
+        consoleLog.innerHTML += "\n";
+    });
+    
+    writeLog('FINISH', 'telemetry', `Analisis selesai. Berhasil mengaudit ${resources.length} entri koneksi nyata.`);
+});
+
+writeLog('SYSTEM', 'network', "Mesin telemetri jaringan nyata laboratorium aktif.");
 </script>
 </body>
 </html>
