@@ -3,37 +3,25 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Bluetooth VRP Research Harness</title>
+<title>Chrome Intent Launcher</title>
 
 <style>
 body{
     font-family:monospace;
     padding:20px;
-    background:#fff;
-    color:#000;
-}
-
-.grid{
-    display:grid;
-    gap:12px;
-}
-
-.card{
-    border:1px solid #000;
-    padding:15px;
 }
 
 button{
     width:100%;
-    padding:12px;
-    margin-top:10px;
+    padding:14px;
+    margin-top:12px;
 }
 
 #log{
     margin-top:20px;
     border:1px solid #000;
     padding:10px;
-    height:320px;
+    height:240px;
     overflow:auto;
     white-space:pre-wrap;
 }
@@ -41,84 +29,38 @@ button{
 </head>
 <body>
 
-<h2>Bluetooth Compatibility Research Harness</h2>
+<h2>Chrome Android Intent Launcher</h2>
 
-<div class="grid">
-
-<div class="card">
-
-<button id="envBtn">
-Environment Probe
-</button>
-
-<button id="checkBt">
-Check Web Bluetooth
-</button>
-
-<button id="requestBt">
-Request Bluetooth Device
-</button>
-
-<button id="openBtSettings">
+<button id="openBluetooth">
 Open Bluetooth Settings
 </button>
 
-<button id="observeLifecycle">
-Install Lifecycle Observer
+<button id="openWifi">
+Open Wi-Fi Settings
 </button>
 
-</div>
-
-</div>
+<button id="openMain">
+Open Main Settings
+</button>
 
 <div id="log"></div>
 
 <script>
 
-const logger =
+const logBox =
     document.getElementById("log");
-
-let activeDevice = null;
-
-const ENV = {
-
-    ua: navigator.userAgent,
-
-    android:
-        /Android/i.test(navigator.userAgent),
-
-    chrome:
-        /Chrome/i.test(navigator.userAgent),
-
-    webview:
-        /(wv|Version\/[\d.]+).*Chrome/i
-        .test(navigator.userAgent),
-
-    secureContext:
-        window.isSecureContext,
-
-    bluetooth:
-        "bluetooth" in navigator
-
-};
 
 function log(msg){
 
     const line =
         "[" + new Date().toLocaleTimeString() + "] " + msg;
 
-    logger.textContent += line + "\n";
+    logBox.textContent += line + "\n";
 
-    logger.scrollTop = logger.scrollHeight;
+    logBox.scrollTop =
+        logBox.scrollHeight;
 
     console.log(line);
-}
-
-function dumpEnvironment(){
-
-    log("=== ENVIRONMENT ===");
-
-    log(JSON.stringify(ENV,null,2));
 }
 
 function buildIntent(action){
@@ -127,192 +69,83 @@ function buildIntent(action){
         "intent:#Intent;" +
         "action=" + action + ";" +
         "category=android.intent.category.DEFAULT;" +
+        "launchFlags=0x10000000;" +
         "end"
     );
 }
 
-function openBluetoothSettings(){
+function launchIntent(action){
 
-    const uri = buildIntent(
-        "android.settings.BLUETOOTH_SETTINGS"
-    );
+    const uri = buildIntent(action);
 
-    log("Dispatch Bluetooth settings intent");
-
+    log("Launching:");
     log(uri);
 
     try{
 
         /*
-         * Standard navigation only.
-         * No javascript: nesting.
-         * No top-frame escalation.
+         * Chrome-compatible navigation.
+         * Requires direct user gesture.
          */
 
-        window.location.assign(uri);
+        const anchor =
+            document.createElement("a");
 
-    }catch(err){
+        anchor.href = uri;
 
-        log("BLOCKED => " + err.message);
+        anchor.style.display = "none";
 
-    }
-}
+        document.body.appendChild(anchor);
 
-async function checkBluetooth(){
+        anchor.click();
 
-    log("Checking Bluetooth support");
+        setTimeout(() => {
 
-    if(!window.isSecureContext){
+            anchor.remove();
 
-        log("Secure context required");
-
-        return;
-    }
-
-    if(!navigator.bluetooth){
-
-        log("Web Bluetooth unsupported");
-
-        return;
-    }
-
-    try{
-
-        const availability =
-            await navigator.bluetooth.getAvailability();
-
-        log(
-            "Bluetooth availability => " +
-            availability
-        );
+        }, 1000);
 
     }catch(err){
 
         log(
-            "Availability error => " +
+            "Launch blocked => " +
             err.message
         );
 
     }
 }
 
-async function requestBluetoothDevice(){
+document
+.getElementById("openBluetooth")
+.addEventListener("click", () => {
 
-    log("Requesting Bluetooth device");
+    launchIntent(
+        "android.settings.BLUETOOTH_SETTINGS"
+    );
 
-    if(!navigator.bluetooth){
-
-        log("Bluetooth API unavailable");
-
-        return;
-    }
-
-    try{
-
-        const device =
-            await navigator.bluetooth.requestDevice({
-
-                acceptAllDevices: true,
-
-                optionalServices: [
-                    "battery_service",
-                    "device_information"
-                ]
-
-            });
-
-        activeDevice = device;
-
-        log(
-            "DEVICE NAME => " +
-            (device.name || "unknown")
-        );
-
-        log(
-            "DEVICE ID => " +
-            device.id
-        );
-
-        device.addEventListener(
-            "gattserverdisconnected",
-            () => {
-
-                log(
-                    "GATT disconnected"
-                );
-
-            }
-        );
-
-        log("Device listener attached");
-
-    }catch(err){
-
-        log(
-            "REQUEST ERROR => " +
-            err.message
-        );
-
-    }
-}
-
-function installLifecycleObservers(){
-
-    log("Installing lifecycle observers");
-
-    [
-        "visibilitychange",
-        "focus",
-        "blur",
-        "pageshow",
-        "pagehide"
-    ].forEach(evt => {
-
-        window.addEventListener(evt, () => {
-
-            log(
-                "EVENT => " +
-                evt +
-                " | hidden=" +
-                document.hidden
-            );
-
-        });
-
-    });
-
-}
+});
 
 document
-.getElementById("envBtn")
-.addEventListener("click", dumpEnvironment);
+.getElementById("openWifi")
+.addEventListener("click", () => {
+
+    launchIntent(
+        "android.settings.WIFI_SETTINGS"
+    );
+
+});
 
 document
-.getElementById("checkBt")
-.addEventListener("click", checkBluetooth);
+.getElementById("openMain")
+.addEventListener("click", () => {
 
-document
-.getElementById("requestBt")
-.addEventListener(
-    "click",
-    requestBluetoothDevice
-);
+    launchIntent(
+        "android.settings.SETTINGS"
+    );
 
-document
-.getElementById("openBtSettings")
-.addEventListener(
-    "click",
-    openBluetoothSettings
-);
+});
 
-document
-.getElementById("observeLifecycle")
-.addEventListener(
-    "click",
-    installLifecycleObservers
-);
-
-log("Bluetooth VRP harness initialized");
+log("Intent launcher ready");
 
 </script>
 </body>
