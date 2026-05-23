@@ -1,115 +1,49 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Analisis Keamanan: Chromium Intent Redirection & UI Masking</title>
+  <title>Intent Navigation Test</title>
   <style>
     body {
       font-family: monospace;
+      padding: 20px;
       background-color: #ffffff;
       color: #000000;
-      padding: 20px;
-      line-height: 1.4;
     }
-    h1, h2, h3 {
-      margin-top: 20px;
-      margin-bottom: 10px;
-      border-bottom: 1px solid #000000;
-      padding-bottom: 5px;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 20px;
-    }
-    th, td {
+    .test-container {
       border: 1px solid #000000;
-      padding: 8px;
-      text-align: left;
-      vertical-align: top;
+      padding: 20px;
+      margin-top: 20px;
     }
-    th {
-      background-color: #f2f2f2;
-      width: 30%;
-    }
-    pre {
-      background-color: #f8f8f8;
-      border: 1px dashed #000000;
-      padding: 10px;
-      overflow-x: auto;
-    }
-    ul, ol {
-      padding-left: 20px;
-    }
-    li {
-      margin-bottom: 5px;
+    button {
+      padding: 10px 20px;
+      font-family: monospace;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
 
-  <h1>ANALISIS VULNERABILITY: CHROMIUM INTENT BINDING & INTERFACES</h1>
+  <h1>Intent Schema Security Verification</h1>
+  <p>Pengujian kepatuhan peramban terhadap pembatasan skema eksternal Android Intent.</p>
 
-  <table>
-    <tr>
-      <th>Parameter Isu</th>
-      <td>Chromium Tracker Issue 40064598 / Komponen Blink-Web-Security</td>
-    </tr>
-    <tr>
-      <th>Vektor Dampak</th>
-      <td>Universal Cross-Site Scripting (UXSS) via Konteks Navigasi Android Intent</td>
-    </tr>
-    <tr>
-      <th>Klasifikasi Risiko</th>
-      <td>High Severity Chain (Eskalasi via Kombinasi State-Masking)</td>
-    </tr>
-    <tr>
-      <th>Mekanisme Target</th>
-      <td>Bypass Batasan Same-Origin Policy (SOP) & Intent Federation Abuse</td>
-    </tr>
-  </table>
+  <div class="test-container">
+    <button onclick="triggerIntent()">Uji Navigasi Intent (Bluetooth Settings)</button>
+  </div>
 
-  <h2>1. Analisis Validasi Skema Intent (Intent Scheme Security)</h2>
-  <p>Kerentanan ini mengeksploitasi kelemahan pada subsistem penanganan URL peramban ketika menerjemahkan URI berbasis skema internal Android (<code>intent://</code>) dari dalam konteks eksekusi skrip dinamis. Pada arsitektur yang rentan, parser gagal memverifikasi rantai kepemilikan token keamanan asal (*origin validation*) saat terjadi transisi status asinkron.</p>
-  
-  <p>Titik kritis kegagalan validasi meliputi:</p>
-  <ul>
-    <li><strong>Logical Nesting Perversity:</strong> Penggunaan rantai pemanggilan berlapis seperti pseudo-skema <code>javascript:</code> yang memaksa mutasi properti <code>window.location</code> secara langsung ke skema <code>intent:</code>. Kegagalan terjadi karena Blink Engine melepas validasi origin aktif sebelum sistem operasi Android mengambil alih resolusi paket IPC.</li>
-    <li><strong>User Gesture Serialization:</strong> Sifat transien dari *User Activation Token* dimanfaatkan untuk mengeksekusi dua tindakan istimewa secara simultan: mengizinkan pengalihan subsistem aplikasi luar dan memberikan izin transisi visual layar penuh (Fullscreen).</li>
-  </ul>
-
-  <h2>2. Kerentanan Intent Federation / Intent Redirection</h2>
-  <p>Konsep *Intent Federation* atau *Intent Redirection* terjadi ketika peramban web bertindak sebagai jembatan atau agen federal yang menyalurkan instruksi dari konten web publik ke komponen internal sistem operasi atau aplikasi pihak ketiga. Kegagalan keamanan pada lapisan ini memungkinkan terjadinya eksploitasi antar-komponen:</p>
-  <ul>
-    <li><strong>Unsanitized Intent Parsing:</strong> Peramban gagal menyaring parameter sensitif di dalam string intent, seperti <code>component</code>, <code>extra</code>, atau <code>selector</code>, yang dapat memaksa aplikasi target mengeksekusi aksi internal yang seharusnya tidak terekspos ke luar (misalnya, memaksa browser pihak ketiga membuka URI internal).</li>
-    <li><strong>Arbitrary Component Launching:</strong> Melalui penentuan nama paket secara eksplisit (<code>package=...</code>), penyerang memanfaatkan hak istimewa peramban untuk berinteraksi dengan *Activity* yang tidak diekspor secara publik (<code>exported=false</code>) namun memiliki kelemahan dalam menangani data dari luar.</li>
-  </ul>
-
-  <h2>3. Pembatasan Konteks Visual (UI State Masking)</h2>
-  <p>Ketika kerentanan manipulasi skema dan federasi intent ini dikombinasikan dengan Fullscreen API, tingkat keparahan teknis meningkat secara signifikan. Hal ini disebabkan oleh hilangnya indikator keamanan visual utama peramban:</p>
-  <ul>
-    <li><strong>Sembunyi Omnibox & Notifikasi:</strong> Eksekusi perintah Fullscreen memaksa elemen dekorasi jendela peramban (*browser chrome*) tereliminasi dari *viewport*. Pengguna kehilangan visibilitas terhadap bilah alamat asli (URL) serta bar notifikasi bawaan sistem operasi.</li>
-    <li><strong>Isolasi Visual Semu:</strong> Karena dokumen penyerang dapat mempertahankan hak eksekusi skrip universal (UXSS) di balik layar tampilan penuh, hilangnya indikator origin mematikan kemampuan pengguna untuk memverifikasi keaslian konteks sesi atau form input yang disajikan.</li>
-  </ul>
-
-  <h2>4. Struktur Logika Payload dan Parsing</h2>
-  <pre>window.open("javascript:location='intent://google.com#Intent;scheme=https;package=com.sec.android.app.sbrowser;end'");</pre>
-  <p>Mekanisme pemrosesan parameter oleh mesin peramban:</p>
-  <ol>
-    <li><code>window.open()</code> menginisiasi konteks penjelajahan baru di bawah kendali manifes asal.</li>
-    <li>Eksekutor skrip mengevaluasi string <code>javascript:location=</code> untuk mengubah penunjuk referensi dokumen aktif tanpa memicu pembersihan memori (*context reload*).</li>
-    <li>Parameter fragmen (<code>#Intent;...</code>) diparsing oleh penangan *Intent Android* internal untuk menentukan paket target (<code>package=com.sec.android.app.sbrowser</code>) dan skema paksaan (<code>scheme=https</code>).</li>
-  </ol>
-
-  <h2>5. Parameter Mitigasi dan Perbaikan Struktural</h2>
-  <p>Untuk menanggulangi celah keamanan pada penanganan intent, federasi intent, dan manipulasi status visual ini, arsitektur peramban modern menerapkan aturan pengetatan berikut:</p>
-  <ul>
-    <li><strong>Gating Berbasis Aktivasi Pengguna (Transient Activation Requirement):</strong> Browser wajib memblokir navigasi ke skema non-web (seperti <code>intent://</code>) jika tindakan tersebut diinisiasi dari skrip atau pseudo-skema tanpa interaksi fisik (klik langsung) yang sinkron dan valid dalam jendela aktif.</li>
-    <li><strong>Terminasi Layar Penuh Otomatis (Fullscreen Drop on Navigation):</strong> Setiap kali ada permintaan navigasi lintas origin atau inisiasi panggilan IPC ke subsistem luar, browser diwajibkan keluar (*exit*) dari mode layar penuh secara otomatis sebelum memproses dokumen baru.</li>
-    <li><strong>Sanitasi Komponen Intent (Strict Intent Filtering):</strong> Pembersihan atau pengabaian string intent yang mengandung argumen penentu komponen internal (seperti pengalihan eksplisit ke kelas komponen tertentu) sebelum intent dikirimkan ke sistem Android (`Intent.parseUri`).</li>
-    <li><strong>Kebijakan Isolasi Origin:</strong> Implementasi kontrol ketat pada fungsi pembukaan jendela baru, memastikan objek <code>window.opener</code> diputus secara struktural jika skema tujuan melibatkan delegasi eksternal.</li>
-  </ul>
+  <script>
+    function triggerIntent() {
+      // Menggunakan standar skema intent Android untuk mengakses pengaturan Bluetooth global
+      const intentUrl = "intent:#Intent;action=android.settings.BLUETOOTH_SETTINGS;end";
+      
+      try {
+        window.location.href = intentUrl;
+      } catch (e) {
+        console.error("Navigation blocked by browser security policy:", e.message);
+      }
+    }
+  </script>
 
 </body>
 </html>
