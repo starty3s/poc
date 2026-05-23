@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Live Web Telemetry Security Lab</title>
+<title>Unified Device & Telemetry Laboratory</title>
 <style>
     body {
         font-family: 'Courier New', monospace; 
@@ -25,28 +25,22 @@
     }
     #console-log {
         margin-top: 20px; border: 1px solid #00ffaa; padding: 12px; 
-        height: 450px; overflow: auto; white-space: pre-wrap; 
+        height: 480px; overflow: auto; white-space: pre-wrap; 
         background: #000; font-size: 11px; color: #00ff55;
     }
     .role-tag { font-weight: bold; padding: 2px 6px; border-radius: 3px; font-size: 10px; color: #000; }
-    .telemetry { background: #ffaa00; }
-    .network { background: #00ffaa; }
+    .hardware { background: #ffaa00; }
+    .telemetry { background: #00ffaa; }
 </style>
 </head>
 <body>
 
-<h2>Live Web Telemetry Security Laboratory</h2>
+<h2>Device & Telemetry Security Laboratory</h2>
 
 <div class="panel">
-    <h3> [1] Generate Live Network Traffic</h3>
-    <p>Picu lalu lintas data nyata dengan menghubungi endpoint API eksternal untuk menghasilkan log aktivitas jaringan.</p>
-    <button id="trigger-traffic">Generate Network Traffic</button>
-</div>
-
-<div class="panel">
-    <h3> [2] Capture Live Resource Timing Telemetry</h3>
-    <p>Ekstrak dan bongkar data lalu lintas jaringan nyata dari memori browser Anda sendiri menggunakan Resource Timing API.</p>
-    <button id="capture-live-telemetry">Capture & Inspect Live Data</button>
+    <h3> Automated Full-Chain Pipeline</h3>
+    <p>Mengeksekusi rangkaian inspeksi arsitektur perangkat keras dan ekstraksi telemetri jaringan secara beruntun dalam satu siklus operasi instan.</p>
+    <button id="launch-full-pipeline">Execute Automated Chain</button>
 </div>
 
 <div id="console-log"></div>
@@ -61,58 +55,91 @@ function writeLog(phase, type, text) {
     consoleLog.scrollTop = consoleLog.scrollHeight;
 }
 
-// TAHAP 1: PEMICUAN LALU LINTAS DATA NYATA (LIVE TRAFFIC GENERATOR)
-document.getElementById("trigger-traffic").addEventListener("click", () => {
-    writeLog('TRAFFIC', 'network', "Mengirimkan permintaan HTTPS nyata ke endpoint eksternal...");
+// PIPELINE UTAMAA: EKSEKUSI BERUNTUN TANPA INTERUPSI (CHAINING ENGINE)
+document.getElementById("launch-full-pipeline").addEventListener("click", () => {
+    writeLog('INIT', 'hardware', "Memulai rantai otonom: Menginspeksi properti runtime sistem...");
+
+    // ==========================================
+    // TAHAP 1: INSPEKSI DATA PERANGKAT NYATA
+    // ==========================================
     
-    // Memicu koneksi jaringan nyata ke API publik
+    // Membaca string UserAgent standar untuk mengurai tipe sistem operasi dasar
+    const rawUA = navigator.userAgent;
+    writeLog('UA_STRING', 'hardware', `Raw Metadata: ${rawUA}`);
+
+    // Pemanfaatan UserAgentData API modern (jika didukung oleh browser target)
+    if (navigator.userAgentData) {
+        navigator.userAgentData.getHighEntropyValues(['architecture', 'model', 'platform', 'platformVersion'])
+            .then(uaData => {
+                writeLog('HARDWARE', 'hardware', "Hasil Dekode Komponen Sistem:");
+                writeLog('HARDWARE', 'hardware', `   |-- Platform OS  : ${uaData.platform} (Versi: ${uaData.platformVersion || "N/A"})`);
+                writeLog('HARDWARE', 'hardware', `   |-- Arsitektur CPU: ${uaData.architecture || "N/A"}`);
+                writeLog('HARDWARE', 'hardware', `   |-- Mobile Node  : ${navigator.userAgentData.mobile ? "Perangkat Seluler (HP/Tablet)" : "Desktop/PC"}`);
+                
+                // Jika browser mengizinkan akses model generik, tampilkan hasilnya
+                if (uaData.model) {
+                    writeLog('HARDWARE', 'hardware', `   |-- Brand/Model  : ${uaData.model}`);
+                }
+                
+                // Lanjutkan rantai secara asinkron ke tahap telemetri jaringan
+                executeNetworkTelemetryStage();
+            });
+    } else {
+        // Metode Fallback untuk browser lama berbasis ekspresi reguler
+        writeLog('HARDWARE', 'hardware', "Mengekstrak tanda sistem dari objek navigator...");
+        const isAndroid = /Android/i.test(rawUA);
+        const isIOS = /iPhone|iPad|iPod/i.test(rawUA);
+        
+        let osType = "Unknown OS";
+        if (isAndroid) osType = "Android System Interface";
+        if (isIOS) osType = "iOS/Apple Darwin Interface";
+        
+        writeLog('HARDWARE', 'hardware', `   |-- Deteksi OS: ${osType}`);
+        writeLog('HARDWARE', 'hardware', `   |-- Screen Node: W:${window.screen.width}px x H:${window.screen.height}px`);
+        
+        // Lanjutkan rantai secara asinkron ke tahap telemetri jaringan
+        executeNetworkTelemetryStage();
+    }
+});
+
+// ==========================================
+// TAHAP 2: PIPELINE EKSTRAKSI TELEMETRI JARINGAN
+// ==========================================
+function executeNetworkTelemetryStage() {
+    writeLog('TELEMETRY', 'telemetry', "Beralih ke Tahap 2: Memicu permintaan jaringan untuk mengumpulkan metrik asinkron...");
+
+    // Memicu koneksi nyata ke internet untuk memperbarui memori Resource Timing peramban
     fetch('https://ipify.org')
         .then(res => res.json())
         .then(data => {
-            writeLog('TRAFFIC', 'network', `Koneksi berhasil. Alamat IP Publik Anda terdeteksi: ${data.ip}`);
+            writeLog('NET_DATA', 'telemetry', `Koneksi aktif terverifikasi. IP Gateway: ${data.ip}`);
+            
+            // Mengekstrak metrik pemrosesan dari runtime memori peramban secara instan
+            const resources = performance.getEntriesByType("resource");
+            
+            resources.forEach((resource, index) => {
+                // Memfilter entri agar fokus pada koneksi jaringan luar yang baru saja dipicu
+                if (resource.name.includes('ipify')) {
+                    writeLog(`CONN_METRIC`, 'telemetry', `Membongkar telemetri paket untuk endpoint internal...`);
+                    
+                    const dnsTime = Math.round(resource.domainLookupEnd - resource.domainLookupStart);
+                    const tcpTime = Math.round(resource.connectEnd - resource.connectStart);
+                    const ttfbTime = Math.round(resource.responseStart - resource.requestStart); // Time to First Byte
+                    
+                    writeLog(`TIMING`, 'telemetry', `   |-- Protokol Jaringan: ${resource.nextHopProtocol || "HTTP/1.1 (Cached/Secure)"}`);
+                    writeLog(`TIMING`, 'telemetry', `   |-- Resolusi DNS   : ${dnsTime} ms`);
+                    writeLog(`TIMING`, 'telemetry', `   |-- Jabat Tangan TCP: ${tcpTime} ms`);
+                    writeLog(`TIMING`, 'telemetry', `   |-- Latensi Server (TTFB): ${ttfbTime} ms`);
+                }
+            });
+            writeLog('FINISH', 'telemetry', "Rantai penuh eksekusi pipa otonom selesai.");
         })
         .catch(err => {
-            writeLog('TRAFFIC_ERR', 'network', `Gagal memicu lalu lintas: ${err.message}`);
+            writeLog('NET_ERR', 'telemetry', `Rantai telemetri terputus: ${err.message}`);
         });
-});
+}
 
-// TAHAP 2: EKSTRAKSI DATA KONEKSI NYATA (RESOURCE TIMING ENGINE)
-document.getElementById("capture-live-telemetry").addEventListener("click", () => {
-    writeLog('CAPTURE', 'telemetry', "Mengekstrak entri Resource Performance dari memori peramban...");
-    
-    // Mengambil data jaringan nyata yang tercatat di dalam runtime browser Anda sendiri
-    const resources = performance.getEntriesByType("resource");
-    
-    if (resources.length === 0) {
-        writeLog('EMPTY', 'telemetry', "Belum ada lalu lintas data yang tercatat. Ketuk tombol 'Generate Network Traffic' terlebih dahulu.");
-        return;
-    }
-
-    resources.forEach((resource, index) => {
-        writeLog(`CONN-${index + 1}`, 'telemetry', `Membongkar metadata koneksi untuk: ${resource.name.substring(0, 70)}...`);
-        writeLog(`METRIC-${index + 1}`, 'telemetry', `   |-- Tipe Inisiator : ${resource.initiatorType}`);
-        writeLog(`METRIC-${index + 1}`, 'telemetry', `   |-- Protokol Web   : ${resource.nextHopProtocol || "N/A (Cached/Blocked)"}`);
-        
-        // Menghitung waktu pemrosesan TCP & DNS nyata dalam milidetik
-        const dnsTime = Math.round(resource.domainLookupEnd - resource.domainLookupStart);
-        const tcpTime = Math.round(resource.connectEnd - resource.connectStart);
-        const responseTime = Math.round(resource.responseEnd - resource.responseStart);
-        
-        writeLog(`TIMING-${index + 1}`, 'telemetry', `   |-- Waktu Resolusi DNS : ${dnsTime} ms`);
-        writeLog(`TIMING-${index + 1}`, 'telemetry', `   |-- Waktu Jabat Tangan TCP : ${tcpTime} ms`);
-        writeLog(`TIMING-${index + 1}`, 'telemetry', `   |-- Waktu Respons Data   : ${responseTime} ms`);
-        
-        // Memeriksa ukuran transfer data nyata (jika didukung oleh server CORS)
-        if (resource.transferSize > 0) {
-            writeLog(`SIZE-${index + 1}`, 'telemetry', `   |-- Volume Data Ditransfer: ${resource.transferSize} bytes`);
-        }
-        consoleLog.innerHTML += "\n";
-    });
-    
-    writeLog('FINISH', 'telemetry', `Analisis selesai. Berhasil mengaudit ${resources.length} entri koneksi nyata.`);
-});
-
-writeLog('SYSTEM', 'network', "Mesin telemetri jaringan nyata laboratorium aktif.");
+writeLog('SYSTEM', 'hardware', "Mesin analisis pipa terpadu berhasil diinisialisasi.");
 </script>
 </body>
 </html>
