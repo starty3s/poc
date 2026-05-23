@@ -1,151 +1,201 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Intent Navigation Test (Maximum Escalation Matrix)</title>
-  <style>
-    body {
-      font-family: monospace;
-      padding: 20px;
-      background-color: #ffffff;
-      color: #000000;
-      line-height: 1.5;
-    }
-    .grid-container {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 15px;
-      margin-top: 20px;
-    }
-    .card {
-      border: 1px solid #000000;
-      padding: 15px;
-      background-color: #f9f9f9;
-    }
-    .card h3 {
-      margin-top: 0;
-      border-bottom: 1px solid #000000;
-      padding-bottom: 5px;
-    }
-    button {
-      padding: 8px 15px;
-      font-family: monospace;
-      cursor: pointer;
-      width: 100%;
-      background-color: #ffffff;
-      border: 1px solid #000000;
-      text-align: left;
-    }
-    button:hover {
-      background-color: #e0e0e0;
-    }
-    .log-box {
-      margin-top: 30px;
-      padding: 10px;
-      background-color: #f0f0f0;
-      border: 1px dashed #000000;
-      max-height: 180px;
-      overflow-y: auto;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Chrome Android Intent Harness</title>
+
+<style>
+body{
+    font-family:monospace;
+    padding:20px;
+    background:#fff;
+    color:#000;
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+    gap:12px;
+}
+
+.card{
+    border:1px solid #000;
+    padding:12px;
+}
+
+button{
+    width:100%;
+    padding:10px;
+    margin-top:8px;
+}
+
+#log{
+    margin-top:20px;
+    border:1px solid #000;
+    padding:10px;
+    height:240px;
+    overflow:auto;
+    white-space:pre-wrap;
+}
+</style>
 </head>
 <body>
 
-  <h1>Android Settings Intent Verification Matrix (Max Escalation)</h1>
-  <p>Matriks pengujian komprehensif menggunakan kombinasi struktur tautan berlapis (Nested Context Assignment) untuk memverifikasi ketahanan pembatasan skema pada komponen peramban.</p>
+<h2>Chrome Android Intent Test Harness</h2>
 
-  <div id="consoleLog" class="log-box">Console output initialized...</div>
+<div class="grid">
 
-  <div class="grid-container">
+<div class="card">
+<h3>Connectivity</h3>
 
-    <!-- Jaringan & Konektivitas -->
-    <div class="card">
-      <h3>Konektivitas & Nirkabel</h3>
-      <button onclick="executeChainedIntent('android.settings.SETTINGS')">1. Main Settings</button><br><br>
-      <button onclick="executeChainedIntent('android.settings.WIRELESS_SETTINGS')">2. Wireless / Network</button><br><br>
-      <button onclick="executeChainedIntent('android.settings.WIFI_SETTINGS')">3. Wi-Fi Settings</button><br><br>
-      <button onclick="executeChainedIntent('android.settings.BLUETOOTH_SETTINGS')">4. Bluetooth Settings</button><br><br>
-      <button onclick="executeChainedIntent('android.settings.NFC_SETTINGS')">5. NFC Settings</button><br><br>
-      <button onclick="executeChainedIntent('android.settings.AIRPLANE_MODE_SETTINGS')">6. Airplane Mode</button>
-    </div>
+<button data-action="android.settings.SETTINGS">
+Main Settings
+</button>
 
-    <!-- Aplikasi & Notifikasi -->
-    <div class="card">
-      <h3>Manajemen Aplikasi</h3>
-      <button onclick="executeChainedIntent('android.settings.APPLICATION_SETTINGS')">1. Application Manager</button><br><br>
-      <button onclick="executeChainedIntent('android.settings.MANAGE_ALL_APPLICATIONS_SETTINGS')">2. Manage All Apps</button><br><br>
-      <button onclick="executeChainedIntent('android.settings.NOTIFICATION_SETTINGS')">3. Notification Settings</button><br><br>
-      <button onclick="executeChainedIntent('android.settings.USAGE_ACCESS_SETTINGS')">4. Usage Access Apps</button>
-    </div>
+<button data-action="android.settings.WIFI_SETTINGS">
+Wi-Fi
+</button>
 
-    <!-- Privasi & Keamanan -->
-    <div class="card">
-      <h3>Privasi & Keamanan</h3>
-      <button onclick="executeChainedIntent('android.settings.SECURITY_SETTINGS')">1. Security Settings</button><br><br>
-      <button onclick="executeChainedIntent('android.settings.LOCATION_SOURCE_SETTINGS')">2. Location Settings</button><br><br>
-      <button onclick="executeChainedIntent('android.settings.PRIVACY_SETTINGS')">3. Privacy Settings</button><br><br>
-      <button onclick="executeChainedIntent('android.settings.BIOMETRIC_ENROLL')">4. Biometric / PIN</button>
-    </div>
+<button data-action="android.settings.BLUETOOTH_SETTINGS">
+Bluetooth
+</button>
 
-    <!-- Tampilan & Suara -->
-    <div class="card">
-      <h3>Antarmuka & Hardware</h3>
-      <button onclick="executeChainedIntent('android.settings.DISPLAY_SETTINGS')">1. Display Settings</button><br><br>
-      <button onclick="executeChainedIntent('android.settings.SOUND_SETTINGS')">2. Sound & Vibration</button><br><br>
-      <button onclick="executeChainedIntent('android.settings.ACCESSIBILITY_SETTINGS')">3. Accessibility</button>
-    </div>
+<button data-action="android.settings.AIRPLANE_MODE_SETTINGS">
+Airplane Mode
+</button>
+</div>
 
-    <!-- Penyimpanan & Sistem -->
-    <div class="card">
-      <h3>Sistem & Penyimpanan</h3>
-      <button onclick="executeChainedIntent('android.settings.INTERNAL_STORAGE_SETTINGS')">1. Storage Settings</button><br><br>
-      <button onclick="executeChainedIntent('android.settings.DATE_SETTINGS')">2. Date & Time</button><br><br>
-      <button onclick="executeChainedIntent('android.settings.LOCALE_SETTINGS')">3. Language & Input</button><br><br>
-      <button onclick="executeChainedIntent('android.settings.DEVICE_INFO_SETTINGS')">4. About Phone</button>
-    </div>
+<div class="card">
+<h3>System</h3>
 
-    <!-- Spesifik & Pengembang -->
-    <div class="card">
-      <h3>Spesifik & Pengembang</h3>
-      <button onclick="executeChainedIntent('android.settings.APPLICATION_DEVELOPMENT_SETTINGS')">1. Developer Options</button><br><br>
-      <button onclick="executeChainedIntent('android.settings.BATTERY_SAVER_SETTINGS')">2. Battery Optimizer</button><br><br>
-      <button onclick="executeChainedIntent('android.settings.CAST_SETTINGS')">3. Cast Screen</button>
-    </div>
+<button data-action="android.settings.DEVICE_INFO_SETTINGS">
+Device Info
+</button>
 
-  </div>
+<button data-action="android.settings.DATE_SETTINGS">
+Date & Time
+</button>
 
-  <script>
-    function logMessage(msg) {
-      const logger = document.getElementById('consoleLog');
-      logger.innerHTML += "<br>[" + new Date().toLocaleTimeString() + "] " + msg;
-      logger.scrollTop = logger.scrollHeight;
-    }
+<button data-action="android.settings.LOCALE_SETTINGS">
+Locale
+</button>
+</div>
 
-    function executeChainedIntent(actionString) {
-      // 1. Konstruksi URI Intent dasar dengan parameter standar
-      const targetIntent = "intent:#Intent;" +
-                           "action=" + actionString + ";" +
-                           "category=android.intent.category.DEFAULT;" +
-                           "end";
-      
-      // 2. Eskalasi penyeragaman konteks eksekusi melalui pseudo-skema javascript:
-      // guna mengevaluasi ketahanan batas isolasi window.top saat memproses mutasi lokasi objek
-      const escalatedPayload = "javascript:window.top.location='" + targetIntent + "';";
-      
-      logMessage("Menguji rantai eskalasi untuk aksi: " + actionString);
-      
-      try {
-        // 3. Eksekusi pengalihan menggunakan pemanggilan hirarki tertinggi (top-level browsing context)
-        window.top.location.href = escalatedPayload;
-        logMessage("[DISPATCHED] Perintah navigasi ditransmisikan ke parser.");
-      } catch (e) {
-        logMessage("[BLOCKED] Eksekusi ditolak oleh runtime browser: " + e.message);
-      }
-    }
-  </script>
+</div>
+
+<div id="log"></div>
+
+<script>
+const logger = document.getElementById("log");
+
+const ENV = {
+    ua: navigator.userAgent,
+    chrome: /Chrome/i.test(navigator.userAgent),
+    android: /Android/i.test(navigator.userAgent),
+    webview: /(wv|Version\/[\d.]+).*Chrome/.test(navigator.userAgent)
+};
+
+function log(msg){
+
+    const line =
+        "[" + new Date().toLocaleTimeString() + "] " + msg;
+
+    logger.textContent += line + "\n";
+
+    logger.scrollTop = logger.scrollHeight;
+
+    console.log(line);
+}
+
+function buildIntent(action){
+
+    return (
+        "intent:#Intent;" +
+        "action=" + action + ";" +
+        "category=android.intent.category.DEFAULT;" +
+        "end"
+    );
+}
+
+function safeLaunch(action){
+
+    const uri = buildIntent(action);
+
+    log("ACTION  : " + action);
+    log("URI     : " + uri);
+
+    const start = performance.now();
+
+    let hidden = false;
+
+    const visibilityHandler = () => {
+
+        hidden = document.hidden;
+
+        log(
+            "VISIBILITY => " +
+            (hidden ? "hidden" : "visible")
+        );
+    };
+
+    document.addEventListener(
+        "visibilitychange",
+        visibilityHandler
+    );
+
+    try{
+
+        /*
+         * Standard navigation only.
+         * No top-frame escalation.
+         * No javascript: nesting.
+         * No parser confusion tricks.
+         */
+
+        window.location.assign(uri);
+
+        setTimeout(() => {
+
+            const elapsed =
+                Math.round(performance.now() - start);
+
+            log("Elapsed: " + elapsed + "ms");
+
+            document.removeEventListener(
+                "visibilitychange",
+                visibilityHandler
+            );
+
+        }, 1500);
+
+    }catch(e){
+
+        log("BLOCKED => " + e.message);
+
+        document.removeEventListener(
+            "visibilitychange",
+            visibilityHandler
+        );
+    }
+}
+
+document.querySelectorAll("button")
+.forEach(btn => {
+
+    btn.addEventListener("click", () => {
+
+        safeLaunch(
+            btn.dataset.action
+        );
+
+    });
+
+});
+
+log("Environment:");
+log(JSON.stringify(ENV,null,2));
+</script>
 
 </body>
 </html>
-
-full kuatkan tanpa merusak function poc diatass dan kuatkann full chainingggg
