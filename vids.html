@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Intent Navigation Test</title>
+  <title>Intent Navigation Test (Strict Standards)</title>
   <style>
     body {
       font-family: monospace;
@@ -26,7 +26,7 @@
 <body>
 
   <h1>Intent Schema Security Verification</h1>
-  <p>Pengujian kepatuhan peramban terhadap pembatasan skema eksternal Android Intent.</p>
+  <p>Pengujian kepatuhan peramban terhadap pembatasan skema eksternal Android Intent menggunakan format spesifikasi penuh standar Chromium.</p>
 
   <div class="test-container">
     <button onclick="triggerIntent()">Uji Navigasi Intent (Bluetooth Settings)</button>
@@ -34,11 +34,17 @@
 
   <script>
     function triggerIntent() {
-      // Menggunakan standar skema intent Android untuk mengakses pengaturan Bluetooth global
-      const intentUrl = "intent:#Intent;action=android.settings.BLUETOOTH_SETTINGS;end";
+      // Menggunakan sintaksis skema intent dengan deklarasi komponen dan fallback eksplisit
+      // Sesuai dengan standar dokumentasi pengembang Chromium untuk intent URI Android
+      const intentUrl = "intent:#Intent;" +
+                        "action=android.settings.BLUETOOTH_SETTINGS;" +
+                        "category=android.intent.category.DEFAULT;" +
+                        "component=com.android.settings/.bluetooth.BluetoothSettings;" +
+                        "end";
       
       try {
-        window.location.href = intentUrl;
+        // Melakukan penugasan lokasi secara langsung pada window top-level
+        window.top.location = intentUrl;
       } catch (e) {
         console.error("Navigation blocked by browser security policy:", e.message);
       }
