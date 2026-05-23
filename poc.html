@@ -1,201 +1,192 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Chrome Android Intent Harness</title>
-
+<title>Hardened Cross-Origin Network Laboratory</title>
 <style>
-body{
-    font-family:monospace;
-    padding:20px;
-    background:#fff;
-    color:#000;
-}
-
-.grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
-    gap:12px;
-}
-
-.card{
-    border:1px solid #000;
-    padding:12px;
-}
-
-button{
-    width:100%;
-    padding:10px;
-    margin-top:8px;
-}
-
-#log{
-    margin-top:20px;
-    border:1px solid #000;
-    padding:10px;
-    height:240px;
-    overflow:auto;
-    white-space:pre-wrap;
-}
+    body {
+        font-family: 'Courier New', monospace; 
+        padding: 20px; 
+        background: #020204; 
+        color: #00ffaa;
+    }
+    h2, h3 { text-transform: uppercase; letter-spacing: 1px; color: #00ffaa; }
+    button {
+        width: 100%; padding: 18px; margin-top: 12px; 
+        background: #05140f; color: #00ffaa; 
+        border: 1px solid #00ffaa; font-weight: bold; 
+        cursor: pointer; font-size: 13px; text-transform: uppercase;
+    }
+    button:hover { background: #00ffaa; color: #000; box-shadow: 0 0 15px #00ffaa; }
+    .panel {
+        border: 1px solid #00ffaa; padding: 15px; 
+        margin-bottom: 15px; background: #010604;
+    }
+    #console-log {
+        margin-top: 20px; border: 1px solid #00ffaa; padding: 12px; 
+        height: 550px; overflow: auto; white-space: pre-wrap; 
+        background: #000; font-size: 11px; color: #00ff55;
+    }
+    .role-tag { font-weight: bold; padding: 2px 6px; border-radius: 3px; font-size: 10px; color: #000; }
+    .hardware { background: #ffaa00; }
+    .telemetry { background: #00ffaa; }
+    .fingerprint { background: #ff3333; color: #fff; }
 </style>
 </head>
 <body>
 
-<h2>Chrome Android Intent Test Harness</h2>
+<h2>Cross-Origin Security Laboratory</h2>
 
-<div class="grid">
-
-<div class="card">
-<h3>Connectivity</h3>
-
-<button data-action="android.settings.SETTINGS">
-Main Settings
-</button>
-
-<button data-action="android.settings.WIFI_SETTINGS">
-Wi-Fi
-</button>
-
-<button data-action="android.settings.BLUETOOTH_SETTINGS">
-Bluetooth
-</button>
-
-<button data-action="android.settings.AIRPLANE_MODE_SETTINGS">
-Airplane Mode
-</button>
+<div class="panel">
+    <h3> Enhanced Worker-Batching Pipeline (Subnet: 10.40.38.x)</h3>
+    <p>Rantai Analisis: System Hardware Enumeration -> Concurrency Worker Batching -> Error Timing Differentiation -> Signature Cross-Matching.</p>
+    <button id="launch-hardened-chain">Launch Enhanced Pipeline</button>
+    <button id="export-log-report" style="background: #1f0f0f; border-color: #ff3333; color: #ff3333; display: none;">Download Technical Report (.TXT)</button>
 </div>
 
-<div class="card">
-<h3>System</h3>
-
-<button data-action="android.settings.DEVICE_INFO_SETTINGS">
-Device Info
-</button>
-
-<button data-action="android.settings.DATE_SETTINGS">
-Date & Time
-</button>
-
-<button data-action="android.settings.LOCALE_SETTINGS">
-Locale
-</button>
-</div>
-
-</div>
-
-<div id="log"></div>
+<div id="console-log"></div>
 
 <script>
-const logger = document.getElementById("log");
+const consoleLog = document.getElementById("console-log");
+let auditReports = []; 
 
-const ENV = {
-    ua: navigator.userAgent,
-    chrome: /Chrome/i.test(navigator.userAgent),
-    android: /Android/i.test(navigator.userAgent),
-    webview: /(wv|Version\/[\d.]+).*Chrome/.test(navigator.userAgent)
-};
-
-function log(msg){
-
-    const line =
-        "[" + new Date().toLocaleTimeString() + "] " + msg;
-
-    logger.textContent += line + "\n";
-
-    logger.scrollTop = logger.scrollHeight;
-
-    console.log(line);
+function writeLog(phase, type, text) {
+    const timestamp = new Date().toLocaleTimeString();
+    let tag = `<span class="role-tag ${type}">${type.toUpperCase()}</span>`;
+    
+    auditReports.push(`[${timestamp}] [${phase}] [${type.toUpperCase()}] ${text}`);
+    
+    consoleLog.innerHTML += `[${timestamp}] [${phase}] ${tag} ${text}\n`;
+    consoleLog.scrollTop = consoleLog.scrollHeight;
 }
 
-function buildIntent(action){
+document.getElementById("launch-hardened-chain").addEventListener("click", () => {
+    writeLog('STAGE-1', 'hardware', "Menginisialisasi enumerasi arsitektur runtime lokal...");
+    document.getElementById("export-log-report").style.display = "none";
 
-    return (
-        "intent:#Intent;" +
-        "action=" + action + ";" +
-        "category=android.intent.category.DEFAULT;" +
-        "end"
-    );
-}
-
-function safeLaunch(action){
-
-    const uri = buildIntent(action);
-
-    log("ACTION  : " + action);
-    log("URI     : " + uri);
-
-    const start = performance.now();
-
-    let hidden = false;
-
-    const visibilityHandler = () => {
-
-        hidden = document.hidden;
-
-        log(
-            "VISIBILITY => " +
-            (hidden ? "hidden" : "visible")
-        );
-    };
-
-    document.addEventListener(
-        "visibilitychange",
-        visibilityHandler
-    );
-
-    try{
-
-        /*
-         * Standard navigation only.
-         * No top-frame escalation.
-         * No javascript: nesting.
-         * No parser confusion tricks.
-         */
-
-        window.location.assign(uri);
-
-        setTimeout(() => {
-
-            const elapsed =
-                Math.round(performance.now() - start);
-
-            log("Elapsed: " + elapsed + "ms");
-
-            document.removeEventListener(
-                "visibilitychange",
-                visibilityHandler
-            );
-
-        }, 1500);
-
-    }catch(e){
-
-        log("BLOCKED => " + e.message);
-
-        document.removeEventListener(
-            "visibilitychange",
-            visibilityHandler
-        );
+    try {
+        const canvas = document.createElement('canvas');
+        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+        if (gl) {
+            const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+            if (debugInfo) {
+                writeLog('GPU_INFO', 'hardware', `   |-- Vendor Subsystem  : ${gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL)}`);
+                writeLog('GPU_INFO', 'hardware', `   |-- Renderer Core     : ${gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL)}`);
+            }
+        }
+    } catch (e) {
+        writeLog('GPU_ERR', 'hardware', `Akses WebGL dibatasi: ${e.message}`);
     }
-}
 
-document.querySelectorAll("button")
-.forEach(btn => {
+    if (navigator.hardwareConcurrency) writeLog('CPU_INFO', 'hardware', `   |-- Logical Thread Cores : ${navigator.hardwareConcurrency}`);
+    if (navigator.deviceMemory) writeLog('MEM_INFO', 'hardware', `   |-- Allocatable RAM Info : ~${navigator.deviceMemory} GB`);
 
-    btn.addEventListener("click", () => {
-
-        safeLaunch(
-            btn.dataset.action
-        );
-
-    });
-
+    startWorkerBatching();
 });
 
-log("Environment:");
-log(JSON.stringify(ENV,null,2));
-</script>
+// STRATEGI PENGUATAN: Concurrency Worker Batching Engine
+async function startWorkerBatching() {
+    writeLog('STAGE-2', 'telemetry', "Mengonfigurasi pembagian kerja (Worker Batching) untuk akurasi metrik...");
+    
+    const baseSubnet = "10.40.38";
+    const targetPorts = [80, 443, 3000, 5000, 5555, 8008, 8009, 8080, 8081, 8888, 9000];
+    const targetHosts = Array.from({length: 30}, (_, i) => i + 1);
+    
+    // Memecah daftar host menjadi kelompok kecil berukuran 5 objek per siklus
+    const batchSize = 5;
+    
+    for (let i = 0; i < targetHosts.length; i += batchSize) {
+        const currentBatch = targetHosts.slice(i, i + batchSize);
+        writeLog('BATCH_EXEC', 'telemetry', `Memproses antrean kelompok simpul: IP ${baseSubnet}.${currentBatch[0]} s/d ${baseSubnet}.${currentBatch[currentBatch.length - 1]}`);
+        
+        // Mengeksekusi kelompok simpul secara asinkron dan menjamin penyelesaian alokasi sebelum siklus berikutnya
+        await Promise.all(currentBatch.map(host => {
+            const targetIp = `${baseSubnet}.${host}`;
+            return executeIndividualHostDiscovery(targetIp, targetPorts);
+        }));
+    }
 
+    writeLog('COMPLETED', 'telemetry', "Seluruh saluran interaksi asinkron nirkabel selesai diproses.");
+    document.getElementById("export-log-report").style.display = "block";
+}
+
+// Isolasi Fungsi Probe untuk mencegah tabrakan memori delta waktu
+function executeIndividualHostDiscovery(targetIp, ports) {
+    return new Promise((resolve) => {
+        let completedPorts = 0;
+        
+        ports.forEach(port => {
+            const startTime = performance.now();
+            const img = new Image();
+            
+            const evaluateNetworkState = () => {
+                const elapsed = performance.now() - startTime;
+                
+                // Rentang kalibrasi diperketat (<200ms) karena manajemen antrean batch memotong latensi browser
+                if (elapsed < 200) {
+                    writeLog(`ACTIVE_SIMPUL`, 'telemetry', `Respons aktif terdeteksi -> ${targetIp}:${port} [${Math.round(elapsed)}ms]`);
+                    executeSignatureCrossMatch(targetIp, port);
+                }
+                
+                completedPorts++;
+                if (completedPorts === ports.length) resolve();
+            };
+
+            img.onload = () => {
+                writeLog(`OPEN_RESOURCE`, 'telemetry', `Sumber daya web lintas domain merespons sukses -> ${targetIp}:${port}`);
+                executeSignatureCrossMatch(targetIp, port);
+                
+                completedPorts++;
+                if (completedPorts === ports.length) resolve();
+            };
+            
+            img.onerror = evaluateNetworkState;
+            
+            const protocol = port === 443 ? 'https' : 'http';
+            img.src = `${protocol}://${targetIp}:${port}/favicon.ico?cb=${Math.random()}`;
+        });
+    });
+}
+
+function executeSignatureCrossMatch(ip, port) {
+    const serviceVectors = [
+        { identity: "MikroTik RouterOS Interface", assetPath: "/webfig/img/logo.png" },
+        { identity: "TP-Link Administrator WebUI", assetPath: "/images/logo.jpg" },
+        { identity: "Linksys Smart Wi-Fi Gateway", assetPath: "/ui/1.0.0/dynamic/images/logo.png" },
+        { identity: "Android Chromecast / Media Daemon", assetPath: "/ss/logo.png" },
+        { identity: "Smart TV Media Cast Receiver", assetPath: "/cp/icon.png" },
+        { identity: "Apple AirPlay Protocol Daemon", assetPath: "/ServerIcon.png" },
+        { identity: "HP JetDirect Integrated WebOS", assetPath: "/localui/hp/images/hp-logo.gif" },
+        { identity: "Epson Network Printer Interface", assetPath: "/PRESENTATION/EPSON_LOGO.GIF" }
+    ];
+
+    serviceVectors.forEach(vector => {
+        const fingerprintImg = new Image();
+        const protocol = port === 443 ? 'https' : 'http';
+        
+        fingerprintImg.onload = () => {
+            writeLog('MATCH_FOUND', 'fingerprint', `[SIGNATURE MATCH] Endpoint ${ip}:${port} terkonfirmasi sebagai: ${vector.identity}`);
+        };
+        
+        fingerprintImg.src = `${protocol}://${ip}:${port}${vector.assetPath}?cb=${Math.random()}`;
+    });
+}
+
+document.getElementById("export-log-report").addEventListener("click", () => {
+    if (auditReports.length === 0) return;
+    
+    const textBlob = new Blob([auditReports.join("\r\n")], { type: "text/plain" });
+    const downloadAnchor = document.createElement("a");
+    
+    downloadAnchor.download = `network_security_report_${Date.now()}.txt`;
+    downloadAnchor.href = window.URL.createObjectURL(textBlob);
+    downloadAnchor.style.display = "none";
+    
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
+});
+</script>
 </body>
 </html>
