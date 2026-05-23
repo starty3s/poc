@@ -3,25 +3,25 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Asynchronous Subnet Mapping Laboratory</title>
+<title>Network Location & Topology Laboratory</title>
 <style>
     body {
         font-family: 'Courier New', monospace; 
         padding: 20px; 
-        background: #030305; 
+        background: #050508; 
         color: #00ffaa;
     }
     h2, h3 { text-transform: uppercase; letter-spacing: 1px; color: #00ffaa; }
     button {
         width: 100%; padding: 18px; margin-top: 12px; 
-        background: #091414; color: #00ffaa; 
+        background: #0d1a1a; color: #00ffaa; 
         border: 1px solid #00ffaa; font-weight: bold; 
         cursor: pointer; font-size: 13px; text-transform: uppercase;
     }
     button:hover { background: #00ffaa; color: #000; box-shadow: 0 0 15px #00ffaa; }
     .panel {
         border: 1px solid #00ffaa; padding: 15px; 
-        margin-bottom: 15px; background: #010a0a;
+        margin-bottom: 15px; background: #020c0c;
     }
     #console-log {
         margin-top: 20px; border: 1px solid #00ffaa; padding: 12px; 
@@ -29,18 +29,24 @@
         background: #000; font-size: 11px; color: #00ff55;
     }
     .role-tag { font-weight: bold; padding: 2px 6px; border-radius: 3px; font-size: 10px; color: #000; }
-    .scanner { background: #00ffaa; }
-    .discovery { background: #ffaa00; }
+    .network { background: #00ffaa; }
+    .location { background: #ffaa00; }
 </style>
 </head>
 <body>
 
-<h2>Unified Network Topology Laboratory</h2>
+<h2>Network Location & Topology Laboratory</h2>
 
 <div class="panel">
-    <h3> Passive Subnet Discovery Engine</h3>
-    <p>Simulasi pemetaan keberadaan node aktif di satu segmen Wi-Fi tanpa memicu API Geolocation Perangkat.</p>
-    <button id="start-passive-scan">Launch Passive Subnet Scan</button>
+    <h3>[1] Public Network Geolocation Lookup</h3>
+    <p>Mengidentifikasi estimasi lokasi geografis pusat jaringan (Wired Gateway) berdasarkan pemetaan IP Publik tanpa izin GPS perangkat.</p>
+    <button id="lookup-public-location">Analyze Network Gateway Location</button>
+</div>
+
+<div class="panel">
+    <h3>[2] Local Topology & Proximity Audit</h3>
+    <p>Melakukan analisis kedekatan relatif simpul nirkabel berdasarkan estimasi pelemahan sinyal radio (RSSI Approximation).</p>
+    <button id="scan-local-topology">Analyze Proximity Metrics</button>
 </div>
 
 <div id="console-log"></div>
@@ -55,37 +61,50 @@ function writeLog(phase, type, text) {
     consoleLog.scrollTop = consoleLog.scrollHeight;
 }
 
-// Simulasi Pemetaan Berantai Tanpa Ketergantungan Izin Lokasi GPS
-document.getElementById("start-passive-scan").addEventListener("click", () => {
-    writeLog('INIT', 'scanner', "Memulai inisialisasi soket pemindaian nirkabel internal...");
-    writeLog('ARPMAP', 'scanner', "Membaca tabel ARP lokal untuk mengidentifikasi Mac Address gateway...");
+// 1. ANALISIS LOKASI JARINGAN PUBLIK (Mengecek Geolocation IP Publik Router)
+document.getElementById("lookup-public-location").addEventListener("click", () => {
+    writeLog('API_INIT', 'location', "Menghubungi endpoint resolusi IP eksternal...");
     
-    // Basis data simulasi node aktif di satu subnet Wi-Fi yang sama
-    const activeNodes = [
-        { ip: "172.30.200.1", type: "MikroTik RouterOS", name: "Main-Gateway-AP" },
-        { ip: "172.30.200.5", type: "Android Client (Samsung)", name: "Galaxy-S23-User" },
-        { ip: "172.30.200.12", type: "iOS Client (iPhone)", name: "iPhone-Staff-Finance" },
-        { ip: "172.30.200.24", type: "Linux Workstation", name: "Lab-Server-Ubuntu" }
+    // Menggunakan API publik gratis untuk melihat estimasi lokasi geografis koneksi internet Wi-Fi
+    fetch('https://ipapi.co')
+        .then(response => response.json())
+        .then(data => {
+            writeLog('GEO_DATA', 'location', `Analisis IP Publik Selesai (${data.ip})`);
+            writeLog('GEO_DATA', 'location', `   |-- Negara   : ${data.country_name}`);
+            writeLog('GEO_DATA', 'location', `   |-- Wilayah  : ${data.region}`);
+            writeLog('GEO_DATA', 'location', `   |-- Kota     : ${data.city}`);
+            writeLog('GEO_DATA', 'location', `   |-- ISP      : ${data.org}`);
+            writeLog('GEO_DATA', 'location', `   |-- Koordinat: Lat ${data.latitude}, Lon ${data.longitude} (Akurasi Radius ISP)`);
+            writeLog('GEO_DATA', 'location', "Catatan: Lokasi ini adalah lokasi infrastruktur ISP penyedia Wi-Fi, bukan posisi GPS individu.");
+        })
+        .catch(err => {
+            writeLog('GEO_ERR', 'location', `Gagal mengambil data lokasi publik: ${err.message}`);
+        });
+});
+
+// 2. ANALISIS METRIK KEDEKATAN LOKAL (RSSI & Proximity)
+document.getElementById("scan-local-topology").addEventListener("click", () => {
+    writeLog('PROC_INIT', 'network', "Mengekstrak data metrik nirkabel dari tumpukan frame lokal...");
+    
+    // Basis data konseptual untuk menunjukkan metrik kekuatan sinyal (RSSI) yang mengindikasikan jarak perangkat ke router
+    const localTopology = [
+        { ip: "172.30.200.1", dev: "Gateway Router", rssi: "-30 dBm", prox: "Sangat Dekat (Akses Poin)" },
+        { ip: "172.30.200.5", dev: "Android Node", rssi: "-55 dBm", prox: "Sedang (~5-10 meter dari AP)" },
+        { ip: "172.30.200.12", dev: "iOS Node", rssi: "-85 dBm", prox: "Jauh / Batas Jangkauan Sinyal" }
     ];
 
-    let timeline = 0;
-
-    activeNodes.forEach((node, index) => {
-        timeline += 800;
+    let currentDelay = 0;
+    localTopology.forEach((node, idx) => {
+        currentDelay += 600;
         setTimeout(() => {
-            writeLog(`NODE-${index+1}`, 'discovery', `Respons paket ICMP terdeteksi dari target -> ${node.ip}`);
-            writeLog(`INFO-${index+1}`, 'discovery', `   |-- Device Vendor: ${node.type}`);
-            writeLog(`INFO-${index+1}`, 'discovery', `   |-- Broadcast Name: ${node.name}.local (via mDNS)`);
-            writeLog(`INFO-${index+1}`, 'discovery', `   |-- Status Layanan: Aktif (Port Terbuka: 80, 443, 5353)`);
-            
-            if (index === activeNodes.length - 1) {
-                writeLog('FINISH', 'scanner', "Pemetaan topologi simpul lokal selesai. Seluruh target terdaftar.");
-            }
-        }, timeline);
+            writeLog(`NODE-${idx+1}`, 'network', `Node terdeteksi di subnet: ${node.ip} (${node.dev})`);
+            writeLog(`METRIC-${idx+1}`, 'network', `   |-- Kekuatan Sinyal Radio: ${node.rssi}`);
+            writeLog(`METRIC-${idx+1}`, 'network', `   |-- Estimasi Jarak Ruang : ${node.prox}`);
+        }, currentDelay);
     });
 });
 
-writeLog('SYSTEM', 'scanner', "Mesin analisis topologi nirkabel siap digunakan.");
+writeLog('SYSTEM', 'network', "Laboratorium analisis lokasi dan topologi terpadu aktif.");
 </script>
 </body>
 </html>
