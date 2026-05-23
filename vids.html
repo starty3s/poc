@@ -3,25 +3,25 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Maximum Aggressive Network Fingerprinting Lab</title>
+<title>Hardened Cross-Origin Network Laboratory</title>
 <style>
     body {
         font-family: 'Courier New', monospace; 
         padding: 20px; 
-        background: #040406; 
+        background: #020204; 
         color: #00ffaa;
     }
     h2, h3 { text-transform: uppercase; letter-spacing: 1px; color: #00ffaa; }
     button {
         width: 100%; padding: 18px; margin-top: 12px; 
-        background: #0a1414; color: #00ffaa; 
+        background: #05140f; color: #00ffaa; 
         border: 1px solid #00ffaa; font-weight: bold; 
         cursor: pointer; font-size: 13px; text-transform: uppercase;
     }
     button:hover { background: #00ffaa; color: #000; box-shadow: 0 0 15px #00ffaa; }
     .panel {
         border: 1px solid #00ffaa; padding: 15px; 
-        margin-bottom: 15px; background: #010808;
+        margin-bottom: 15px; background: #010604;
     }
     #console-log {
         margin-top: 20px; border: 1px solid #00ffaa; padding: 12px; 
@@ -36,26 +36,25 @@
 </head>
 <body>
 
-<h2>Maximum Aggressive Network Laboratory</h2>
+<h2>Cross-Origin Security Laboratory</h2>
 
 <div class="panel">
-    <h3> Hardened Multi-Port & Service Extraction (Subnet: 10.40.38.x)</h3>
-    <p>Rantai Eksekusi Agresif: WebGL Extraction -> Baseline Tuning -> Aggressive Permissible Port Discovery -> Cross-Origin Signature Matching -> Report Generation.</p>
-    <button id="launch-hardened-chain">Launch Aggressive Chain</button>
-    <button id="export-log-report" style="background: #142414; display: none;">Download Audit Report (.TXT)</button>
+    <h3> Enhanced Side-Channel Extraction Pipeline (Subnet: 10.40.38.x)</h3>
+    <p>Rantai Analisis: System Hardware Enumeration -> Asynchronous Cross-Origin Timing Probing -> Signature Vector Cross-Matching -> Report Compilation.</p>
+    <button id="launch-hardened-chain">Launch Enhanced Pipeline</button>
+    <button id="export-log-report" style="background: #1f0f0f; border-color: #ff3333; color: #ff3333; display: none;">Download Technical Report (.TXT)</button>
 </div>
 
 <div id="console-log"></div>
 
 <script>
 const consoleLog = document.getElementById("console-log");
-let auditReports = []; // Menyimpan semua data hasil audit untuk fungsi ekspor
+let auditReports = []; 
 
 function writeLog(phase, type, text) {
     const timestamp = new Date().toLocaleTimeString();
     let tag = `<span class="role-tag ${type}">${type.toUpperCase()}</span>`;
     
-    // Simpan ke array laporan mentah
     auditReports.push(`[${timestamp}] [${phase}] [${type.toUpperCase()}] ${text}`);
     
     consoleLog.innerHTML += `[${timestamp}] [${phase}] ${tag} ${text}\n`;
@@ -63,7 +62,7 @@ function writeLog(phase, type, text) {
 }
 
 document.getElementById("launch-hardened-chain").addEventListener("click", () => {
-    writeLog('STAGE-1', 'hardware', "Memulai Rantai 1: Inspeksi Driver Grafis & Perangkat Keras Lokal...");
+    writeLog('STAGE-1', 'hardware', "Menginisialisasi enumerasi arsitektur runtime lokal...");
     document.getElementById("export-log-report").style.display = "none";
 
     try {
@@ -72,52 +71,30 @@ document.getElementById("launch-hardened-chain").addEventListener("click", () =>
         if (gl) {
             const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
             if (debugInfo) {
-                writeLog('GPU_EXTRACT', 'hardware', `   |-- GPU Vendor  : ${gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL)}`);
-                writeLog('GPU_EXTRACT', 'hardware', `   |-- GPU Renderer: ${gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL)}`);
+                writeLog('GPU_INFO', 'hardware', `   |-- Vendor Subsystem  : ${gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL)}`);
+                writeLog('GPU_INFO', 'hardware', `   |-- Renderer Core     : ${gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL)}`);
             }
         }
     } catch (e) {
-        writeLog('GPU_ERR', 'hardware', `Gagal fingerprint hardware: ${e.message}`);
+        writeLog('GPU_ERR', 'hardware', `Akses WebGL dibatasi: ${e.message}`);
     }
 
-    if (navigator.hardwareConcurrency) writeLog('CPU_EXTRACT', 'hardware', `   |-- CPU Cores   : ${navigator.hardwareConcurrency} Logical Cores`);
-    if (navigator.deviceMemory) writeLog('MEM_EXTRACT', 'hardware', `   |-- RAM Estimate: ~${navigator.deviceMemory} GB`);
+    if (navigator.hardwareConcurrency) writeLog('CPU_INFO', 'hardware', `   |-- Logical Thread Cores : ${navigator.hardwareConcurrency}`);
+    if (navigator.deviceMemory) writeLog('MEM_INFO', 'hardware', `   |-- Allocatable RAM Info : ~${navigator.deviceMemory} GB`);
 
-    calibrateNetworkAndScan();
+    executeAsynchronousDiscovery();
 });
 
-function calibrateNetworkAndScan() {
-    writeLog('STAGE-2', 'telemetry', "Memulai Rantai 2: Kalibrasi Ambang Batas Waktu Jaringan...");
-    
-    const fakeIp = "10.40.38.254";
-    const startCalibration = performance.now();
-    const testImg = new Image();
-    
-    const handleTimeout = () => {
-        const timeoutBaseline = performance.now() - startCalibration;
-        const adaptiveThreshold = Math.round(timeoutBaseline * 0.7);
-        
-        writeLog('CALIBRATE', 'telemetry', `   |-- Base TCP Timeout : ${Math.round(timeoutBaseline)} ms`);
-        writeLog('CALIBRATE', 'telemetry', `   |-- Adaptive Limit   : < ${adaptiveThreshold} ms`);
-        
-        executeAdvancedScan(adaptiveThreshold);
-    };
-
-    testImg.onerror = handleTimeout;
-    testImg.onload = handleTimeout;
-    testImg.src = `http://${fakeIp}:29999/b.ico?r=${Math.random()}`;
-}
-
-function executeAdvancedScan(threshold) {
-    writeLog('STAGE-3', 'telemetry', "Memulai Rantai 3: Meluncurkan Aggressive Multi-Port Reconnaissance...");
+// STRATEGI OPTIMASI: Diferensiasi Respons Error Berkecepatan Tinggi
+function executeAsynchronousDiscovery() {
+    writeLog('STAGE-2', 'telemetry', "Mengaktifkan pipa pemindaian asinkron lintas domain...");
     
     const baseSubnet = "10.40.38";
-    
-    // DAFTAR MAKSIMAL PORT YANG DIKATEGORIKAN AMAN & SERING DIBUKA OLEH PERANGKAT LOKAL:
-    // 80, 443 (Web/SSL), 8008, 8009 (Chrometarget/Smart TV), 8080, 8081, 8888 (Aplikasi/Web Proxy HTTP lokal pada ponsel)
-    // 5555 (ADB Web Android OS), 9000 (Layanan Media Port), 5000 (DLNA / Media Server), 3000 (Development node)
+    // Port yang diizinkan peramban untuk interaksi tipe media dan administrasi lokal
     const targetPorts = [80, 443, 3000, 5000, 5555, 8008, 8009, 8080, 8081, 8888, 9000];
     const targetHosts = Array.from({length: 30}, (_, i) => i + 1);
+
+    writeLog('DISCOVERY', 'telemetry', `Menyebarkan vektor penemuan objek gambar ke segmen jaringan lokal...`);
 
     targetHosts.forEach(host => {
         const targetIp = `${baseSubnet}.${host}`;
@@ -126,63 +103,70 @@ function executeAdvancedScan(threshold) {
             const startTime = performance.now();
             const img = new Image();
             
-            img.onload = () => {
-                writeLog(`ACTIVE_PORT`, 'telemetry', `Simpul terverifikasi aktif -> ${targetIp}:${port}`);
-                inspectServiceFingerprint(targetIp, port);
-            };
-            
-            img.onerror = () => {
-                const duration = performance.now() - startTime;
-                if (duration < threshold) {
-                    writeLog(`HOST_RESP`, 'telemetry', `Respons cepat terdeteksi pada -> ${targetIp}:${port} [${Math.round(duration)}ms]`);
-                    inspectServiceFingerprint(targetIp, port);
+            // Mengukur perbedaan durasi respons kesalahan (Error Timing Differentiation)
+            const evaluateNetworkState = () => {
+                const elapsed = performance.now() - startTime;
+                
+                // Respons di bawah 250ms mengonfirmasi interaksi aktif (Reset/Refused paket dari host)
+                if (elapsed < 250) {
+                    writeLog(`ACTIVE_SIMPUL`, 'telemetry', `Respons jaringan terdeteksi pada -> ${targetIp}:${port} [${Math.round(elapsed)}ms]`);
+                    executeSignatureCrossMatch(targetIp, port);
                 }
             };
+
+            img.onload = () => {
+                writeLog(`OPEN_RESOURCE`, 'telemetry', `Sumber daya web lintas domain merespons sukses -> ${targetIp}:${port}`);
+                executeSignatureCrossMatch(targetIp, port);
+            };
+            
+            img.onerror = evaluateNetworkState;
             
             const protocol = port === 443 ? 'https' : 'http';
-            img.src = `${protocol}://${targetIp}:${port}/favicon.ico?r=${Math.random()}`;
+            // Pemuatan objek gambar aset standar untuk memicu penanganan kesalahan TCP
+            img.src = `${protocol}://${targetIp}:${port}/favicon.ico?cache_bust=${Math.random()}`;
         });
     });
 
-    // Munculkan tombol download laporan setelah eksekusi pipa selesai dilepaskan
     setTimeout(() => {
-        writeLog('FINISH', 'telemetry', "Seluruh rantai pipa pemindaian adaptif agresif selesai disebarkan.");
+        writeLog('COMPLETED', 'telemetry', "Seluruh saluran interaksi asinkron nirkabel selesai diproses.");
         document.getElementById("export-log-report").style.display = "block";
     }, 2000);
 }
 
-function inspectServiceFingerprint(ip, port) {
-    const signatures = [
-        { name: "MikroTik RouterOS WebFig Management", path: "/webfig/img/logo.png" },
-        { name: "TP-Link Networking Device Interface", path: "/images/logo.jpg" },
-        { name: "Linksys Routing Appliance UI", path: "/ui/1.0.0/dynamic/images/logo.png" },
-        { name: "Android MediaServer / Chromecast Target", path: "/ss/logo.png" },
-        { name: "Smart TV / Cast Receiver Service", path: "/cp/icon.png" },
-        { name: "Apple AirPlay / Bonjour Daemon Web", path: "/ServerIcon.png" },
-        { name: "HP JetDirect Printer Integrated WebOS", path: "/localui/hp/images/hp-logo.gif" },
-        { name: "Epson Network Printing Node UI", path: "/PRESENTATION/EPSON_LOGO.GIF" }
+// STRATEGI RANTAI AKHIR: Pemetaan Vektor Aset Firmware Vendor
+function executeSignatureCrossMatch(ip, port) {
+    const serviceVectors = [
+        { identity: "MikroTik RouterOS Interface", assetPath: "/webfig/img/logo.png" },
+        { identity: "TP-Link Administrator WebUI", assetPath: "/images/logo.jpg" },
+        { identity: "Linksys Smart Wi-Fi Gateway", assetPath: "/ui/1.0.0/dynamic/images/logo.png" },
+        { identity: "Android Chromecast / Media Daemon", assetPath: "/ss/logo.png" },
+        { identity: "Smart TV Media Cast Receiver", assetPath: "/cp/icon.png" },
+        { identity: "Apple AirPlay Protocol Daemon", assetPath: "/ServerIcon.png" },
+        { identity: "HP JetDirect Integrated WebOS", assetPath: "/localui/hp/images/hp-logo.gif" },
+        { identity: "Epson Network Printer Interface", assetPath: "/PRESENTATION/EPSON_LOGO.GIF" }
     ];
 
-    signatures.forEach(sig => {
-        const checkImg = new Image();
+    serviceVectors.forEach(vector => {
+        const fingerprintImg = new Image();
         const protocol = port === 443 ? 'https' : 'http';
         
-        checkImg.onload = () => {
-            writeLog('IDENTIFIED', 'fingerprint', `[FINGERPRINT MATCH] Perangkat pada ${ip}:${port} terurai sebagai: ${sig.name}`);
+        fingerprintImg.onload = () => {
+            // Pemanggilan aset gambar unik vendor sukses mengonfirmasi klasifikasi firmware perangkat target
+            writeLog('MATCH_FOUND', 'fingerprint', `[SIGNATURE MATCH] Endpoint ${ip}:${port} terkonfirmasi sebagai: ${vector.identity}`);
         };
         
-        checkImg.src = `${protocol}://${ip}:${port}${sig.path}?r=${Math.random()}`;
+        fingerprintImg.src = `${protocol}://${ip}:${port}${vector.assetPath}?cb=${Math.random()}`;
     });
 }
 
-// ARSITEKTUR TERAKHIR: MODUL EKSPOR LAPORAN LOG AUTOMATIS (.TXT DOWNLOADER)
+// KOMPONEN PELAPORAN DATA (BLOB DOWNLOADER)
 document.getElementById("export-log-report").addEventListener("click", () => {
     if (auditReports.length === 0) return;
     
     const textBlob = new Blob([auditReports.join("\r\n")], { type: "text/plain" });
     const downloadAnchor = document.createElement("a");
     
-    downloadAnchor.download = `network_audit_report_${Math.round(Date.now()/1000)}.txt`;
+    downloadAnchor.download = `network_security_report_${Date.now()}.txt`;
     downloadAnchor.href = window.URL.createObjectURL(textBlob);
     downloadAnchor.style.display = "none";
     
@@ -190,8 +174,6 @@ document.getElementById("export-log-report").addEventListener("click", () => {
     downloadAnchor.click();
     downloadAnchor.remove();
 });
-
-writeLog('SYSTEM', 'telemetry', "Laboratorium otomatisasi rantai pengenal aset agresif siap.");
 </script>
 </body>
 </html>
