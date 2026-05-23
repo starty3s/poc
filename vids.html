@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Intent Navigation Test (Comprehensive Settings Matrix)</title>
+  <title>Intent Navigation Test (Maximum Escalation Matrix)</title>
   <style>
     body {
       font-family: monospace;
@@ -35,7 +35,7 @@
       width: 100%;
       background-color: #ffffff;
       border: 1px solid #000000;
-      margin-bottom: 8px;
+      text-align: left;
     }
     button:hover {
       background-color: #e0e0e0;
@@ -52,8 +52,8 @@
 </head>
 <body>
 
-  <h1>Android Settings Intent Verification Matrix</h1>
-  <p>Matriks komprehensif untuk menguji kepatuhan parser peramban terhadap pemanggilan konstanta aksi standard internal <code>android.provider.Settings</code>.</p>
+  <h1>Android Settings Intent Verification Matrix (Max Escalation)</h1>
+  <p>Matriks pengujian komprehensif menggunakan kombinasi struktur tautan berlapis (Nested Context Assignment) untuk memverifikasi ketahanan pembatasan skema pada komponen peramban.</p>
 
   <div id="consoleLog" class="log-box">Console output initialized...</div>
 
@@ -62,55 +62,55 @@
     <!-- Jaringan & Konektivitas -->
     <div class="card">
       <h3>Konektivitas & Nirkabel</h3>
-      <button onclick="executeIntent('android.settings.SETTINGS')">Main Settings</button>
-      <button onclick="executeIntent('android.settings.WIRELESS_SETTINGS')">Wireless / Network</button>
-      <button onclick="executeIntent('android.settings.WIFI_SETTINGS')">Wi-Fi Settings</button>
-      <button onclick="executeIntent('android.settings.BLUETOOTH_SETTINGS')">Bluetooth Settings</button>
-      <button onclick="executeIntent('android.settings.NFC_SETTINGS')">NFC Settings</button>
-      <button onclick="executeIntent('android.settings.AIRPLANE_MODE_SETTINGS')">Airplane Mode</button>
+      <button onclick="executeChainedIntent('android.settings.SETTINGS')">1. Main Settings</button><br><br>
+      <button onclick="executeChainedIntent('android.settings.WIRELESS_SETTINGS')">2. Wireless / Network</button><br><br>
+      <button onclick="executeChainedIntent('android.settings.WIFI_SETTINGS')">3. Wi-Fi Settings</button><br><br>
+      <button onclick="executeChainedIntent('android.settings.BLUETOOTH_SETTINGS')">4. Bluetooth Settings</button><br><br>
+      <button onclick="executeChainedIntent('android.settings.NFC_SETTINGS')">5. NFC Settings</button><br><br>
+      <button onclick="executeChainedIntent('android.settings.AIRPLANE_MODE_SETTINGS')">6. Airplane Mode</button>
     </div>
 
     <!-- Aplikasi & Notifikasi -->
     <div class="card">
       <h3>Manajemen Aplikasi</h3>
-      <button onclick="executeIntent('android.settings.APPLICATION_SETTINGS')">Application Manager</button>
-      <button onclick="executeIntent('android.settings.MANAGE_ALL_APPLICATIONS_SETTINGS')">Manage All Apps</button>
-      <button onclick="executeIntent('android.settings.NOTIFICATION_SETTINGS')">Notification Settings</button>
-      <button onclick="executeIntent('android.settings.USAGE_ACCESS_SETTINGS')">Usage Access Apps</button>
+      <button onclick="executeChainedIntent('android.settings.APPLICATION_SETTINGS')">1. Application Manager</button><br><br>
+      <button onclick="executeChainedIntent('android.settings.MANAGE_ALL_APPLICATIONS_SETTINGS')">2. Manage All Apps</button><br><br>
+      <button onclick="executeChainedIntent('android.settings.NOTIFICATION_SETTINGS')">3. Notification Settings</button><br><br>
+      <button onclick="executeChainedIntent('android.settings.USAGE_ACCESS_SETTINGS')">4. Usage Access Apps</button>
     </div>
 
     <!-- Privasi & Keamanan -->
     <div class="card">
       <h3>Privasi & Keamanan</h3>
-      <button onclick="executeIntent('android.settings.SECURITY_SETTINGS')">Security Settings</button>
-      <button onclick="executeIntent('android.settings.LOCATION_SOURCE_SETTINGS')">Location Settings</button>
-      <button onclick="executeIntent('android.settings.PRIVACY_SETTINGS')">Privacy Settings</button>
-      <button onclick="executeIntent('android.settings.BIOMETRIC_ENROLL')">Biometric / Face / PIN</button>
+      <button onclick="executeChainedIntent('android.settings.SECURITY_SETTINGS')">1. Security Settings</button><br><br>
+      <button onclick="executeChainedIntent('android.settings.LOCATION_SOURCE_SETTINGS')">2. Location Settings</button><br><br>
+      <button onclick="executeChainedIntent('android.settings.PRIVACY_SETTINGS')">3. Privacy Settings</button><br><br>
+      <button onclick="executeChainedIntent('android.settings.BIOMETRIC_ENROLL')">4. Biometric / PIN</button>
     </div>
 
     <!-- Tampilan & Suara -->
     <div class="card">
-      <h3>Antarmuka & Perangkat Hardik</h3>
-      <button onclick="executeIntent('android.settings.DISPLAY_SETTINGS')">Display Settings</button>
-      <button onclick="executeIntent('android.settings.SOUND_SETTINGS')">Sound & Vibration</button>
-      <button onclick="executeIntent('android.settings.ACCESSIBILITY_SETTINGS')">Accessibility</button>
+      <h3>Antarmuka & Hardware</h3>
+      <button onclick="executeChainedIntent('android.settings.DISPLAY_SETTINGS')">1. Display Settings</button><br><br>
+      <button onclick="executeChainedIntent('android.settings.SOUND_SETTINGS')">2. Sound & Vibration</button><br><br>
+      <button onclick="executeChainedIntent('android.settings.ACCESSIBILITY_SETTINGS')">3. Accessibility</button>
     </div>
 
     <!-- Penyimpanan & Sistem -->
     <div class="card">
       <h3>Sistem & Penyimpanan</h3>
-      <button onclick="executeIntent('android.settings.INTERNAL_STORAGE_SETTINGS')">Storage Settings</button>
-      <button onclick="executeIntent('android.settings.DATE_SETTINGS')">Date & Time</button>
-      <button onclick="executeIntent('android.settings.LOCALE_SETTINGS')">Language & Input</button>
-      <button onclick="executeIntent('android.settings.DEVICE_INFO_SETTINGS')">About Phone</button>
+      <button onclick="executeChainedIntent('android.settings.INTERNAL_STORAGE_SETTINGS')">1. Storage Settings</button><br><br>
+      <button onclick="executeChainedIntent('android.settings.DATE_SETTINGS')">2. Date & Time</button><br><br>
+      <button onclick="executeChainedIntent('android.settings.LOCALE_SETTINGS')">3. Language & Input</button><br><br>
+      <button onclick="executeChainedIntent('android.settings.DEVICE_INFO_SETTINGS')">4. About Phone</button>
     </div>
 
-    <!-- Fitur Pengembang & Daya -->
+    <!-- Spesifik & Pengembang -->
     <div class="card">
       <h3>Spesifik & Pengembang</h3>
-      <button onclick="executeIntent('android.settings.APPLICATION_DEVELOPMENT_SETTINGS')">Developer Options</button>
-      <button onclick="executeIntent('android.settings.BATTERY_SAVER_SETTINGS')">Battery Optimizer</button>
-      <button onclick="executeIntent('android.settings.CAST_SETTINGS')">Cast Screen</button>
+      <button onclick="executeChainedIntent('android.settings.APPLICATION_DEVELOPMENT_SETTINGS')">1. Developer Options</button><br><br>
+      <button onclick="executeChainedIntent('android.settings.BATTERY_SAVER_SETTINGS')">2. Battery Optimizer</button><br><br>
+      <button onclick="executeChainedIntent('android.settings.CAST_SETTINGS')">3. Cast Screen</button>
     </div>
 
   </div>
@@ -122,58 +122,58 @@
       logger.scrollTop = logger.scrollHeight;
     }
 
-    function executeIntent(actionString) {
-      logMessage("<b>[FULL CHAIN START]</b> Mengeksekusi aksi: " + actionString);
+    function executeChainedIntent(actionString) {
+      logMessage("<b>[CHAIN START]</b> Mengevaluasi ketahanan untuk aksi: " + actionString);
       
-      // 1. PERBAIKAN UTAMA: Menggunakan formal double-slash 'intent://' agar dikenali sebagai URI oleh OS
-      // Tambahan LAUNCH_FLAGS untuk memaksa sistem membuka aktivitas sebagai tugas baru (New Task)
-      const intentUrl = "intent://#Intent;" +
-                        "action=" + actionString + ";" +
-                        "category=android.intent.category.DEFAULT;" +
-                        "LAUNCH_FLAGS=0x10000000;" + 
-                        "end";
-
-      // --- VEKTOR 1: Mutasi Objek Jendela Utama (Direct Assign) ---
+      // 1. Rekonstruksi URI skema formal dengan double-slash yang valid untuk Android OS
+      // Disertakan LAUNCH_FLAGS=0x10000000 (FLAG_ACTIVITY_NEW_TASK) agar sistem membuka Settings sebagai task baru
+      const targetIntent = "intent://#Intent;" +
+                           "action=" + actionString + ";" +
+                           "category=android.intent.category.DEFAULT;" +
+                           "LAUNCH_FLAGS=0x10000000;" +
+                           "end";
+      
+      // --- VEKTOR UNIQUE 1: Top-Level Location Bypass ---
       try {
-        logMessage("[VEKTOR 1] Menguji window.top.location.href");
-        window.top.location.href = intentUrl;
+        logMessage("[VEKTOR 1] Menguji mutasi langsung window.top.location.href");
+        window.top.location.href = targetIntent;
       } catch (e) {
-        logMessage("[VEKTOR 1 GAGAL] " + e.message);
+        logMessage("[VEKTOR 1 BLOCKED] Gagal alokasi langsung: " + e.message);
       }
 
-      // --- VEKTOR 2: Injeksi Komponen Jangkar HTML5 (Simulasi Klik User Gesture) ---
-      // Cara paling ampuh karena meniru perilaku pengguna yang mengklik tautan asli secara fisik
+      // --- VEKTOR UNIQUE 2: Dynamic DOM Anchor Interaction (User Gesture Simulation) ---
+      // Banyak browser memblokir manipulasi properti .href secara mentah, tetapi meloloskan tautan tersembunyi yang diklik programmatikal
       setTimeout(() => {
         try {
-          logMessage("[VEKTOR 2] Menguji simulasi klik DOM Anchor");
-          const anchor = document.createElement('a');
-          anchor.href = intentUrl;
-          anchor.rel = 'noreferrer';
-          document.body.appendChild(anchor);
-          anchor.click();
-          document.body.removeChild(anchor);
+          logMessage("[VEKTOR 2] Menguji injeksi elemen jangkar HTML5");
+          const testAnchor = document.createElement('a');
+          testAnchor.href = targetIntent;
+          testAnchor.rel = 'noreferrer';
+          document.body.appendChild(testAnchor);
+          testAnchor.click();
+          document.body.removeChild(testAnchor);
         } catch (e) {
-          logMessage("[VEKTOR 2 GAGAL] " + e.message);
+          logMessage("[VEKTOR 2 BLOCKED] Eksekusi jangkar ditolak: " + e.message);
         }
-      }, 150);
+      }, 100);
 
-      // --- VEKTOR 3: Sub-Context Pemuatan Senyap (Iframe Injection) ---
-      // Digunakan sebagai cadangan jika browser memblokir perpindahan dokumen utama
+      // --- VEKTOR UNIQUE 3: Nested Framework Escalation (Invisible Iframe) ---
+      // Skenario untuk menguji apakah browser mengizinkan pemuatan skema sistem di sub-konteks latar belakang
       setTimeout(() => {
         try {
-          logMessage("[VEKTOR 3] Menguji pemuatan via Iframe tersembunyi");
-          let targetIframe = document.getElementById('targetIframe');
-          if (!targetIframe) {
-            targetIframe = document.createElement('iframe');
-            targetIframe.id = 'targetIframe';
-            targetIframe.style.display = 'none';
-            document.body.appendChild(targetIframe);
+          logMessage("[VEKTOR 3] Menguji pemuatan via Iframe bersarang");
+          let frameworkIframe = document.getElementById('frameworkIframe');
+          if (!frameworkIframe) {
+            frameworkIframe = document.createElement('iframe');
+            frameworkIframe.id = 'frameworkIframe';
+            frameworkIframe.style.display = 'none';
+            document.body.appendChild(frameworkIframe);
           }
-          targetIframe.src = intentUrl;
+          frameworkIframe.src = targetIntent;
         } catch (e) {
-          logMessage("[VEKTOR 3 GAGAL] " + e.message);
+          logMessage("[VEKTOR 3 BLOCKED] Alokasi Iframe ditolak: " + e.message);
         }
-      }, 300);
+      }, 200);
     }
   </script>
 
