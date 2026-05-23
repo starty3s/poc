@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Hardened Multi-Port Service Fingerprinting Lab</title>
+<title>Maximum Aggressive Network Fingerprinting Lab</title>
 <style>
     body {
         font-family: 'Courier New', monospace; 
@@ -36,28 +36,35 @@
 </head>
 <body>
 
-<h2>Device & Network Security Laboratory</h2>
+<h2>Maximum Aggressive Network Laboratory</h2>
 
 <div class="panel">
-    <h3> Hardened Fingerprinting Chain (Subnet: 10.40.38.x)</h3>
-    <p>Eksekusi beruntun: WebGL Driver Inspection -> Dynamic Baseline Calibration -> Multi-Port Port Scanning -> Cross-Origin Service Fingerprinting.</p>
-    <button id="launch-hardened-chain">Execute Advanced Chain</button>
+    <h3> Hardened Multi-Port & Service Extraction (Subnet: 10.40.38.x)</h3>
+    <p>Rantai Eksekusi Agresif: WebGL Extraction -> Baseline Tuning -> Aggressive Permissible Port Discovery -> Cross-Origin Signature Matching -> Report Generation.</p>
+    <button id="launch-hardened-chain">Launch Aggressive Chain</button>
+    <button id="export-log-report" style="background: #142414; display: none;">Download Audit Report (.TXT)</button>
 </div>
 
 <div id="console-log"></div>
 
 <script>
 const consoleLog = document.getElementById("console-log");
+let auditReports = []; // Menyimpan semua data hasil audit untuk fungsi ekspor
 
 function writeLog(phase, type, text) {
     const timestamp = new Date().toLocaleTimeString();
     let tag = `<span class="role-tag ${type}">${type.toUpperCase()}</span>`;
+    
+    // Simpan ke array laporan mentah
+    auditReports.push(`[${timestamp}] [${phase}] [${type.toUpperCase()}] ${text}`);
+    
     consoleLog.innerHTML += `[${timestamp}] [${phase}] ${tag} ${text}\n`;
     consoleLog.scrollTop = consoleLog.scrollHeight;
 }
 
 document.getElementById("launch-hardened-chain").addEventListener("click", () => {
     writeLog('STAGE-1', 'hardware', "Memulai Rantai 1: Inspeksi Driver Grafis & Perangkat Keras Lokal...");
+    document.getElementById("export-log-report").style.display = "none";
 
     try {
         const canvas = document.createElement('canvas');
@@ -76,7 +83,6 @@ document.getElementById("launch-hardened-chain").addEventListener("click", () =>
     if (navigator.hardwareConcurrency) writeLog('CPU_EXTRACT', 'hardware', `   |-- CPU Cores   : ${navigator.hardwareConcurrency} Logical Cores`);
     if (navigator.deviceMemory) writeLog('MEM_EXTRACT', 'hardware', `   |-- RAM Estimate: ~${navigator.deviceMemory} GB`);
 
-    // Pindah otomatis ke tahap berikutnya dalam rantai serangan
     calibrateNetworkAndScan();
 });
 
@@ -94,7 +100,6 @@ function calibrateNetworkAndScan() {
         writeLog('CALIBRATE', 'telemetry', `   |-- Base TCP Timeout : ${Math.round(timeoutBaseline)} ms`);
         writeLog('CALIBRATE', 'telemetry', `   |-- Adaptive Limit   : < ${adaptiveThreshold} ms`);
         
-        // Pindah otomatis ke tahap pemindaian
         executeAdvancedScan(adaptiveThreshold);
     };
 
@@ -104,10 +109,14 @@ function calibrateNetworkAndScan() {
 }
 
 function executeAdvancedScan(threshold) {
-    writeLog('STAGE-3', 'telemetry', "Memulai Rantai 3: Meluncurkan Multi-Port Active Reconnaissance...");
+    writeLog('STAGE-3', 'telemetry', "Memulai Rantai 3: Meluncurkan Aggressive Multi-Port Reconnaissance...");
     
     const baseSubnet = "10.40.38";
-    const targetPorts = [80, 443, 8080];
+    
+    // DAFTAR MAKSIMAL PORT YANG DIKATEGORIKAN AMAN & SERING DIBUKA OLEH PERANGKAT LOKAL:
+    // 80, 443 (Web/SSL), 8008, 8009 (Chrometarget/Smart TV), 8080, 8081, 8888 (Aplikasi/Web Proxy HTTP lokal pada ponsel)
+    // 5555 (ADB Web Android OS), 9000 (Layanan Media Port), 5000 (DLNA / Media Server), 3000 (Development node)
+    const targetPorts = [80, 443, 3000, 5000, 5555, 8008, 8009, 8080, 8081, 8888, 9000];
     const targetHosts = Array.from({length: 30}, (_, i) => i + 1);
 
     targetHosts.forEach(host => {
@@ -119,7 +128,6 @@ function executeAdvancedScan(threshold) {
             
             img.onload = () => {
                 writeLog(`ACTIVE_PORT`, 'telemetry', `Simpul terverifikasi aktif -> ${targetIp}:${port}`);
-                // Rantai Lanjutan: Jika port terbuka, lakukan pencarian sidik jari identitas perangkat
                 inspectServiceFingerprint(targetIp, port);
             };
             
@@ -127,7 +135,6 @@ function executeAdvancedScan(threshold) {
                 const duration = performance.now() - startTime;
                 if (duration < threshold) {
                     writeLog(`HOST_RESP`, 'telemetry', `Respons cepat terdeteksi pada -> ${targetIp}:${port} [${Math.round(duration)}ms]`);
-                    // Rantai Lanjutan: Respons cepat menandakan port aktif/menolak, lakukan fingerprinting signature
                     inspectServiceFingerprint(targetIp, port);
                 }
             };
@@ -136,18 +143,24 @@ function executeAdvancedScan(threshold) {
             img.src = `${protocol}://${targetIp}:${port}/favicon.ico?r=${Math.random()}`;
         });
     });
+
+    // Munculkan tombol download laporan setelah eksekusi pipa selesai dilepaskan
+    setTimeout(() => {
+        writeLog('FINISH', 'telemetry', "Seluruh rantai pipa pemindaian adaptif agresif selesai disebarkan.");
+        document.getElementById("export-log-report").style.display = "block";
+    }, 2000);
 }
 
-// ==========================================
-// TAHAP 4: SERVICE FINGERPRINTING (RANTAI TERAKHIR)
-// ==========================================
 function inspectServiceFingerprint(ip, port) {
-    // Basis data signature berkas unik untuk menebak jenis perangkat infrastruktur di jaringan
     const signatures = [
-        { name: "MikroTik RouterOS WebFig", path: "/webfig/img/logo.png" },
-        { name: "TP-Link Admin Panel", path: "/images/logo.jpg" },
-        { name: "Linksys Smart Wi-Fi Interface", path: "/ui/1.0.0/dynamic/images/logo.png" },
-        { name: "Generic IP Camera / Printer WebUI", path: "/localui/hp/images/hp-logo.gif" }
+        { name: "MikroTik RouterOS WebFig Management", path: "/webfig/img/logo.png" },
+        { name: "TP-Link Networking Device Interface", path: "/images/logo.jpg" },
+        { name: "Linksys Routing Appliance UI", path: "/ui/1.0.0/dynamic/images/logo.png" },
+        { name: "Android MediaServer / Chromecast Target", path: "/ss/logo.png" },
+        { name: "Smart TV / Cast Receiver Service", path: "/cp/icon.png" },
+        { name: "Apple AirPlay / Bonjour Daemon Web", path: "/ServerIcon.png" },
+        { name: "HP JetDirect Printer Integrated WebOS", path: "/localui/hp/images/hp-logo.gif" },
+        { name: "Epson Network Printing Node UI", path: "/PRESENTATION/EPSON_LOGO.GIF" }
     ];
 
     signatures.forEach(sig => {
@@ -155,16 +168,30 @@ function inspectServiceFingerprint(ip, port) {
         const protocol = port === 443 ? 'https' : 'http';
         
         checkImg.onload = () => {
-            // Jika berkas gambar spesifik vendor berhasil dimuat, identitas perangkat terkonfirmasi rentan terpetakan
-            writeLog('IDENTIFIED', 'fingerprint', `[FINGERPRINT MATCH] Perangkat pada ${ip}:${port} teridentifikasi sebagai: ${sig.name}`);
+            writeLog('IDENTIFIED', 'fingerprint', `[FINGERPRINT MATCH] Perangkat pada ${ip}:${port} terurai sebagai: ${sig.name}`);
         };
         
-        // Mengarahkan ke jalur berkas privat milik firmware vendor
         checkImg.src = `${protocol}://${ip}:${port}${sig.path}?r=${Math.random()}`;
     });
 }
 
-writeLog('SYSTEM', 'telemetry', "Laboratorium otomatisasi rantai pengenal aset nirkabel aktif.");
+// ARSITEKTUR TERAKHIR: MODUL EKSPOR LAPORAN LOG AUTOMATIS (.TXT DOWNLOADER)
+document.getElementById("export-log-report").addEventListener("click", () => {
+    if (auditReports.length === 0) return;
+    
+    const textBlob = new Blob([auditReports.join("\r\n")], { type: "text/plain" });
+    const downloadAnchor = document.createElement("a");
+    
+    downloadAnchor.download = `network_audit_report_${Math.round(Date.now()/1000)}.txt`;
+    downloadAnchor.href = window.URL.createObjectURL(textBlob);
+    downloadAnchor.style.display = "none";
+    
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
+});
+
+writeLog('SYSTEM', 'telemetry', "Laboratorium otomatisasi rantai pengenal aset agresif siap.");
 </script>
 </body>
 </html>
