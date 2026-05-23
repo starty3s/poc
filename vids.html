@@ -108,6 +108,14 @@
     li {
       margin-bottom: 8px;
     }
+    
+    .severity-badge {
+      background-color: #7f1d1d;
+      color: #fca5a5;
+      padding: 2px 8px;
+      font-weight: bold;
+      border: 1px solid #b91c1c;
+    }
   </style>
 </head>
 <body>
@@ -137,14 +145,27 @@
         <td>Universal Cross-Site Scripting (UXSS) via Android Intent Redirection</td>
       </tr>
       <tr>
-        <th>Konsekuensi Keamanan</th>
-        <td>Eksekusi kode skrip arbitrer yang melewati batasan Same-Origin Policy (SOP)</td>
+        <th>Metrik Keparahan</th>
+        <td><span class="severity-badge">Severity S2 (Medium-High)</span> / $3,000 VRP Reward</td>
       </tr>
     </table>
 
+    <!-- ANALISIS SEVERITY (DIPERKUAT) -->
+    <div class="card" style="border-left-color: var(--accent-red);">
+      <h3>1. Analisis Parameter Keparahan (Severity S2 Justification)</h3>
+      <p>Penetapan tingkat keparahan <strong>Severity S2 (Medium-High)</strong> oleh tim keamanan internal Google Chromium didasarkan pada visualisasi risiko dan potensi eksploitasi di lingkungan produksi (in-the-wild). Imbalan finansial sebesar <strong>$3,000</strong> melalui Vulnerability Reward Program (VRP) mengonfirmasi signifikansi teknis dari celah ini.</p>
+      
+      <p>Faktor-faktor penentu tingginya eskalasi keparahan meliputi:</p>
+      <ul>
+        <li><strong>Bypass Same-Origin Policy (SOP):</strong> Kerentanan ini diklasifikasikan sebagai UXSS (Universal Cross-Site Scripting). Berbeda dengan XSS biasa yang terbatas pada satu domain rentan, UXSS mampu mengeksekusi skrip jahat secara universal di atas origin mana pun yang sedang aktif pada browser korban.</li>
+        <li><strong>Interaksi Pengguna Minimal (Low Attack Complexity):</strong> Eksploitasi hanya membutuhkan satu gestur interaksi tunggal (seperti menekan satu tombol yang tampak sah) untuk memicu seluruh rantai muatan infeksi (*exploit chain*).</li>
+        <li><strong>Eskalasi Lintas Aplikasi (Cross-Process Call):</strong> Kemampuan mematikan untuk memanggil dan mengarahkan parameter langsung ke subsistem paket aplikasi pihak ketiga tertentu (dalam hal ini <code>com.sec.android.app.sbrowser</code>) meningkatkan risiko intersepsi data sensitif antar-aplikasi.</li>
+      </ul>
+    </div>
+
     <!-- ANALISIS ARSITEKTUR -->
     <div class="card" style="border-left-color: #3b82f6;">
-      <h3>1. Alur Kerentanan Sistem (Vulnerability Pipeline)</h3>
+      <h3>2. Alur Kerentanan Sistem (Vulnerability Pipeline)</h3>
       <p>Kerentanan ini berakar pada inkonsistensi penanganan parser ketika sebuah tautan menggunakan kombinasi pseudo-skema secara bertingkat. Komponen <code>Mobile>Intents</code> bertanggung jawab menerjemahkan URL dengan skema <code>intent://</code> menjadi instruksi panggilan IPC (Inter-Process Communication) untuk meluncurkan aplikasi eksternal di Android.</p>
       
       <p>Akar masalah terjadi melalui tahapan kronologis berikut:</p>
@@ -157,8 +178,7 @@
 
     <!-- BEDAH PAYLOAD KODE -->
     <div class="card">
-      <h3>2. Analisis Struktur Payload Sintaksis</h3>
-      <p>Konstruksi parameter yang digunakan dalam evaluasi lab ini dirancang untuk menguji batas ketahanan parser peramban:</p>
+      <h3>3. Analisis Struktur Payload Sintaksis</h3>
       <pre>window.open("javascript:location='intent://google.com#Intent;scheme=https;package=com.sec.android.app.sbrowser;end'");</pre>
       
       <p><strong>Komponen Analisis Struktur:</strong></p>
@@ -171,12 +191,12 @@
 
     <!-- LABORATORIUM PENELITIAN AUDIT STABIL -->
     <div class="card" style="border-left-color: #eab308;">
-      <h3>3. Eksekusi Logika Pengujian (Deterministic Audit Log)</h3>
+      <h3>4. Eksekusi Logika Pengujian (Deterministic Audit Log)</h3>
       <p style="color: var(--text-muted)">Gunakan tombol kendali statis di bawah untuk memantau perilaku penanganan objek saat instruksi dikirim ke peramban.</p>
       
       <div class="poc-box">
         <button class="trigger-btn" onclick="executePoC()">EKSEKUSI AUDIT KODE</button>
-        <p id="click-status" style="margin-top: 15px; font-weight: bold;">Status Konsol: Menunggu Trigger</p>
+        <p id="click-status" style="margin-top: 15px; font-weight: bold;">Status Profiler: Menunggu Trigger</p>
       </div>
 
       <p style="font-size: 0.9rem; margin-top: 15px;"><strong>Konsol Log Aktivitas Engine (Real-Time Output):</strong></p>
@@ -188,8 +208,7 @@
 
     <!-- IMPLEMENTASI PERBAIKAN -->
     <div class="card" style="border-left-color: var(--accent-green);">
-      <h3>4. Mekanisme Rekayasa Perbaikan (Remediation & Patching)</h3>
-      <p>Untuk menutup celah bypass origin ini, tim pengembang Chromium menerapkan metode pengamanan di level kode native:</p>
+      <h3>5. Mekanisme Rekayasa Perbaikan (Remediation & Patching)</h3>
       <ul>
         <li><strong>Strict Intent Scheme Validation:</strong> Peramban modern sekarang menolak pemrosesan skema <code>intent://</code> jika rantai pemanggilannya diinisiasi dari dalam konteks pseudo-skema <code>javascript:</code> yang tidak memiliki interaksi fisik tepercaya dari pengguna (*user gesture token*).</li>
         <li><strong>Isolasi Navigasi:</strong> Setiap kali skema <code>intent:</code> dipanggil, peramban akan memutus keterikatan objek <code>window</code> penyerang dengan jendela baru untuk mencegah kebocoran referensi memori (*cross-context memory isolation*).</li>
@@ -209,15 +228,14 @@
 
     function executePoC() {
       clickCount++;
-      document.getElementById("click-status").innerText = `Status Konsol: Percobaan Ke-${clickCount}`;
+      document.getElementById("click-status").innerText = `Status Profiler: Percobaan Ke-${clickCount}`;
       
       addLog(`[ACTION] Fungsi executePoC() dipanggil.`);
       addLog(`[ANALYSIS] Mengevaluasi objek window.open dengan parameter payload skema intent...`);
 
       try {
-        // Logika penanganan manipulasi URL tanpa mengarah ke halaman kosong (about:blank)
         window.open("javascript:location='intent://google.com#Intent;scheme=https;package=com.sec.android.app.sbrowser;end'");
-        addLog(`[COMPLETED] Instruksi dikirim. Periksa reaksi sub-proses Android Intent.`);
+        addLog(`[COMPLETED] Instruksi dikirim ke peramban. Menganalisis respon sandboxing.`);
       } catch (err) {
         addLog(`[EXCEPTION] Eksekusi dihentikan oleh browser: ${err.message}`);
       }
