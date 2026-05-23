@@ -1,204 +1,168 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Intent Navigation Test (Maximum Escalation Matrix)</title>
+  <title>Android Intent Security Validation Testbed</title>
   <style>
     body {
-      font-family: monospace;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      padding: 30px;
+      background-color: #f8f9fa;
+      color: #212529;
+      line-height: 1.6;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .control-panel {
+      background-color: #fff;
+      border: 1px solid #dee2e6;
       padding: 20px;
-      background-color: #ffffff;
-      color: #000000;
-      line-height: 1.5;
+      border-radius: 8px;
+      margin-bottom: 25px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .control-panel label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 8px;
+    }
+    select {
+      width: 100%;
+      padding: 10px;
+      font-size: 14px;
+      border-radius: 4px;
+      border: 1px solid #ced4da;
+      background-color: #fff;
     }
     .grid-container {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 15px;
-      margin-top: 20px;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
     }
     .card {
-      border: 1px solid #000000;
-      padding: 15px;
-      background-color: #f9f9f9;
+      background-color: #fff;
+      border: 1px solid #dee2e6;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
     .card h3 {
       margin-top: 0;
-      border-bottom: 1px solid #000000;
-      padding-bottom: 5px;
+      font-size: 16px;
+      border-bottom: 2px solid #0d6efd;
+      padding-bottom: 8px;
+      color: #0d6efd;
     }
     button {
-      padding: 8px 15px;
+      padding: 10px 14px;
+      font-size: 13px;
       font-family: monospace;
       cursor: pointer;
       width: 100%;
-      background-color: #ffffff;
-      border: 1px solid #000000;
+      background-color: #fff;
+      border: 1px solid #ced4da;
       text-align: left;
+      margin-bottom: 10px;
+      border-radius: 4px;
+      transition: all 0.2s ease;
     }
     button:hover {
-      background-color: #e0e0e0;
+      background-color: #f1f3f5;
+      border-color: #6c757d;
     }
-    .log-box {
-      margin-top: 30px;
-      padding: 10px;
-      background-color: #f0f0f0;
-      border: 1px dashed #000000;
-      max-height: 180px;
-      overflow-y: auto;
+    .badge {
+      background-color: #6c757d;
+      color: white;
+      padding: 2px 6px;
+      font-size: 10px;
+      border-radius: 3px;
+      float: right;
     }
   </style>
 </head>
 <body>
 
-  <h1>Android Settings Intent Verification Matrix (Max Escalation)</h1>
-  <p>Matriks pengujian komprehensif menggunakan kombinasi struktur tautan berlapis (Nested Context Assignment) untuk memverifikasi ketahanan pembatasan skema pada komponen peramban.</p>
+<div class="container">
+  <h1>Android Settings Intent Vulnerability Matrix</h1>
+  <p>Alat uji validasi isolasi skema peramban. Pilih metode serangan (vektor) terlebih dahulu, lalu klik target aksi pengaturan untuk menguji kerentanan.</p>
 
-  <div id="consoleLog" class="log-box">Console output initialized...</div>
-
-  <div class="grid-container">
-
-    <!-- Jaringan & Konektivitas -->
-    <div class="card">
-      <h3>Konektivitas & Nirkabel</h3>
-      <button onclick="executeChainedIntent('android.settings.SETTINGS')">1. Main Settings</button><br><br>
-      <button onclick="executeChainedIntent('android.settings.WIRELESS_SETTINGS')">2. Wireless / Network</button><br><br>
-      <button onclick="executeChainedIntent('android.settings.WIFI_SETTINGS')">3. Wi-Fi Settings</button><br><br>
-      <button onclick="executeChainedIntent('android.settings.BLUETOOTH_SETTINGS')">4. Bluetooth Settings</button><br><br>
-      <button onclick="executeChainedIntent('android.settings.NFC_SETTINGS')">5. NFC Settings</button><br><br>
-      <button onclick="executeChainedIntent('android.settings.AIRPLANE_MODE_SETTINGS')">6. Airplane Mode</button>
-    </div>
-
-    <!-- Aplikasi & Notifikasi -->
-    <div class="card">
-      <h3>Manajemen Aplikasi</h3>
-      <button onclick="executeChainedIntent('android.settings.APPLICATION_SETTINGS')">1. Application Manager</button><br><br>
-      <button onclick="executeChainedIntent('android.settings.MANAGE_ALL_APPLICATIONS_SETTINGS')">2. Manage All Apps</button><br><br>
-      <button onclick="executeChainedIntent('android.settings.NOTIFICATION_SETTINGS')">3. Notification Settings</button><br><br>
-      <button onclick="executeChainedIntent('android.settings.USAGE_ACCESS_SETTINGS')">4. Usage Access Apps</button>
-    </div>
-
-    <!-- Privasi & Keamanan -->
-    <div class="card">
-      <h3>Privasi & Keamanan</h3>
-      <button onclick="executeChainedIntent('android.settings.SECURITY_SETTINGS')">1. Security Settings</button><br><br>
-      <button onclick="executeChainedIntent('android.settings.LOCATION_SOURCE_SETTINGS')">2. Location Settings</button><br><br>
-      <button onclick="executeChainedIntent('android.settings.PRIVACY_SETTINGS')">3. Privacy Settings</button><br><br>
-      <button onclick="executeChainedIntent('android.settings.BIOMETRIC_ENROLL')">4. Biometric / PIN</button>
-    </div>
-
-    <!-- Tampilan & Suara -->
-    <div class="card">
-      <h3>Antarmuka & Hardware</h3>
-      <button onclick="executeChainedIntent('android.settings.DISPLAY_SETTINGS')">1. Display Settings</button><br><br>
-      <button onclick="executeChainedIntent('android.settings.SOUND_SETTINGS')">2. Sound & Vibration</button><br><br>
-      <button onclick="executeChainedIntent('android.settings.ACCESSIBILITY_SETTINGS')">3. Accessibility</button>
-    </div>
-
-    <!-- Penyimpanan & Sistem -->
-    <div class="card">
-      <h3>Sistem & Penyimpanan</h3>
-      <button onclick="executeChainedIntent('android.settings.INTERNAL_STORAGE_SETTINGS')">1. Storage Settings</button><br><br>
-      <button onclick="executeChainedIntent('android.settings.DATE_SETTINGS')">2. Date & Time</button><br><br>
-      <button onclick="executeChainedIntent('android.settings.LOCALE_SETTINGS')">3. Language & Input</button><br><br>
-      <button onclick="executeChainedIntent('android.settings.DEVICE_INFO_SETTINGS')">4. About Phone</button>
-    </div>
-
-    <!-- Spesifik & Pengembang -->
-    <div class="card">
-      <h3>Spesifik & Pengembang</h3>
-      <button onclick="executeChainedIntent('android.settings.APPLICATION_DEVELOPMENT_SETTINGS')">1. Developer Options</button><br><br>
-      <button onclick="executeChainedIntent('android.settings.BATTERY_SAVER_SETTINGS')">2. Battery Optimizer</button><br><br>
-      <button onclick="executeChainedIntent('android.settings.CAST_SETTINGS')">3. Cast Screen</button>
-    </div>
-
+  <!-- PANEL KONTROL VEKTOR TUNGGAL -->
+  <div class="control-panel">
+    <label for="vectorSelector">Pilih Vektor Eksekusi (Isolasi Uji Tunggal):</label>
+    <select id="vectorSelector">
+      <option value="v1">Vektor 1: Navigasi Langsung Standar (window.location.href)</option>
+      <option value="v2">Vektor 2: Simulasi DOM Klik Jangkar (Dynamic Tag &lt;a&gt;)</option>
+      <option value="v3">Vektor 3: Injeksi Sub-Konteks Iframe Tersembunyi</option>
+      <option value="v4">Vektor 4: Ekskalasi Eksplisit Komponen (Bypass Batasan Implicit)</option>
+    </select>
   </div>
 
-  <script>
-    function logMessage(msg) {
-      const logger = document.getElementById('consoleLog');
-      logger.innerHTML += "<br>[" + new Date().toLocaleTimeString() + "] " + msg;
-      logger.scrollTop = logger.scrollHeight;
-    }
+  <div class="grid-container">
+    <!-- Kategori 1 -->
+    <div class="card">
+      <h3>Konektivitas & Nirkabel</h3>
+      <button onclick="testIntent('android.settings.SETTINGS')">Main Settings</button>
+      <button onclick="testIntent('android.settings.WIFI_SETTINGS')">Wi-Fi Settings</button>
+      <button onclick="testIntent('android.settings.BLUETOOTH_SETTINGS')">Bluetooth Settings</button>
+    </div>
 
-    function executeChainedIntent(actionString) {
-      logMessage("<b>[ANALYSIS START]</b> Menguji ketahanan skema untuk aksi: " + actionString);
-      
-      // Konstruksi standar URI Intent dengan flag aktivitas terpisah
-      const targetIntent = "intent://#Intent;" +
-                           "action=" + actionString + ";" +
-                           "category=android.intent.category.DEFAULT;" +
-                           "LAUNCH_FLAGS=0x10000000;" + 
-                           "end";
+    <!-- Kategori 2 -->
+    <div class="card">
+      <h3>Sistem & Keamanan</h3>
+      <button onclick="testIntent('android.settings.MANAGE_ALL_APPLICATIONS_SETTINGS')">Manage All Apps</button>
+      <button onclick="testIntent('android.settings.SECURITY_SETTINGS')">Security Settings</button>
+      <button onclick="testIntent('android.settings.APPLICATION_DEVELOPMENT_SETTINGS')">Developer Options <span class="badge">Danger</span></button>
+    </div>
+  </div>
+</div>
 
-      // Konstruksi alternatif berbasis skema kustom langsung jika resolver memperbolehkan penanganan relasi string langsung
-      const directSettingScheme = "settings://" + actionString.replace("android.settings.", "").toLowerCase();
+<script>
+  function testIntent(actionString) {
+    const chosenVector = document.getElementById('vectorSelector').value;
+    
+    // Sintaks URI Intent Android Standar (RFC 2396 alternatif)
+    const standardIntent = `intent:#Intent;action=${actionString};category=android.intent.category.DEFAULT;i.f=0x10000000;end`;
+    
+    // Sintaks Eksplisit Komponen (High-Risk Escalation)
+    const explicitIntent = `intent:#Intent;action=${actionString};component=com.android.settings/.Settings;end`;
 
-      // Array penampung vektor untuk eksekusi terstruktur
-      const vectors = [
-        {
-          name: "Vektor 1: Top-Level Window Mutation",
-          execute: () => {
-            window.top.location.href = targetIntent;
-          }
-        },
-        {
-          name: "Vektor 2: Dynamic Anchor Insertion",
-          execute: () => {
-            const anchor = document.createElement('a');
-            anchor.href = targetIntent;
-            anchor.target = '_top';
-            document.body.appendChild(anchor);
-            anchor.click();
-            document.body.removeChild(anchor);
-          }
-        },
-        {
-          name: "Vektor 3: Sub-Context Document Loading",
-          execute: () => {
-            let iframe = document.getElementById('testFrameworkFrame');
-            if (!iframe) {
-              iframe = document.createElement('iframe');
-              iframe.id = 'testFrameworkFrame';
-              iframe.style.display = 'none';
-              document.body.appendChild(iframe);
-            }
-            iframe.src = targetIntent;
-          }
-        },
-        {
-          name: "Vektor 4: Form Submission Method",
-          execute: () => {
-            const form = document.createElement('form');
-            form.action = targetIntent;
-            form.method = 'GET';
-            document.body.appendChild(form);
-            form.submit();
-            document.body.removeChild(form);
-          }
-        },
-        {
-          name: "Vektor 5: Direct Custom Scheme Fallback",
-          execute: () => {
-            window.location.href = directSettingScheme;
-          }
+    switch(chosenVector) {
+      case "v1":
+        // Vektor 1: Menguji penanganan manipulasi objek lokasi utama secara langsung
+        window.location.href = standardIntent;
+        break;
+        
+      case "v2":
+        // Vektor 2: Menguji proteksi user-activation gesture bypass melalui manipulasi DOM
+        const a = document.createElement('a');
+        a.href = standardIntent;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        break;
+        
+      case "v3":
+        // Vektor 3: Menguji mitigasi sandbox iframe terhadap pemanggilan native intent
+        let iframe = document.getElementById('sandboxFrame');
+        if (!iframe) {
+          iframe = document.createElement('iframe');
+          iframe.id = 'sandboxFrame';
+          iframe.style.display = 'none';
+          document.body.appendChild(iframe);
         }
-      ];
-
-      // Pemicuan berantai berbasis jadwal (pipelined schedule) untuk menghindari tumpang tindih thread navigasi tunggal
-      vectors.forEach((vector, index) => {
-        setTimeout(() => {
-          try {
-            logMessage(`[EXECUTE] Memanggil ${vector.name}`);
-            vector.execute();
-          } catch (e) {
-            logMessage(`[STATUS] ${vector.name} menghasilkan pengecualian: ${e.message}`);
-          }
-        }, index * 100); // Jeda 100ms antar vektor untuk memberikan ruang pemrosesan pada event loop peramban
-      });
+        iframe.src = standardIntent;
+        break;
+        
+      case "v4":
+        // Vektor 4: Menguji apakah parser peramban memblokir pendefinisian target komponen internal langsung
+        window.location.href = explicitIntent;
+        break;
     }
-  </script>
+  }
+</script>
 
 </body>
 </html>
