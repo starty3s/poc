@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Unified Device & Telemetry Laboratory</title>
+<title>Hardened Device & Network Telemetry Lab</title>
 <style>
     body {
         font-family: 'Courier New', monospace; 
@@ -25,7 +25,7 @@
     }
     #console-log {
         margin-top: 20px; border: 1px solid #00ffaa; padding: 12px; 
-        height: 480px; overflow: auto; white-space: pre-wrap; 
+        height: 520px; overflow: auto; white-space: pre-wrap; 
         background: #000; font-size: 11px; color: #00ff55;
     }
     .role-tag { font-weight: bold; padding: 2px 6px; border-radius: 3px; font-size: 10px; color: #000; }
@@ -35,12 +35,12 @@
 </head>
 <body>
 
-<h2>Device & Telemetry Security Laboratory</h2>
+<h2>Device & Network Security Laboratory</h2>
 
 <div class="panel">
-    <h3> Automated Full-Chain Pipeline</h3>
-    <p>Mengeksekusi rangkaian inspeksi arsitektur perangkat keras dan ekstraksi telemetri jaringan secara beruntun dalam satu siklus operasi instan.</p>
-    <button id="launch-full-pipeline">Execute Automated Chain</button>
+    <h3> Hardened Automated Pipeline (Subnet: 10.40.38.x)</h3>
+    <p>Mengeksekusi rangkaian inspeksi identitas perangkat keras (WebGL Fingerprinting) dan pemindaian port nirkabel lokal secara beruntun.</p>
+    <button id="launch-hardened-chain">Execute Hardened Chain</button>
 </div>
 
 <div id="console-log"></div>
@@ -55,91 +55,82 @@ function writeLog(phase, type, text) {
     consoleLog.scrollTop = consoleLog.scrollHeight;
 }
 
-// PIPELINE UTAMAA: EKSEKUSI BERUNTUN TANPA INTERUPSI (CHAINING ENGINE)
-document.getElementById("launch-full-pipeline").addEventListener("click", () => {
-    writeLog('INIT', 'hardware', "Memulai rantai otonom: Menginspeksi properti runtime sistem...");
+// PIPELINE UTAMA: EKSEKUSI BERUNTUN INSTAN TANPA INTERUPSI FOKUS
+document.getElementById("launch-hardened-chain").addEventListener("click", () => {
+    writeLog('INIT', 'hardware', "Memulai rantai otonom: Mengekstrak properti perangkat keras nyata...");
 
     // ==========================================
-    // TAHAP 1: INSPEKSI DATA PERANGKAT NYATA
+    // TAHAP 1: WEBGL GPU IDENTIFICATION (HARDWARE IDENTITY)
     // ==========================================
-    
-    // Membaca string UserAgent standar untuk mengurai tipe sistem operasi dasar
-    const rawUA = navigator.userAgent;
-    writeLog('UA_STRING', 'hardware', `Raw Metadata: ${rawUA}`);
-
-    // Pemanfaatan UserAgentData API modern (jika didukung oleh browser target)
-    if (navigator.userAgentData) {
-        navigator.userAgentData.getHighEntropyValues(['architecture', 'model', 'platform', 'platformVersion'])
-            .then(uaData => {
-                writeLog('HARDWARE', 'hardware', "Hasil Dekode Komponen Sistem:");
-                writeLog('HARDWARE', 'hardware', `   |-- Platform OS  : ${uaData.platform} (Versi: ${uaData.platformVersion || "N/A"})`);
-                writeLog('HARDWARE', 'hardware', `   |-- Arsitektur CPU: ${uaData.architecture || "N/A"}`);
-                writeLog('HARDWARE', 'hardware', `   |-- Mobile Node  : ${navigator.userAgentData.mobile ? "Perangkat Seluler (HP/Tablet)" : "Desktop/PC"}`);
+    try {
+        const canvas = document.createElement('canvas');
+        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+        
+        if (gl) {
+            const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+            if (debugInfo) {
+                // Mengekstrak nama vendor dan model GPU nyata yang tertanam pada perangkat
+                const vendor = gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL);
+                const renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
                 
-                // Jika browser mengizinkan akses model generik, tampilkan hasilnya
-                if (uaData.model) {
-                    writeLog('HARDWARE', 'hardware', `   |-- Brand/Model  : ${uaData.model}`);
-                }
-                
-                // Lanjutkan rantai secara asinkron ke tahap telemetri jaringan
-                executeNetworkTelemetryStage();
-            });
-    } else {
-        // Metode Fallback untuk browser lama berbasis ekspresi reguler
-        writeLog('HARDWARE', 'hardware', "Mengekstrak tanda sistem dari objek navigator...");
-        const isAndroid = /Android/i.test(rawUA);
-        const isIOS = /iPhone|iPad|iPod/i.test(rawUA);
-        
-        let osType = "Unknown OS";
-        if (isAndroid) osType = "Android System Interface";
-        if (isIOS) osType = "iOS/Apple Darwin Interface";
-        
-        writeLog('HARDWARE', 'hardware', `   |-- Deteksi OS: ${osType}`);
-        writeLog('HARDWARE', 'hardware', `   |-- Screen Node: W:${window.screen.width}px x H:${window.screen.height}px`);
-        
-        // Lanjutkan rantai secara asinkron ke tahap telemetri jaringan
-        executeNetworkTelemetryStage();
+                writeLog('GPU_EXTRACT', 'hardware', "Hardware Driver Signature Detected:");
+                writeLog('GPU_EXTRACT', 'hardware', `   |-- GPU Vendor  : ${vendor}`);
+                writeLog('GPU_EXTRACT', 'hardware', `   |-- GPU Renderer: ${renderer}`);
+            }
+        }
+    } catch (e) {
+        writeLog('GPU_ERR', 'hardware', `Gagal ekstraksi fingerprint perangkat keras: ${e.message}`);
     }
+
+    // Ekstraksi data core prosesor (Logical CPU Cores) dan memory estimate
+    if (navigator.hardwareConcurrency) {
+        writeLog('CPU_EXTRACT', 'hardware', `   |-- Kapasitas CPU: ${navigator.hardwareConcurrency} Logical Cores`);
+    }
+    if (navigator.deviceMemory) {
+        writeLog('MEM_EXTRACT', 'hardware', `   |-- Estimasi RAM : ~${navigator.deviceMemory} GB`);
+    }
+
+    // Melanjutkan secara beruntun ke pemindaian port lokal pada segmen Wi-Fi aktif Anda
+    executeNetworkScanStage();
 });
 
 // ==========================================
-// TAHAP 2: PIPELINE EKSTRAKSI TELEMETRI JARINGAN
+// TAHAP 2: AUTONOMOUS PORT SCANNING (SEGMENTED WI-FI)
 // ==========================================
-function executeNetworkTelemetryStage() {
-    writeLog('TELEMETRY', 'telemetry', "Beralih ke Tahap 2: Memicu permintaan jaringan untuk mengumpulkan metrik asinkron...");
+function executeNetworkScanStage() {
+    // Menargetkan basis segmen Wi-Fi aktif berdasarkan ipconfig Anda (10.40.38.x)
+    const baseSubnet = "10.40.38";
+    writeLog('SCAN_INIT', 'telemetry', `Beralih ke Tahap 2: Memulai pemindaian otonom pada segmen nirkabel -> ${baseSubnet}.1 s/d ${baseSubnet}.30...`);
 
-    // Memicu koneksi nyata ke internet untuk memperbarui memori Resource Timing peramban
-    fetch('https://ipify.org')
-        .then(res => res.json())
-        .then(data => {
-            writeLog('NET_DATA', 'telemetry', `Koneksi aktif terverifikasi. IP Gateway: ${data.ip}`);
-            
-            // Mengekstrak metrik pemrosesan dari runtime memori peramban secara instan
-            const resources = performance.getEntriesByType("resource");
-            
-            resources.forEach((resource, index) => {
-                // Memfilter entri agar fokus pada koneksi jaringan luar yang baru saja dipicu
-                if (resource.name.includes('ipify')) {
-                    writeLog(`CONN_METRIC`, 'telemetry', `Membongkar telemetri paket untuk endpoint internal...`);
-                    
-                    const dnsTime = Math.round(resource.domainLookupEnd - resource.domainLookupStart);
-                    const tcpTime = Math.round(resource.connectEnd - resource.connectStart);
-                    const ttfbTime = Math.round(resource.responseStart - resource.requestStart); // Time to First Byte
-                    
-                    writeLog(`TIMING`, 'telemetry', `   |-- Protokol Jaringan: ${resource.nextHopProtocol || "HTTP/1.1 (Cached/Secure)"}`);
-                    writeLog(`TIMING`, 'telemetry', `   |-- Resolusi DNS   : ${dnsTime} ms`);
-                    writeLog(`TIMING`, 'telemetry', `   |-- Jabat Tangan TCP: ${tcpTime} ms`);
-                    writeLog(`TIMING`, 'telemetry', `   |-- Latensi Server (TTFB): ${ttfbTime} ms`);
-                }
-            });
-            writeLog('FINISH', 'telemetry', "Rantai penuh eksekusi pipa otonom selesai.");
-        })
-        .catch(err => {
-            writeLog('NET_ERR', 'telemetry', `Rantai telemetri terputus: ${err.message}`);
-        });
+    const targetHosts = Array.from({length: 30}, (_, i) => i + 1);
+
+    targetHosts.forEach(host => {
+        const targetIp = `${baseSubnet}.${host}`;
+        const startTime = performance.now();
+        
+        // Memanfaatkan objek gambar bayangan untuk mengukur waktu respon port TCP
+        const img = new Image();
+        
+        img.onload = () => {
+            writeLog(`ACTIVE_NODE`, 'telemetry', `Simpul aktif terverifikasi pada IP -> ${targetIp} (HTTP Port 80 Terbuka)`);
+        };
+        
+        img.onerror = () => {
+            const duration = performance.now() - startTime;
+            // Kecepatan respon penolakan di bawah 150ms mengindikasikan host tersebut ada di subnet nirkabel
+            if (duration < 150) {
+                writeLog(`HOST_FOUND`, 'telemetry', `Indikasi kuat perangkat aktif pada alamat IP -> ${targetIp}`);
+            }
+        };
+        
+        // Menguji port HTTP standar
+        img.src = `http://${targetIp}:80/favicon.ico?r=${Math.random()}`;
+    });
+
+    writeLog('FINISH', 'telemetry', "Seluruh antrean operasi pipa berantai selesai dikirimkan.");
 }
 
-writeLog('SYSTEM', 'hardware', "Mesin analisis pipa terpadu berhasil diinisialisasi.");
+writeLog('SYSTEM', 'hardware', "Laboratorium pengujian identitas arsitektur nirkabel siap.");
 </script>
 </body>
 </html>
