@@ -123,85 +123,80 @@
     }
 
     function executeChainedIntent(actionString) {
-      logMessage("<b>[ULTIMATE CHAIN START]</b> Mengeskalasi muatan untuk aksi: " + actionString);
+      logMessage("<b>[ANALYSIS START]</b> Menguji ketahanan skema untuk aksi: " + actionString);
       
-      // Menggunakan kombinasi bendera peluncuran aktivitas dan fallback rekursif
-      // Jika intent:// pertama memicu dialog/gagal, parameter S.browser_fallback_url memaksa pengalihan ulang ke skema dasar
+      // Konstruksi standar URI Intent dengan flag aktivitas terpisah
       const targetIntent = "intent://#Intent;" +
                            "action=" + actionString + ";" +
                            "category=android.intent.category.DEFAULT;" +
-                           "LAUNCH_FLAGS=0x14000000;" + // Campuran FLAG_ACTIVITY_NEW_TASK (0x10000000) & FLAG_ACTIVITY_CLEAR_TOP (0x04000000)
-                           "S.browser_fallback_url=" + encodeURIComponent("intent://#Intent;action=" + actionString + ";category=android.intent.category.DEFAULT;end") + ";" +
+                           "LAUNCH_FLAGS=0x10000000;" + 
                            "end";
-      
-      // --- VEKTOR UNIQUE 1: Top-Level Location Assault ---
-      try {
-        logMessage("[VEKTOR 1] Menguji mutasi agresif objek window.top.location");
-        window.top.location.href = targetIntent;
-        window.top.location.assign(targetIntent);
-      } catch (e) {
-        logMessage("[VEKTOR 1 BLOCKED] Gagal alokasi properti: " + e.message);
-      }
 
-      // --- VEKTOR UNIQUE 2: Dynamic DOM Anchor Interaction ---
-      setTimeout(() => {
-        try {
-          logMessage("[VEKTOR 2] Menguji injeksi elemen jangkar HTML5 + Target _top");
-          const testAnchor = document.createElement('a');
-          testAnchor.href = targetIntent;
-          testAnchor.target = '_top';
-          testAnchor.rel = 'noreferrer';
-          document.body.appendChild(testAnchor);
-          testAnchor.click();
-          document.body.removeChild(testAnchor);
-        } catch (e) {
-          logMessage("[VEKTOR 2 BLOCKED] Eksekusi jangkar ditolak: " + e.message);
-        }
-      }, 80);
+      // Konstruksi alternatif berbasis skema kustom langsung jika resolver memperbolehkan penanganan relasi string langsung
+      const directSettingScheme = "settings://" + actionString.replace("android.settings.", "").toLowerCase();
 
-      // --- VEKTOR UNIQUE 3: Nested Framework Escalation (Iframe) ---
-      setTimeout(() => {
-        try {
-          logMessage("[VEKTOR 3] Menguji bypass konteks via Iframe terisolasi");
-          let frameworkIframe = document.getElementById('frameworkIframe');
-          if (!frameworkIframe) {
-            frameworkIframe = document.createElement('iframe');
-            frameworkIframe.id = 'frameworkIframe';
-            frameworkIframe.style.display = 'none';
-            frameworkIframe.sandbox = 'allow-top-navigation allow-scripts'; // Memberikan izin penetrasi jendela atas
-            document.body.appendChild(frameworkIframe);
+      // Array penampung vektor untuk eksekusi terstruktur
+      const vectors = [
+        {
+          name: "Vektor 1: Top-Level Window Mutation",
+          execute: () => {
+            window.top.location.href = targetIntent;
           }
-          frameworkIframe.src = targetIntent;
-        } catch (e) {
-          logMessage("[VEKTOR 3 BLOCKED] Alokasi Iframe ditolak: " + e.message);
+        },
+        {
+          name: "Vektor 2: Dynamic Anchor Insertion",
+          execute: () => {
+            const anchor = document.createElement('a');
+            anchor.href = targetIntent;
+            anchor.target = '_top';
+            document.body.appendChild(anchor);
+            anchor.click();
+            document.body.removeChild(anchor);
+          }
+        },
+        {
+          name: "Vektor 3: Sub-Context Document Loading",
+          execute: () => {
+            let iframe = document.getElementById('testFrameworkFrame');
+            if (!iframe) {
+              iframe = document.createElement('iframe');
+              iframe.id = 'testFrameworkFrame';
+              iframe.style.display = 'none';
+              document.body.appendChild(iframe);
+            }
+            iframe.src = targetIntent;
+          }
+        },
+        {
+          name: "Vektor 4: Form Submission Method",
+          execute: () => {
+            const form = document.createElement('form');
+            form.action = targetIntent;
+            form.method = 'GET';
+            document.body.appendChild(form);
+            form.submit();
+            document.body.removeChild(form);
+          }
+        },
+        {
+          name: "Vektor 5: Direct Custom Scheme Fallback",
+          execute: () => {
+            window.location.href = directSettingScheme;
+          }
         }
-      }, 160);
+      ];
 
-      // --- VEKTOR UNIQUE 4: Form Submission Method ---
-      setTimeout(() => {
-        try {
-          logMessage("[VEKTOR 4] Menguji eskalasi melalui pengiriman Form tiruan");
-          const testForm = document.createElement('form');
-          testForm.action = targetIntent;
-          testForm.method = 'GET';
-          testForm.target = '_top';
-          document.body.appendChild(testForm);
-          testForm.submit();
-          document.body.removeChild(testForm);
-        } catch (e) {
-          logMessage("[VEKTOR 4 BLOCKED] Pengiriman form digagalkan runtime: " + e.message);
-        }
-      }, 240);
-
-      // --- VEKTOR UNIQUE 5: Location Override (Bypass via Replace) ---
-      setTimeout(() => {
-        try {
-          logMessage("[VEKTOR 5] Eksekusi akhir: Memaksa manipulasi riwayat via location.replace()");
-          window.location.replace(targetIntent);
-        } catch (e) {
-          logMessage("[VEKTOR 5 BLOCKED] Metode replace dibatasi: " + e.message);
-        }
-      }, 320);
+      // Pemicuan berantai berbasis jadwal (pipelined schedule) untuk menghindari tumpang tindih thread navigasi tunggal
+      vectors.forEach((vector, index) => {
+        setTimeout(() => {
+          try {
+            logMessage(`[EXECUTE] Memanggil ${vector.name}`);
+            vector.execute();
+          } catch (e) {
+            logMessage(`[STATUS] ${vector.name} menghasilkan pengecualian: ${e.message}`);
+          }
+        }, index * 100); // Jeda 100ms antar vektor untuk memberikan ruang pemrosesan pada event loop peramban
+      });
     }
   </script>
 
