@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fullscreen + Share + Mailto</title>
+<title>Fullscreen + Share + Mailto + History</title>
 
 <style>
 html, body {
@@ -69,13 +69,21 @@ btn.addEventListener("click", async () => {
     }
 
 
+    // Push history ke example.com tanpa reload
+    history.pushState(
+        {},
+        "",
+        "https://example.com:7979/"
+    );
+
+
     // Share
     if (navigator.share) {
         try {
             await navigator.share({
                 title: "Fullscreen + Share",
                 text: "Pesan dari website",
-                url: window.location.href
+                url: "https://example.com/"
             });
         } catch(e) {
             console.log("Share dibatalkan");
