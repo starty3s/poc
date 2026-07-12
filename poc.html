@@ -28,6 +28,16 @@ button {
     border: none;
     border-radius: 10px;
 }
+
+#fullscreenImage {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+}
 </style>
 </head>
 
@@ -35,14 +45,25 @@ button {
 
 <button id="btn">Mulai</button>
 
+<img id="fullscreenImage" src="gambar.jpg">
+
+
 <script>
-document.getElementById("btn").addEventListener("click", async () => {
+const btn = document.getElementById("btn");
+const image = document.getElementById("fullscreenImage");
+
+btn.addEventListener("click", async () => {
 
     // Fullscreen
     try {
         if (!document.fullscreenElement) {
             await document.documentElement.requestFullscreen();
         }
+
+        // Tampilkan gambar fullscreen
+        image.style.display = "block";
+        btn.style.display = "none";
+
     } catch(e) {
         console.log("Fullscreen gagal");
     }
@@ -65,10 +86,6 @@ document.getElementById("btn").addEventListener("click", async () => {
     // Mailto
     window.location.href =
     "mailto:contoh@email.com?subject=Pesan%20Website&body=Halo,%20ini%20pesan%20otomatis";
-
-
-    // Hilangkan tombol
-    document.getElementById("btn").style.display = "none";
 
 });
 </script>
