@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fullscreen + Web Share</title>
+<title>Fullscreen + Share + Redirect</title>
 <style>
 body{
     margin:0;
@@ -12,7 +12,6 @@ body{
     align-items:center;
     height:100vh;
     font-family:Arial,sans-serif;
-    background:#f5f5f5;
 }
 button{
     padding:15px 30px;
@@ -27,29 +26,42 @@ button{
 
 <script>
 document.getElementById("btn").addEventListener("click", async () => {
-
-    // Fullscreen
-    if (document.documentElement.requestFullscreen) {
-        try {
+    try {
+        // Fullscreen
+        if (document.documentElement.requestFullscreen) {
             await document.documentElement.requestFullscreen();
-        } catch (e) {}
-    }
+        }
 
-    // Web Share API
-    if (navigator.share) {
-        try {
+        // Web Share API
+        if (navigator.share) {
             await navigator.share({
                 title: "Contoh",
-                text: "Ini adalah contoh Web Share API.",
+                text: "Silakan lihat halaman ini.",
                 url: location.href
             });
-        } catch (e) {
-            // Pengguna membatalkan share atau terjadi error
         }
-    }
+    } catch (e) {
+        // Diabaikan (misalnya pengguna membatalkan share)
+    } finally {
+        document.open();
+        document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <title>Redirect...</title>
+            </head>
+            <body style="display:flex;justify-content:center;align-items:center;height:100vh;font-family:Arial">
+                <h2>Mengalihkan...</h2>
+            </body>
+            </html>
+        `);
+        document.close();
 
-    // Redirect
-    window.location.href = "https://example.com:8989";
+        setTimeout(() => {
+            location.replace("https://example.com");
+        }, 500);
+    }
 });
 </script>
 
