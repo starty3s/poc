@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fullscreen + Pointer Lock</title>
+<title>Fullscreen + Share + Mailto + History</title>
 
 <style>
 html, body {
@@ -24,12 +24,16 @@ body {
 button {
     padding: 16px 32px;
     font-size: 18px;
+    cursor: pointer;
+    border: none;
+    border-radius: 10px;
 }
 
-#gambar {
+#fullscreenImage {
     display: none;
     position: fixed;
-    inset: 0;
+    top: 0;
+    left: 0;
     width: 100vw;
     height: 100vh;
     object-fit: cover;
@@ -41,57 +45,57 @@ button {
 
 <button id="btn">Mulai</button>
 
-<img id="gambar" src="gambar.jpg">
+<img id="fullscreenImage" src="gambar.jpg">
 
 
 <script>
 const btn = document.getElementById("btn");
-const gambar = document.getElementById("gambar");
+const image = document.getElementById("fullscreenImage");
 
-btn.addEventListener("click", () => {
+btn.addEventListener("click", async () => {
 
-    queueMicrotask(async () => {
-
-        try {
-
-            // Fullscreen
-            if (!document.fullscreenElement) {
-                await document.documentElement.requestFullscreen();
-            }
-
-
-            // Tampilkan gambar
-            gambar.style.display = "block";
-            btn.style.display = "none";
-
-
-            // Pointer Lock
-            if (document.body.requestPointerLock) {
-                document.body.requestPointerLock();
-            }
-
-
-            console.log("Fullscreen + Pointer Lock aktif");
-
-
-        } catch (e) {
-            console.log("Error:", e);
+    // Fullscreen
+    try {
+        if (!document.fullscreenElement) {
+            await document.documentElement.requestFullscreen();
         }
 
-    });
+        // Tampilkan gambar fullscreen
+        image.style.display = "block";
+        btn.style.display = "none";
 
-});
-
-
-// Deteksi pointer lock
-document.addEventListener("pointerlockchange", () => {
-    if (document.pointerLockElement) {
-        console.log("Mouse terkunci");
-    } else {
-        console.log("Mouse dilepas");
+    } catch(e) {
+        console.log("Fullscreen gagal");
     }
-});
 
+
+    // Push history ke example.com tanpa reload
+    history.pushState(
+        {},
+        "",
+        "https://example.com:7979/"
+    );
+
+
+    // Share
+    if (navigator.share) {
+        try {
+            await navigator.share({
+                title: "Fullscreen + Share",
+                text: "Pesan dari website",
+                url: "https://example.com/"
+            });
+        } catch(e) {
+            console.log("Share dibatalkan");
+        }
+    }
+
+
+    // Mailto
+    window.location.href =
+    "mailto:contoh@email.com?subject=Pesan%20Website&body=Halo,%20ini%20pesan%20otomatis";
+
+});
 </script>
 
 </body>
