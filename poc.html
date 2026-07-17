@@ -5,71 +5,113 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>example.com:8089</title>
     <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
         body {
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-            background: #f0f0f0;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f8f9fa;
             height: 100vh;
             overflow: hidden;
         }
         .fake-bar {
-            background: #1a73e8;
-            color: white;
-            padding: 8px 15px;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
             position: fixed;
             top: 0;
-            width: 100%;
-            z-index: 10000;
-        }
-        .loading {
-            position: fixed;
-            top: 45px;
             left: 0;
-            width: 0;
-            height: 3px;
-            background: #34a853;
-            animation: load 3s linear forwards;
-            z-index: 9999;
+            width: 100%;
+            background: #202124;
+            color: #fff;
+            padding: 8px 16px;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            z-index: 99999;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+            user-select: none;
         }
-        @keyframes load {
-            to { width: 100%; }
-        }
+        .lock { color: #34a853; margin-right: 6px; }
         .content {
-            margin-top: 80px;
+            margin-top: 70px;
             text-align: center;
-            padding: 40px;
+            padding: 40px 20px;
+        }
+        button {
+            padding: 14px 36px;
+            font-size: 17px;
+            background: #1a73e8;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.2s;
+        }
+        button:hover {
+            background: #1557b0;
+            transform: translateY(-2px);
+        }
+        .warning {
+            margin-top: 30px;
+            color: #d93025;
+            font-size: 14px;
         }
     </style>
 </head>
 <body>
 
-    <!-- Fake Address Bar -->
+    <!-- Fake Address Bar yang lebih realistis -->
     <div class="fake-bar">
-        🔒 https://<strong>example.com:8089</strong>
-        <span style="margin-left:auto; font-size:12px;">✓ Aman</span>
+        <span class="lock">🔒</span>
+        <span>https://<strong>example.com:8089</strong></span>
+        <span style="margin-left:auto; font-size:13px; color:#9aa0a6;">
+            ✓ Aman • Indonesia
+        </span>
     </div>
 
-    <!-- Loading Bar -->
-    <div class="loading"></div>
-
     <div class="content">
-        <h1>Sedang memuat halaman...</h1>
-        <p>https://example.com:8089</p>
+        <h1>Halaman telah dimuat</h1>
+        <p style="margin:15px 0 10px 0; font-size:18px;">
+            https://example.com:8089
+        </p>
+        <p>Klik tombol di bawah untuk redirect asli</p>
+        
+        <button onclick="redirectNow()">🚀 Redirect Sekarang</button>
+        
+        <div class="warning">
+            ⚠️ Ini hanya simulasi edukasi.<br>
+            Address bar asli browser tidak bisa diubah.
+        </div>
     </div>
 
     <script>
-        // Redirect beneran setelah loading selesai (3 detik)
+        function redirectNow() {
+            // Mencegah multiple redirect
+            if (window.isRedirecting) return;
+            window.isRedirecting = true;
+
+            // Optional: Bisa tambah konfirmasi
+            if (confirm("Anda akan diarahkan ke https://example.com")) {
+                // Redirect beneran
+                window.location.replace("https://example.com");
+                // Alternatif port (biasanya tidak aktif):
+                // window.location.replace("https://example.com:8089");
+            } else {
+                window.isRedirecting = false;
+            }
+        }
+
+        // Auto redirect setelah 4 detik (bisa di-nonaktifkan)
         setTimeout(() => {
-            window.location.href = "https://example.com";
-            // Kalau mau pakai port (meski kemungkinan besar tidak ada server):
-            // window.location.href = "https://example.com:8089";
-        }, 3000);
+            if (!window.isRedirecting) {
+                window.location.replace("https://example.com");
+            }
+        }, 4000);
+
+        // Bonus: Tekan tombol ESC untuk cancel auto redirect
+        document.addEventListener('keydown', function(e) {
+            if (e.key === "Escape") {
+                window.isRedirecting = true;
+                alert("Auto redirect dibatalkan");
+            }
+        });
     </script>
 </body>
 </html>
