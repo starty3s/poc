@@ -22,7 +22,7 @@ overflow-x:hidden;
 }
 
 
-/* BACKGROUND FOTO */
+/* BACKGROUND */
 
 .background{
 position:fixed;
@@ -30,14 +30,10 @@ width:100%;
 height:100%;
 top:0;
 left:0;
-
 background:url("1.jpeg") center/cover;
-
 z-index:-2;
-
 animation:bgFoto 30s infinite;
 }
-
 
 @keyframes bgFoto{
 
@@ -57,9 +53,7 @@ animation:bgFoto 30s infinite;
 .container{
 
 min-height:100vh;
-
 background:rgba(0,0,0,.35);
-
 padding:30px 20px;
 
 }
@@ -69,15 +63,11 @@ padding:30px 20px;
 h1{
 
 font-size:45px;
-
 margin:20px;
-
 text-shadow:0 0 20px pink;
-
 animation:goyang 1s infinite alternate;
 
 }
-
 
 @keyframes goyang{
 
@@ -95,7 +85,6 @@ transform:rotate(3deg);
 #kata{
 
 font-size:22px;
-
 margin:20px;
 
 }
@@ -105,38 +94,26 @@ margin:20px;
 button{
 
 padding:15px 35px;
-
 border:none;
-
 border-radius:40px;
-
 background:#ff4081;
-
 color:white;
-
 font-size:18px;
-
 cursor:pointer;
-
 margin-bottom:30px;
 
 }
 
 
 
-
-/* GALERI */
+/* FOTO */
 
 .gallery{
 
 display:grid;
-
 grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-
 gap:20px;
-
 max-width:1100px;
-
 margin:auto;
 
 }
@@ -146,7 +123,6 @@ margin:auto;
 .gallery img{
 
 width:100%;
-
 height:260px;
 
 object-fit:contain;
@@ -163,17 +139,15 @@ box-shadow:0 0 25px white;
 
 cursor:pointer;
 
-animation:foto 3s infinite;
-
-transition:.4s;
+animation:foto 3s infinite ease-in-out;
 
 }
 
 
 
-.gallery img:hover{
+.gallery img:nth-child(even){
 
-transform:scale(1.1);
+animation-delay:1s;
 
 }
 
@@ -197,9 +171,7 @@ transform:translateY(-15px) rotate(3deg);
 
 
 
-
-
-/* FOTO KURSOR */
+/* KURSOR FOTO 8.JPEG */
 
 .cursor-foto{
 
@@ -228,23 +200,17 @@ animation:putar 2s linear infinite;
 }
 
 
-
 @keyframes putar{
 
 from{
-
 rotate:0deg;
-
 }
 
 to{
-
 rotate:360deg;
-
 }
 
 }
-
 
 
 
@@ -263,13 +229,11 @@ animation:hati 2s linear forwards;
 }
 
 
-
 @keyframes hati{
 
 from{
 
 opacity:1;
-
 transform:translateY(0) scale(1);
 
 }
@@ -277,14 +241,11 @@ transform:translateY(0) scale(1);
 to{
 
 opacity:0;
-
 transform:translateY(-200px) scale(2);
 
 }
 
 }
-
-
 
 
 
@@ -345,7 +306,7 @@ Semoga panjang umur ❤️
 
 
 <button onclick="musik()">
-🎵 Putar Lagu
+🎵 Musik
 </button>
 
 
@@ -369,8 +330,7 @@ Semoga panjang umur ❤️
 
 
 
-
-<audio id="lagu" loop>
+<audio id="lagu" loop autoplay>
 
 <source src="music.mp3" type="audio/mpeg">
 
@@ -378,22 +338,42 @@ Semoga panjang umur ❤️
 
 
 
-
-
 <script>
+
+
+// MUSIK
+
+let lagu=document.getElementById("lagu");
 
 
 function musik(){
 
-document.getElementById("lagu").play();
+lagu.play();
 
 }
 
 
 
+window.addEventListener("load",()=>{
+
+lagu.volume=0.7;
+
+lagu.play().catch(()=>{
+
+document.body.addEventListener("click",()=>{
+
+lagu.play();
+
+},{once:true});
+
+});
+
+});
 
 
-/* UCAPAN */
+
+
+// UCAPAN
 
 let ucapan=[
 
@@ -403,9 +383,9 @@ let ucapan=[
 
 "🥳 Semoga semua impian tercapai!",
 
-"💰 Semoga rezeki lancar!",
+"💰 Semoga rezeki makin lancar!",
 
-"😂 Jangan lupa traktiran wkwkwk!"
+"😂 Jangan lupa traktiran!"
 
 ];
 
@@ -431,9 +411,7 @@ i=0;
 
 
 
-
-
-/* FOTO KURSOR 8.JPEG */
+// FOTO IKUT KURSOR
 
 let cursorFoto=document.createElement("img");
 
@@ -445,7 +423,7 @@ document.body.appendChild(cursorFoto);
 
 
 
-document.addEventListener("mousemove",function(e){
+document.addEventListener("mousemove",(e)=>{
 
 cursorFoto.style.left=e.clientX+"px";
 
@@ -457,15 +435,12 @@ cursorFoto.style.top=e.clientY+"px";
 
 
 
-
-
-
-/* KLIK FOTO HATI */
+// HATI KLIK FOTO
 
 document.querySelectorAll(".gallery img").forEach(foto=>{
 
 
-foto.onclick=function(e){
+foto.onclick=(e)=>{
 
 
 for(let x=0;x<15;x++){
@@ -486,16 +461,13 @@ h.style.top=e.clientY+(Math.random()*50-25)+"px";
 document.body.appendChild(h);
 
 
-setTimeout(()=>{
-
-h.remove();
-
-},2000);
+setTimeout(()=>h.remove(),2000);
 
 
 }
 
 }
+
 
 });
 
@@ -503,12 +475,9 @@ h.remove();
 
 
 
-
-
-/* BALON */
+// BALON
 
 for(let i=0;i<15;i++){
-
 
 let b=document.createElement("div");
 
@@ -520,9 +489,7 @@ b.style.left=Math.random()*100+"vw";
 
 b.style.animationDelay=Math.random()*8+"s";
 
-
 document.body.appendChild(b);
-
 
 }
 
