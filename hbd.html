@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>🤣 Pilihan Sulit WKWK</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:"Comic Sans MS",Arial;
+}
+
+
+body{
+
+min-height:100vh;
+text-align:center;
+color:white;
+
+background:
+linear-gradient(135deg,#ff9a9e,#fad0c4,#a18cd1);
+
+overflow:hidden;
+
+}
+
+
+.container{
+
+padding:30px;
+
+}
+
+
+
+h1{
+
+font-size:45px;
+
+animation:goyang 1s infinite alternate;
+
+text-shadow:0 0 20px black;
+
+}
+
+
+@keyframes goyang{
+
+from{
+transform:rotate(-5deg);
+}
+
+to{
+transform:rotate(5deg);
+}
+
+}
+
+
+
+p{
+
+font-size:25px;
+
+margin:20px;
+
+}
+
+
+
+
+.meme{
+
+width:200px;
+height:200px;
+
+object-fit:cover;
+
+border-radius:30px;
+
+border:5px solid white;
+
+box-shadow:0 0 30px black;
+
+animation:loncat 2s infinite;
+
+}
+
+
+
+@keyframes loncat{
+
+50%{
+
+transform:translateY(-20px) rotate(5deg);
+
+}
+
+}
+
+
+
+
+button{
+
+padding:15px 40px;
+
+margin:20px;
+
+border:none;
+
+border-radius:50px;
+
+font-size:22px;
+
+cursor:pointer;
+
+font-weight:bold;
+
+}
+
+
+
+#jimin{
+
+background:#555;
+
+color:white;
+
+position:absolute;
+
+}
+
+
+#funda{
+
+background:#ff1493;
+
+color:white;
+
+}
+
+
+
+#hasil{
+
+display:none;
+
+font-size:30px;
+
+margin-top:30px;
+
+}
+
+
+
+
+a{
+
+display:inline-block;
+
+background:red;
+
+color:white;
+
+padding:15px 30px;
+
+border-radius:40px;
+
+text-decoration:none;
+
+font-size:22px;
+
+margin-top:20px;
+
+}
+
+
+
+.emoji{
+
+position:fixed;
+
+font-size:40px;
+
+animation:naik 2s forwards;
+
+}
+
+
+
+@keyframes naik{
+
+to{
+
+transform:translateY(-200px);
+
+opacity:0;
+
+}
+
+}
+
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<div class="container">
+
+
+<h1>
+🤣 PILIHAN TERAKHIR 🤣
+</h1>
+
+
+<img class="meme"
+src="https://i.imgflip.com/30b1gx.jpg">
+
+
+<p>
+Siapa yang paling cocok jadi orang spesial? 😏
+</p>
+
+
+<button id="jimin" onmouseover="kabur()">
+
+💜 Jimin
+
+</button>
+
+
+<button id="funda" onclick="pilihFunda()">
+
+❤️ Funda
+
+</button>
+
+
+
+<div id="hasil">
+
+🤣 WKWKWK KENA PRANK 🤣
+
+<br><br>
+
+Ternyata Jimin cuma umpan 😂
+
+<br>
+
+Pilihan yang benar adalah...
+
+<br>
+
+🔥 FUNDA 🔥
+
+
+<br><br>
+
+
+<a href="https://starty3s.github.io/poc/poc">
+
+🚀 LANJUT KE HADIAH 🎁
+
+</a>
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+<script>
+
+
+// tombol jimin kabur
+
+
+function kabur(){
+
+
+let tombol=document.getElementById("jimin");
+
+
+tombol.style.left=
+Math.random()*80+"vw";
+
+
+tombol.style.top=
+Math.random()*80+"vh";
+
+
+}
+
+
+
+// pilih funda
+
+
+function pilihFunda(){
+
+
+document.getElementById("hasil").style.display="block";
+
+
+for(let i=0;i<30;i++){
+
+
+let e=document.createElement("div");
+
+e.className="emoji";
+
+e.innerHTML=[
+"🤣",
+"❤️",
+"🎉",
+"🔥",
+"🥳"
+][Math.floor(Math.random()*5)];
+
+
+
+e.style.left=Math.random()*100+"vw";
+
+e.style.top="70%";
+
+
+document.body.appendChild(e);
+
+
+setTimeout(()=>{
+
+e.remove();
+
+},2000);
+
+
+}
+
+
+}
+
+
+
+// tambahan pesan random
+
+
+let teks=[
+
+"Jimin? Tidak semudah itu 😎",
+
+"WKWKWK tombolnya takut dipilih",
+
+"Funda adalah jawaban kehidupan 😂",
+
+"Jangan menyerah pilih Funda",
+
+"Salam plenger 🤣"
+
+];
+
+
+setInterval(()=>{
+
+
+document.title=
+teks[Math.floor(Math.random()*teks.length)];
+
+
+},2000);
+
+
+
+</script>
+
+
+</body>
+</html>
