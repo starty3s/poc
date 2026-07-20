@@ -6,142 +6,180 @@
 <title>🎉 Happy Birthday 🎂</title>
 
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
-body{
-background:linear-gradient(135deg,#ff9a9e,#fad0c4,#ffd6e0);
-text-align:center;
-overflow-x:hidden;
-color:#fff;
-animation:bg 8s infinite alternate;
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
 }
+
+body{
+    background:linear-gradient(135deg,#ff9a9e,#fad0c4,#ffd6e0);
+    text-align:center;
+    overflow-x:hidden;
+    color:#fff;
+    animation:bg 8s infinite alternate;
+}
+
 @keyframes bg{
-0%{filter:hue-rotate(0deg)}
-100%{filter:hue-rotate(50deg)}
+    0%{filter:hue-rotate(0deg);}
+    100%{filter:hue-rotate(50deg);}
 }
 
 h1{
-margin:30px 0;
-font-size:45px;
-animation:goyang .8s infinite alternate;
+    margin:30px 0 15px;
+    font-size:45px;
+    animation:goyang .8s infinite alternate;
 }
 
 @keyframes goyang{
-from{transform:rotate(-2deg)}
-to{transform:rotate(2deg)}
+    from{transform:rotate(-2deg);}
+    to{transform:rotate(2deg);}
+}
+
+#kata{
+    font-size:22px;
+    margin-bottom:20px;
 }
 
 button{
-padding:12px 30px;
-border:none;
-border-radius:30px;
-background:#ff4081;
-color:white;
-font-size:18px;
-cursor:pointer;
-margin-bottom:20px;
+    padding:12px 30px;
+    border:none;
+    border-radius:30px;
+    background:#ff4081;
+    color:white;
+    font-size:18px;
+    cursor:pointer;
+    margin-bottom:30px;
 }
 
 .gallery{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-gap:20px;
-padding:20px;
-max-width:900px;
-margin:auto;
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:20px;
+    padding:20px;
+    max-width:1000px;
+    margin:auto;
 }
 
 .gallery img{
-width:100%;
-height:250px;
-object-fit:cover;
-border-radius:20px;
-border:5px solid white;
-box-shadow:0 10px 20px rgba(0,0,0,.3);
-animation:joget 2.5s infinite ease-in-out;
-transition:.3s;
-cursor:pointer;
+    width:100%;
+    height:300px;
+    object-fit:contain;      /* FOTO TIDAK DICROP */
+    background:white;
+    padding:8px;
+    border-radius:20px;
+    border:5px solid white;
+    box-shadow:0 10px 20px rgba(0,0,0,.3);
+    animation:joget 2.5s infinite ease-in-out;
+    transition:.3s;
+    cursor:pointer;
 }
 
-.gallery img:nth-child(2){animation-delay:.3s}
-.gallery img:nth-child(3){animation-delay:.6s}
-.gallery img:nth-child(4){animation-delay:.9s}
+.gallery img:nth-child(2){
+    animation-delay:.3s;
+}
+.gallery img:nth-child(3){
+    animation-delay:.6s;
+}
+.gallery img:nth-child(4){
+    animation-delay:.9s;
+}
 
 .gallery img:hover{
-transform:scale(1.1) rotate(5deg);
+    transform:scale(1.08) rotate(4deg);
+    box-shadow:0 0 25px hotpink;
 }
 
 @keyframes joget{
-0%,100%{transform:translateY(0) rotate(-2deg)}
-50%{transform:translateY(-10px) rotate(2deg)}
+    0%,100%{
+        transform:translateY(0) rotate(-2deg);
+    }
+    50%{
+        transform:translateY(-10px) rotate(2deg);
+    }
 }
 
 .heart{
-position:fixed;
-font-size:28px;
-animation:naik 2s linear forwards;
-pointer-events:none;
+    position:fixed;
+    font-size:28px;
+    pointer-events:none;
+    animation:naik 2s linear forwards;
 }
 
 @keyframes naik{
-to{
-transform:translateY(-180px) scale(2);
-opacity:0;
-}
+    from{
+        opacity:1;
+        transform:translateY(0) scale(1);
+    }
+    to{
+        opacity:0;
+        transform:translateY(-180px) scale(2);
+    }
 }
 </style>
-
 </head>
+
 <body>
 
 <h1>🎂 SELAMAT ULANG TAHUN 🎉</h1>
 
 <p id="kata">Semoga panjang umur ❤️</p>
-<br>
 
 <button onclick="playMusic()">🎵 Putar Lagu</button>
 
 <div class="gallery">
-<img src="1.jpeg">
-<img src="2.jpeg">
-<img src="3.jpeg">
-<img src="4.jpeg">
+    <img src="1.jpeg" alt="">
+    <img src="2.jpeg" alt="">
+    <img src="3.jpeg" alt="">
+    <img src="4.jpeg" alt="">
 </div>
 
 <audio id="music" loop>
-<source src="music.mp3" type="audio/mpeg">
+    <source src="music.mp3" type="audio/mpeg">
 </audio>
 
 <script>
 function playMusic(){
-document.getElementById("music").play();
+    document.getElementById("music").play();
 }
 
 const ucapan=[
 "🎂 Selamat Ulang Tahun!",
 "🥳 Semoga Bahagia Selalu!",
-"💖 Semoga Semua Impian Tercapai!",
+"❤️ Semoga Sehat Selalu!",
 "💸 Semoga Rezekinya Lancar!",
-"😂 Jangan Lupa Traktiran WKWKWK"
+"😂 Jangan Lupa Traktiran WKWKWK!"
 ];
 
 let i=0;
+
 setInterval(()=>{
-document.getElementById("kata").innerHTML=ucapan[i];
-i=(i+1)%ucapan.length;
+    document.getElementById("kata").innerHTML=ucapan[i];
+    i=(i+1)%ucapan.length;
 },2000);
 
-document.querySelectorAll("img").forEach(img=>{
-img.onclick=(e)=>{
-for(let i=0;i<10;i++){
-let h=document.createElement("div");
-h.className="heart";
-h.innerHTML=["❤️","💖","💕","💗"][Math.floor(Math.random()*4)];
-h.style.left=(e.clientX+Math.random()*80-40)+"px";
-h.style.top=(e.clientY+Math.random()*40-20)+"px";
-document.body.appendChild(h);
-setTimeout(()=>h.remove(),2000);
-}
-}
+document.querySelectorAll(".gallery img").forEach(img=>{
+    img.addEventListener("click",e=>{
+
+        for(let i=0;i<10;i++){
+
+            let h=document.createElement("div");
+            h.className="heart";
+            h.innerHTML=["❤️","💖","💕","💗"][Math.floor(Math.random()*4)];
+
+            h.style.left=(e.clientX+(Math.random()*80-40))+"px";
+            h.style.top=(e.clientY+(Math.random()*40-20))+"px";
+
+            document.body.appendChild(h);
+
+            setTimeout(()=>{
+                h.remove();
+            },2000);
+
+        }
+
+    });
 });
 </script>
 
