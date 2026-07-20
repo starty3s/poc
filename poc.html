@@ -3,222 +3,431 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🎂 Happy Birthday 🎉</title>
+
+<title>🤣 Happy Birthday Gokil 🎂</title>
 
 <style>
+
 *{
 margin:0;
 padding:0;
 box-sizing:border-box;
-font-family:Arial,sans-serif;
+font-family:"Comic Sans MS",Arial;
 }
 
 body{
-min-height:100vh;
-color:white;
-text-align:center;
 overflow-x:hidden;
+text-align:center;
+color:white;
+min-height:100vh;
 }
 
 
 /* BACKGROUND */
-.background{
+
+.bg{
 position:fixed;
 width:100%;
 height:100%;
+top:0;
+left:0;
+z-index:-5;
+
 background:url("1.jpeg") center/cover;
-z-index:-2;
-animation:bg 30s infinite;
-}
 
-@keyframes bg{
-0%{background-image:url("1.jpeg")}
-15%{background-image:url("2.jpeg")}
-30%{background-image:url("3.jpeg")}
-45%{background-image:url("4.jpeg")}
-60%{background-image:url("7.jpeg")}
-75%{background-image:url("8.jpeg")}
-90%{background-image:url("9.jpeg")}
-100%{background-image:url("10.jpeg")}
+animation:bgjalan 25s infinite;
 }
 
 
-.container{
+@keyframes bgjalan{
+
+0%{
+background-image:url("1.jpeg");
+}
+
+15%{
+background-image:url("2.jpeg");
+}
+
+30%{
+background-image:url("3.jpeg");
+}
+
+45%{
+background-image:url("4.jpeg");
+}
+
+60%{
+background-image:url("7.jpeg");
+}
+
+75%{
+background-image:url("8.jpeg");
+}
+
+90%{
+background-image:url("9.jpeg");
+}
+
+100%{
+background-image:url("10.jpeg");
+}
+
+}
+
+
+
+
+.main{
+
 min-height:100vh;
+
 background:rgba(0,0,0,.35);
+
 padding:30px;
+
 }
+
 
 
 h1{
-font-size:45px;
-margin:20px;
-text-shadow:0 0 20px pink;
-animation:goyang 1s infinite alternate;
+
+font-size:50px;
+
+text-shadow:
+3px 3px red,
+0 0 20px yellow;
+
+animation:goyang .7s infinite alternate;
+
 }
+
 
 @keyframes goyang{
-from{transform:rotate(-3deg)}
-to{transform:rotate(3deg)}
+
+from{
+transform:rotate(-5deg);
+}
+
+to{
+transform:rotate(5deg);
+}
+
 }
 
 
-#kata{
-font-size:23px;
+
+
+.kue{
+
+font-size:100px;
+
+animation:kue 1s infinite alternate;
+
+}
+
+
+@keyframes kue{
+
+from{
+transform:translateY(0);
+}
+
+to{
+transform:translateY(-20px);
+}
+
+}
+
+
+
+#pesan{
+
+font-size:25px;
+
 margin:20px;
+
+font-weight:bold;
+
 }
+
 
 
 button{
+
 padding:15px 35px;
+
 border:none;
-border-radius:40px;
-background:#ff4081;
+
+border-radius:50px;
+
+background:#ff0080;
+
 color:white;
-font-size:18px;
+
+font-size:20px;
+
 cursor:pointer;
+
+box-shadow:0 0 20px white;
+
 }
 
 
-/* FOTO */
+
+
+
+/* GALERI */
 
 .gallery{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-gap:20px;
+
 max-width:1100px;
+
 margin:40px auto;
+
+display:grid;
+
+grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+
+gap:20px;
+
 }
+
 
 
 .gallery img{
+
 width:100%;
+
 height:260px;
+
 object-fit:contain;
+
 background:white;
-padding:7px;
-border-radius:25px;
-border:4px solid white;
-box-shadow:0 0 25px white;
-animation:foto 3s infinite;
+
+padding:8px;
+
+border-radius:30px;
+
+border:5px solid white;
+
+box-shadow:0 0 30px pink;
+
 cursor:pointer;
+
+animation:fotogila 2s infinite;
+
 }
 
 
-@keyframes foto{
+
+@keyframes fotogila{
+
+0%,100%{
+
+transform:rotate(-5deg);
+
+}
+
 50%{
-transform:translateY(-15px) rotate(3deg);
+
+transform:rotate(5deg) translateY(-15px);
+
 }
+
 }
 
 
-/* FOTO KURSOR */
 
-.cursor-foto{
+/* KURSOR FOTO */
+
+.cursorFoto{
+
 position:fixed;
-width:80px;
-height:80px;
+
+width:90px;
+
+height:90px;
+
 border-radius:50%;
+
 object-fit:cover;
-border:4px solid white;
-z-index:999;
+
+border:5px solid yellow;
+
+box-shadow:0 0 30px red;
+
 pointer-events:none;
+
+z-index:9999;
+
 transform:translate(-50%,-50%);
-box-shadow:0 0 20px pink;
+
 }
 
 
-/* HATI */
 
-.heart{
-position:fixed;
-font-size:30px;
-animation:hati 2s forwards;
+
+
+/* KADO */
+
+.kado{
+
+font-size:90px;
+
+cursor:pointer;
+
+animation:kado 1s infinite alternate;
+
+margin-top:40px;
+
 }
 
-@keyframes hati{
+
+@keyframes kado{
+
+from{
+transform:rotate(-10deg);
+}
+
 to{
-transform:translateY(-200px);
+transform:rotate(10deg);
+}
+
+}
+
+
+
+#hadiah{
+
+display:none;
+
+background:#ff1493;
+
+padding:30px;
+
+border-radius:30px;
+
+font-size:25px;
+
+margin:20px;
+
+}
+
+
+
+.link{
+
+display:inline-block;
+
+background:red;
+
+color:white;
+
+padding:15px 30px;
+
+border-radius:40px;
+
+text-decoration:none;
+
+}
+
+
+
+
+
+/* EMOJI */
+
+.emoji{
+
+position:fixed;
+
+font-size:35px;
+
+pointer-events:none;
+
+animation:naik 2s forwards;
+
+}
+
+
+
+@keyframes naik{
+
+to{
+
+transform:translateY(-200px) scale(2);
+
 opacity:0;
+
 }
+
 }
+
+
+
 
 
 /* BALON */
 
-.balloon{
+
+.balon{
+
 position:fixed;
+
 bottom:-100px;
-font-size:45px;
+
+font-size:50px;
+
 animation:balon 8s linear infinite;
+
 }
+
 
 @keyframes balon{
+
 to{
+
 transform:translateY(-120vh);
-}
-}
 
-
-/* ENDING */
-
-.ending{
-margin-top:50px;
-padding:30px;
 }
 
-.kado{
-display:inline-block;
-background:#ff4081;
-padding:20px 30px;
-border-radius:30px;
-font-size:22px;
-cursor:pointer;
-animation:lucu 1s infinite alternate;
 }
 
-
-@keyframes lucu{
-to{
-transform:translateY(-15px);
-}
-}
-
-
-.pesanAkhir{
-display:none;
-font-size:25px;
-margin-top:30px;
-}
-
-
-.linkLucu{
-display:inline-block;
-margin-top:20px;
-background:red;
-color:white;
-padding:15px 30px;
-border-radius:40px;
-text-decoration:none;
-}
 
 </style>
+
 </head>
 
 
 <body>
 
-<div class="background"></div>
 
-<div class="container">
-
-
-<h1>🎂 SELAMAT ULANG TAHUN 🎉</h1>
-
-<p id="kata">Semoga panjang umur ❤️</p>
+<div class="bg"></div>
 
 
-<button onclick="musik()">🎵 Putar Lagu</button>
+<div class="main">
+
+
+<h1>
+🎂 ULANG TAHUN PALING GOKIL 🎉
+</h1>
+
+
+<div class="kue">
+🎂
+</div>
+
+
+<p id="pesan">
+Tunggu kejutan... 🤣
+</p>
+
+
+<button onclick="musik()">
+🎵 Putar Musik
+</button>
+
 
 
 <div class="gallery">
@@ -236,151 +445,430 @@ text-decoration:none;
 </div>
 
 
-
-<div class="ending">
-
-<div class="kado" onclick="bukaKado()">
-🎁 Jangan klik ini...
-(bohong 😂)
+<div class="kado" onclick="buka()">
+🎁
 </div>
 
 
-<div class="pesanAkhir" id="akhir">
+<div id="hadiah">
 
-🤣 WKWKWK KENA PRANK!! 🤣
-<br><br>
-
-Makasih sudah sampai akhir 😆
+🤣 WKWKWK KENA PRANK 🤣
 
 <br><br>
 
-<a class="linkLucu"
+Kamu kuat juga sampai bawah 😂
+
+<br><br>
+
+<a class="link"
 href="https://youtu.be/ZQ9DPK31tkI?si=B5nEJ56OCkSj43Nc"
 target="_blank">
 
-🎬 Klik kalau berani lihat hadiah terakhir 😂
+🎬 Klik hadiah terakhir kalau berani
 
 </a>
 
 </div>
 
-</div>
 
+<audio id="lagu" loop>
 
-</div>
+<source src="music.mp3">
 
-
-
-<audio id="lagu" loop autoplay>
-<source src="music.mp3" type="audio/mpeg">
 </audio>
 
+  <script>
 
 
-<script>
+// =====================
+// MUSIK
+// =====================
 
 let lagu=document.getElementById("lagu");
 
+
 function musik(){
+
 lagu.play();
+
 }
 
 
-window.onload=()=>{
-lagu.play().catch(()=>{});
-}
+window.onload=function(){
+
+lagu.volume=0.7;
+
+lagu.play().catch(()=>{
+
+});
+
+};
 
 
 
-/* UCAPAN */
+
+
+// =====================
+// TULISAN ABSURD
+// =====================
 
 let kata=[
-"🎂 Selamat Ulang Tahun!",
-"❤️ Semoga selalu bahagia!",
-"🥳 Semoga impian tercapai!",
-"💰 Semoga rezeki lancar!",
-"😂 Jangan lupa traktiran!"
+
+"🎂 Selamat ulang tahun manusia paling keren 😎",
+
+"🤣 Umur nambah tapi kelakuan jangan nambah aneh",
+
+"💰 Semoga saldo naik bukan cuma harapan",
+
+"🍗 Semoga makanan selalu enak",
+
+"😂 Jangan lupa traktiran ya bos",
+
+"❤️ Semoga bahagia setiap hari",
+
+"🔥 Tetap jadi manusia paling random"
+
 ];
 
-let i=0;
+
+let nomor=0;
+
 
 setInterval(()=>{
-document.getElementById("kata").innerHTML=kata[i];
-i++;
-if(i>=kata.length)i=0;
+
+
+document.getElementById("pesan").innerHTML=kata[nomor];
+
+
+nomor++;
+
+
+if(nomor>=kata.length){
+
+nomor=0;
+
+}
+
+
 },2000);
 
 
 
-/* KURSOR FOTO */
-
-let cur=document.createElement("img");
-cur.src="8.jpeg";
-cur.className="cursor-foto";
-document.body.appendChild(cur);
-
-
-document.onmousemove=e=>{
-cur.style.left=e.clientX+"px";
-cur.style.top=e.clientY+"px";
-}
 
 
 
-/* HATI */
 
-document.querySelectorAll(".gallery img").forEach(img=>{
 
-img.onclick=e=>{
+// =====================
+// FOTO IKUT KURSOR
+// =====================
 
-for(let i=0;i<10;i++){
 
-let h=document.createElement("div");
-h.className="heart";
-h.innerHTML="❤️";
+let fotoCursor=document.createElement("img");
 
-h.style.left=e.clientX+"px";
-h.style.top=e.clientY+"px";
 
-document.body.appendChild(h);
+fotoCursor.src="8.jpeg";
 
-setTimeout(()=>h.remove(),2000);
 
-}
+fotoCursor.className="cursorFoto";
 
-}
+
+document.body.appendChild(fotoCursor);
+
+
+
+document.addEventListener("mousemove",(e)=>{
+
+
+fotoCursor.style.left=e.clientX+"px";
+
+fotoCursor.style.top=e.clientY+"px";
+
 
 });
 
 
 
-/* BALON */
 
-for(let i=0;i<15;i++){
+
+
+
+
+
+// =====================
+// KLIK LAYAR KELUAR EMOJI
+// =====================
+
+
+document.addEventListener("click",(e)=>{
+
+
+let emoji=[
+
+"🤣",
+"😂",
+"❤️",
+"🎉",
+"🔥",
+"🥳",
+"💰"
+
+];
+
+
+for(let i=0;i<7;i++){
+
+
+let em=document.createElement("div");
+
+
+em.className="emoji";
+
+
+em.innerHTML=
+emoji[Math.floor(Math.random()*emoji.length)];
+
+
+
+em.style.left=
+e.clientX+(Math.random()*100-50)+"px";
+
+
+em.style.top=
+e.clientY+(Math.random()*50-25)+"px";
+
+
+
+document.body.appendChild(em);
+
+
+
+setTimeout(()=>{
+
+em.remove();
+
+},2000);
+
+
+}
+
+
+});
+
+
+
+
+
+
+
+// =====================
+// FOTO KLIK KELUAR HATI
+// =====================
+
+
+document.querySelectorAll(".gallery img")
+.forEach((img)=>{
+
+
+img.onclick=function(e){
+
+
+for(let i=0;i<20;i++){
+
+
+let h=document.createElement("div");
+
+
+h.className="emoji";
+
+
+h.innerHTML="❤️";
+
+
+h.style.left=
+e.clientX+(Math.random()*100-50)+"px";
+
+
+h.style.top=
+e.clientY+(Math.random()*100-50)+"px";
+
+
+
+document.body.appendChild(h);
+
+
+
+setTimeout(()=>{
+
+h.remove();
+
+},2000);
+
+
+
+}
+
+
+}
+
+
+});
+
+
+
+
+
+
+
+
+// =====================
+// BALON RANDOM
+// =====================
+
+
+for(let i=0;i<25;i++){
+
 
 let b=document.createElement("div");
-b.className="balloon";
-b.innerHTML="🎈";
+
+
+b.className="balon";
+
+
+b.innerHTML=[
+"🎈",
+"🎈",
+"⭐",
+"🎉"
+][Math.floor(Math.random()*4)];
+
+
 
 b.style.left=Math.random()*100+"vw";
-b.style.animationDelay=Math.random()*5+"s";
+
+
+b.style.animationDelay=
+Math.random()*8+"s";
+
+
+b.style.animationDuration=
+(5+Math.random()*8)+"s";
+
+
 
 document.body.appendChild(b);
 
+
+}
+
+
+
+
+
+
+
+
+// =====================
+// KADO PRANK
+// =====================
+
+
+function buka(){
+
+
+let kotak=document.querySelector(".kado");
+
+
+kotak.innerHTML="💥 BOOMMM 🤣";
+
+
+document.getElementById("hadiah")
+.style.display="block";
+
+
+
+for(let i=0;i<50;i++){
+
+
+let ledak=document.createElement("div");
+
+
+ledak.className="emoji";
+
+
+ledak.innerHTML=[
+
+"🎉",
+"🤣",
+"❤️",
+"🔥"
+
+][Math.floor(Math.random()*4)];
+
+
+
+ledak.style.left=
+Math.random()*100+"vw";
+
+
+ledak.style.top="50%";
+
+
+
+document.body.appendChild(ledak);
+
+
+
+setTimeout(()=>{
+
+ledak.remove();
+
+},2000);
+
+
+}
+
+
 }
 
 
 
-/* KADO */
 
-function bukaKado(){
 
-document.querySelector(".kado").innerHTML=
-"🎉 SURPRISEEE WKWKWK 😂";
 
-document.getElementById("akhir").style.display="block";
+// =====================
+// FOTO BERKEDIP
+// =====================
 
-}
+
+setInterval(()=>{
+
+
+document.querySelectorAll(".gallery img")
+.forEach(img=>{
+
+
+img.style.boxShadow=
+"0 0 50px yellow";
+
+
+setTimeout(()=>{
+
+
+img.style.boxShadow=
+"0 0 30px pink";
+
+
+},300);
+
+
+
+});
+
+
+},3000);
+
+
 
 </script>
 
