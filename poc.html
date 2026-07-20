@@ -14,7 +14,6 @@ box-sizing:border-box;
 font-family:Arial,sans-serif;
 }
 
-
 body{
 min-height:100vh;
 color:white;
@@ -24,14 +23,15 @@ overflow-x:hidden;
 
 
 /* BACKGROUND FOTO */
+
 .background{
 position:fixed;
-top:0;
-left:0;
 width:100%;
 height:100%;
+top:0;
+left:0;
 
-background:url("1.jpeg") center/cover no-repeat;
+background:url("1.jpeg") center/cover;
 
 z-index:-2;
 
@@ -41,43 +41,19 @@ animation:bgFoto 30s infinite;
 
 @keyframes bgFoto{
 
-0%{
-background-image:url("1.jpeg");
-}
-
-12%{
-background-image:url("2.jpeg");
-}
-
-25%{
-background-image:url("3.jpeg");
-}
-
-37%{
-background-image:url("4.jpeg");
-}
-
-50%{
-background-image:url("7.jpeg");
-}
-
-62%{
-background-image:url("8.jpeg");
-}
-
-75%{
-background-image:url("9.jpeg");
-}
-
-100%{
-background-image:url("10.jpeg");
-}
+0%{background-image:url("1.jpeg")}
+12%{background-image:url("2.jpeg")}
+25%{background-image:url("3.jpeg")}
+37%{background-image:url("4.jpeg")}
+50%{background-image:url("7.jpeg")}
+62%{background-image:url("8.jpeg")}
+75%{background-image:url("9.jpeg")}
+100%{background-image:url("10.jpeg")}
 
 }
 
 
 
-/* LAPISAN GELAP */
 .container{
 
 min-height:100vh;
@@ -96,14 +72,11 @@ font-size:45px;
 
 margin:20px;
 
-text-shadow:
-0 0 10px pink,
-0 0 20px white;
+text-shadow:0 0 20px pink;
 
 animation:goyang 1s infinite alternate;
 
 }
-
 
 
 @keyframes goyang{
@@ -117,7 +90,6 @@ transform:rotate(3deg);
 }
 
 }
-
 
 
 #kata{
@@ -148,18 +120,8 @@ cursor:pointer;
 
 margin-bottom:30px;
 
-transition:.3s;
-
 }
 
-
-button:hover{
-
-transform:scale(1.1);
-
-background:#ff0055;
-
-}
 
 
 
@@ -197,13 +159,11 @@ border-radius:25px;
 
 border:4px solid white;
 
-box-shadow:
-0 0 25px white,
-0 10px 30px black;
+box-shadow:0 0 25px white;
 
 cursor:pointer;
 
-animation:foto 3s infinite ease-in-out;
+animation:foto 3s infinite;
 
 transition:.4s;
 
@@ -211,17 +171,9 @@ transition:.4s;
 
 
 
-.gallery img:nth-child(even){
-
-animation-delay:1s;
-
-}
-
-
-
 .gallery img:hover{
 
-transform:scale(1.12) rotate(5deg);
+transform:scale(1.1);
 
 }
 
@@ -235,10 +187,59 @@ transform:translateY(0) rotate(-3deg);
 
 }
 
-
 50%{
 
 transform:translateY(-15px) rotate(3deg);
+
+}
+
+}
+
+
+
+
+
+/* FOTO KURSOR */
+
+.cursor-foto{
+
+position:fixed;
+
+width:80px;
+
+height:80px;
+
+object-fit:cover;
+
+border-radius:50%;
+
+border:4px solid white;
+
+box-shadow:0 0 25px pink;
+
+pointer-events:none;
+
+z-index:9999;
+
+transform:translate(-50%,-50%);
+
+animation:putar 2s linear infinite;
+
+}
+
+
+
+@keyframes putar{
+
+from{
+
+rotate:0deg;
+
+}
+
+to{
+
+rotate:360deg;
 
 }
 
@@ -285,6 +286,8 @@ transform:translateY(-200px) scale(2);
 
 
 
+
+
 /* BALON */
 
 .balloon{
@@ -298,7 +301,6 @@ font-size:45px;
 animation:naik 8s linear infinite;
 
 }
-
 
 
 @keyframes naik{
@@ -363,8 +365,8 @@ Semoga panjang umur ❤️
 </div>
 
 
-
 </div>
+
 
 
 
@@ -373,6 +375,7 @@ Semoga panjang umur ❤️
 <source src="music.mp3" type="audio/mpeg">
 
 </audio>
+
 
 
 
@@ -388,15 +391,19 @@ document.getElementById("lagu").play();
 
 
 
+
+
+/* UCAPAN */
+
 let ucapan=[
 
 "🎂 Selamat Ulang Tahun!",
 
 "❤️ Semoga selalu bahagia!",
 
-"🥳 Semoga semua cita-cita tercapai!",
+"🥳 Semoga semua impian tercapai!",
 
-"💰 Semoga rezekinya lancar!",
+"💰 Semoga rezeki lancar!",
 
 "😂 Jangan lupa traktiran wkwkwk!"
 
@@ -424,9 +431,38 @@ i=0;
 
 
 
-/* KLIK FOTO KELUAR HATI */
 
-document.querySelectorAll("img").forEach(foto=>{
+
+/* FOTO KURSOR 8.JPEG */
+
+let cursorFoto=document.createElement("img");
+
+cursorFoto.src="8.jpeg";
+
+cursorFoto.className="cursor-foto";
+
+document.body.appendChild(cursorFoto);
+
+
+
+document.addEventListener("mousemove",function(e){
+
+cursorFoto.style.left=e.clientX+"px";
+
+cursorFoto.style.top=e.clientY+"px";
+
+});
+
+
+
+
+
+
+
+
+/* KLIK FOTO HATI */
+
+document.querySelectorAll(".gallery img").forEach(foto=>{
 
 
 foto.onclick=function(e){
@@ -459,11 +495,10 @@ h.remove();
 
 }
 
-
 }
 
-
 });
+
 
 
 
