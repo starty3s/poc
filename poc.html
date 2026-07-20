@@ -6,7 +6,6 @@
 <title>🎂 Happy Birthday 🎉</title>
 
 <style>
-
 *{
 margin:0;
 padding:0;
@@ -23,76 +22,54 @@ overflow-x:hidden;
 
 
 /* BACKGROUND */
-
 .background{
 position:fixed;
 width:100%;
 height:100%;
-top:0;
-left:0;
 background:url("1.jpeg") center/cover;
 z-index:-2;
-animation:bgFoto 30s infinite;
+animation:bg 30s infinite;
 }
 
-@keyframes bgFoto{
-
+@keyframes bg{
 0%{background-image:url("1.jpeg")}
-12%{background-image:url("2.jpeg")}
-25%{background-image:url("3.jpeg")}
-37%{background-image:url("4.jpeg")}
-50%{background-image:url("7.jpeg")}
-62%{background-image:url("8.jpeg")}
-75%{background-image:url("9.jpeg")}
+15%{background-image:url("2.jpeg")}
+30%{background-image:url("3.jpeg")}
+45%{background-image:url("4.jpeg")}
+60%{background-image:url("7.jpeg")}
+75%{background-image:url("8.jpeg")}
+90%{background-image:url("9.jpeg")}
 100%{background-image:url("10.jpeg")}
-
 }
-
 
 
 .container{
-
 min-height:100vh;
 background:rgba(0,0,0,.35);
-padding:30px 20px;
-
+padding:30px;
 }
 
 
-
 h1{
-
 font-size:45px;
 margin:20px;
 text-shadow:0 0 20px pink;
 animation:goyang 1s infinite alternate;
-
 }
 
 @keyframes goyang{
-
-from{
-transform:rotate(-3deg);
-}
-
-to{
-transform:rotate(3deg);
-}
-
+from{transform:rotate(-3deg)}
+to{transform:rotate(3deg)}
 }
 
 
 #kata{
-
-font-size:22px;
+font-size:23px;
 margin:20px;
-
 }
 
 
-
 button{
-
 padding:15px 35px;
 border:none;
 border-radius:40px;
@@ -100,215 +77,148 @@ background:#ff4081;
 color:white;
 font-size:18px;
 cursor:pointer;
-margin-bottom:30px;
-
 }
-
 
 
 /* FOTO */
 
 .gallery{
-
 display:grid;
 grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
 gap:20px;
 max-width:1100px;
-margin:auto;
-
+margin:40px auto;
 }
-
 
 
 .gallery img{
-
 width:100%;
 height:260px;
-
 object-fit:contain;
-
 background:white;
-
 padding:7px;
-
 border-radius:25px;
-
 border:4px solid white;
-
 box-shadow:0 0 25px white;
-
+animation:foto 3s infinite;
 cursor:pointer;
-
-animation:foto 3s infinite ease-in-out;
-
 }
-
-
-
-.gallery img:nth-child(even){
-
-animation-delay:1s;
-
-}
-
 
 
 @keyframes foto{
-
-0%,100%{
-
-transform:translateY(0) rotate(-3deg);
-
-}
-
 50%{
-
 transform:translateY(-15px) rotate(3deg);
-
+}
 }
 
-}
 
-
-
-/* KURSOR FOTO 8.JPEG */
+/* FOTO KURSOR */
 
 .cursor-foto{
-
 position:fixed;
-
 width:80px;
-
 height:80px;
-
-object-fit:cover;
-
 border-radius:50%;
-
+object-fit:cover;
 border:4px solid white;
-
-box-shadow:0 0 25px pink;
-
+z-index:999;
 pointer-events:none;
-
-z-index:9999;
-
 transform:translate(-50%,-50%);
-
-animation:putar 2s linear infinite;
-
+box-shadow:0 0 20px pink;
 }
-
-
-@keyframes putar{
-
-from{
-rotate:0deg;
-}
-
-to{
-rotate:360deg;
-}
-
-}
-
 
 
 /* HATI */
 
 .heart{
-
 position:fixed;
-
 font-size:30px;
-
-pointer-events:none;
-
-animation:hati 2s linear forwards;
-
+animation:hati 2s forwards;
 }
-
 
 @keyframes hati{
-
-from{
-
-opacity:1;
-transform:translateY(0) scale(1);
-
-}
-
 to{
-
+transform:translateY(-200px);
 opacity:0;
-transform:translateY(-200px) scale(2);
-
 }
-
 }
-
 
 
 /* BALON */
 
 .balloon{
-
 position:fixed;
-
 bottom:-100px;
-
 font-size:45px;
-
-animation:naik 8s linear infinite;
-
+animation:balon 8s linear infinite;
 }
 
-
-@keyframes naik{
-
-from{
-
-transform:translateY(0);
-
-}
-
+@keyframes balon{
 to{
-
 transform:translateY(-120vh);
-
+}
 }
 
+
+/* ENDING */
+
+.ending{
+margin-top:50px;
+padding:30px;
 }
 
+.kado{
+display:inline-block;
+background:#ff4081;
+padding:20px 30px;
+border-radius:30px;
+font-size:22px;
+cursor:pointer;
+animation:lucu 1s infinite alternate;
+}
+
+
+@keyframes lucu{
+to{
+transform:translateY(-15px);
+}
+}
+
+
+.pesanAkhir{
+display:none;
+font-size:25px;
+margin-top:30px;
+}
+
+
+.linkLucu{
+display:inline-block;
+margin-top:20px;
+background:red;
+color:white;
+padding:15px 30px;
+border-radius:40px;
+text-decoration:none;
+}
 
 </style>
-
 </head>
 
 
 <body>
 
-
 <div class="background"></div>
-
 
 <div class="container">
 
 
-<h1>
-🎂 SELAMAT ULANG TAHUN 🎉
-</h1>
+<h1>🎂 SELAMAT ULANG TAHUN 🎉</h1>
+
+<p id="kata">Semoga panjang umur ❤️</p>
 
 
-<p id="kata">
-Semoga panjang umur ❤️
-</p>
-
-
-<button onclick="musik()">
-🎵 Musik
-</button>
-
+<button onclick="musik()">🎵 Putar Lagu</button>
 
 
 <div class="gallery">
@@ -326,173 +236,151 @@ Semoga panjang umur ❤️
 </div>
 
 
+
+<div class="ending">
+
+<div class="kado" onclick="bukaKado()">
+🎁 Jangan klik ini...
+(bohong 😂)
+</div>
+
+
+<div class="pesanAkhir" id="akhir">
+
+🤣 WKWKWK KENA PRANK!! 🤣
+<br><br>
+
+Makasih sudah sampai akhir 😆
+
+<br><br>
+
+<a class="linkLucu"
+href="https://youtu.be/ZQ9DPK31tkI?si=B5nEJ56OCkSj43Nc"
+target="_blank">
+
+🎬 Klik kalau berani lihat hadiah terakhir 😂
+
+</a>
+
+</div>
+
+</div>
+
+
 </div>
 
 
 
 <audio id="lagu" loop autoplay>
-
 <source src="music.mp3" type="audio/mpeg">
-
 </audio>
 
 
 
 <script>
 
-
-// MUSIK
-
 let lagu=document.getElementById("lagu");
 
-
 function musik(){
-
 lagu.play();
+}
 
+
+window.onload=()=>{
+lagu.play().catch(()=>{});
 }
 
 
 
-window.addEventListener("load",()=>{
+/* UCAPAN */
 
-lagu.volume=0.7;
-
-lagu.play().catch(()=>{
-
-document.body.addEventListener("click",()=>{
-
-lagu.play();
-
-},{once:true});
-
-});
-
-});
-
-
-
-
-// UCAPAN
-
-let ucapan=[
-
+let kata=[
 "🎂 Selamat Ulang Tahun!",
-
 "❤️ Semoga selalu bahagia!",
-
-"🥳 Semoga semua impian tercapai!",
-
-"💰 Semoga rezeki makin lancar!",
-
+"🥳 Semoga impian tercapai!",
+"💰 Semoga rezeki lancar!",
 "😂 Jangan lupa traktiran!"
-
 ];
-
 
 let i=0;
 
-
 setInterval(()=>{
-
-document.getElementById("kata").innerHTML=ucapan[i];
-
+document.getElementById("kata").innerHTML=kata[i];
 i++;
-
-if(i>=ucapan.length){
-
-i=0;
-
-}
-
+if(i>=kata.length)i=0;
 },2000);
 
 
 
+/* KURSOR FOTO */
+
+let cur=document.createElement("img");
+cur.src="8.jpeg";
+cur.className="cursor-foto";
+document.body.appendChild(cur);
 
 
-// FOTO IKUT KURSOR
-
-let cursorFoto=document.createElement("img");
-
-cursorFoto.src="8.jpeg";
-
-cursorFoto.className="cursor-foto";
-
-document.body.appendChild(cursorFoto);
-
-
-
-document.addEventListener("mousemove",(e)=>{
-
-cursorFoto.style.left=e.clientX+"px";
-
-cursorFoto.style.top=e.clientY+"px";
-
-});
+document.onmousemove=e=>{
+cur.style.left=e.clientX+"px";
+cur.style.top=e.clientY+"px";
+}
 
 
 
+/* HATI */
 
+document.querySelectorAll(".gallery img").forEach(img=>{
 
-// HATI KLIK FOTO
+img.onclick=e=>{
 
-document.querySelectorAll(".gallery img").forEach(foto=>{
-
-
-foto.onclick=(e)=>{
-
-
-for(let x=0;x<15;x++){
-
+for(let i=0;i<10;i++){
 
 let h=document.createElement("div");
-
 h.className="heart";
+h.innerHTML="❤️";
 
-h.innerHTML=["❤️","💖","💕","💗"][Math.floor(Math.random()*4)];
-
-
-h.style.left=e.clientX+(Math.random()*100-50)+"px";
-
-h.style.top=e.clientY+(Math.random()*50-25)+"px";
-
+h.style.left=e.clientX+"px";
+h.style.top=e.clientY+"px";
 
 document.body.appendChild(h);
 
-
 setTimeout(()=>h.remove(),2000);
 
-
 }
 
 }
-
 
 });
 
 
 
-
-
-// BALON
+/* BALON */
 
 for(let i=0;i<15;i++){
 
 let b=document.createElement("div");
-
 b.className="balloon";
-
 b.innerHTML="🎈";
 
 b.style.left=Math.random()*100+"vw";
-
-b.style.animationDelay=Math.random()*8+"s";
+b.style.animationDelay=Math.random()*5+"s";
 
 document.body.appendChild(b);
 
 }
 
+
+
+/* KADO */
+
+function bukaKado(){
+
+document.querySelector(".kado").innerHTML=
+"🎉 SURPRISEEE WKWKWK 😂";
+
+document.getElementById("akhir").style.display="block";
+
+}
 
 </script>
 
