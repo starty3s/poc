@@ -3,9 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>🎉 Happy Birthday 🎂</title>
 
 <style>
+
 *{
     margin:0;
     padding:0;
@@ -14,174 +16,531 @@
 }
 
 body{
-    background:linear-gradient(135deg,#ff9a9e,#fad0c4,#ffd6e0);
-    text-align:center;
+    min-height:100vh;
     overflow-x:hidden;
-    color:#fff;
-    animation:bg 8s infinite alternate;
+    color:white;
+    text-align:center;
 }
 
-@keyframes bg{
-    0%{filter:hue-rotate(0deg);}
-    100%{filter:hue-rotate(50deg);}
+
+/* BACKGROUND FOTO */
+
+.background{
+    position:fixed;
+    width:100%;
+    height:100%;
+    top:0;
+    left:0;
+
+    background:url("7.jpeg") center/cover no-repeat;
+
+    filter:blur(8px) brightness(0.45);
+    transform:scale(1.1);
+
+    z-index:-2;
+
+    animation:zoom 12s infinite alternate;
 }
+
+
+@keyframes zoom{
+
+from{
+    transform:scale(1.1);
+}
+
+to{
+    transform:scale(1.3);
+}
+
+}
+
+
+
+.container{
+
+    padding:30px 20px;
+
+}
+
+
 
 h1{
-    margin:30px 0 15px;
+
+    margin-top:20px;
     font-size:45px;
-    animation:goyang .8s infinite alternate;
+
+    text-shadow:
+    0 0 10px white,
+    0 0 20px pink;
+
+    animation:goyang 1s infinite alternate;
+
 }
+
+
 
 @keyframes goyang{
-    from{transform:rotate(-2deg);}
-    to{transform:rotate(2deg);}
+
+from{
+    transform:rotate(-3deg);
 }
+
+to{
+    transform:rotate(3deg);
+}
+
+}
+
+
 
 #kata{
-    font-size:22px;
-    margin-bottom:20px;
+
+    font-size:24px;
+    margin:20px;
+
 }
+
+
+
 
 button{
-    padding:12px 30px;
+
+    padding:15px 35px;
+
     border:none;
-    border-radius:30px;
+
+    border-radius:40px;
+
     background:#ff4081;
+
     color:white;
+
     font-size:18px;
+
     cursor:pointer;
-    margin-bottom:30px;
+
+    box-shadow:0 5px 15px #0005;
+
+    transition:.3s;
+
 }
+
+
+button:hover{
+
+    transform:scale(1.1);
+
+    background:#ff0055;
+
+}
+
+
+
+
+/* FOTO */
 
 .gallery{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-    gap:20px;
-    padding:20px;
-    max-width:1000px;
-    margin:auto;
+
+    margin-top:40px;
+
+    display:flex;
+
+    justify-content:center;
+
+    flex-wrap:wrap;
+
+    gap:25px;
+
 }
+
+
 
 .gallery img{
-    width:100%;
+
+    width:220px;
+
     height:300px;
-    object-fit:contain;      /* FOTO TIDAK DICROP */
+
+    object-fit:contain;
+
     background:white;
+
     padding:8px;
-    border-radius:20px;
-    border:5px solid white;
-    box-shadow:0 10px 20px rgba(0,0,0,.3);
-    animation:joget 2.5s infinite ease-in-out;
-    transition:.3s;
+
+    border-radius:25px;
+
+    border:4px solid white;
+
+    box-shadow:
+    0 0 20px white,
+    0 10px 30px black;
+
     cursor:pointer;
+
+    animation:foto 3s infinite ease-in-out;
+
+    transition:.4s;
+
 }
+
+
+
 
 .gallery img:nth-child(2){
-    animation-delay:.3s;
+
+    animation-delay:.5s;
+
 }
+
+
 .gallery img:nth-child(3){
-    animation-delay:.6s;
+
+    animation-delay:1s;
+
 }
+
+
 .gallery img:nth-child(4){
-    animation-delay:.9s;
+
+    animation-delay:1.5s;
+
 }
+
+
 
 .gallery img:hover{
-    transform:scale(1.08) rotate(4deg);
-    box-shadow:0 0 25px hotpink;
+
+    transform:scale(1.15) rotate(8deg);
+
+    box-shadow:0 0 40px pink;
+
 }
 
-@keyframes joget{
-    0%,100%{
-        transform:translateY(0) rotate(-2deg);
-    }
-    50%{
-        transform:translateY(-10px) rotate(2deg);
-    }
+
+
+
+
+@keyframes foto{
+
+
+0%{
+
+    transform:translateY(0) rotate(-3deg);
+
 }
+
+
+25%{
+
+    transform:translateY(-15px) rotate(3deg);
+
+}
+
+
+50%{
+
+    transform:translateY(0) rotate(-3deg);
+
+}
+
+
+75%{
+
+    transform:translateY(15px) rotate(3deg);
+
+}
+
+
+100%{
+
+    transform:translateY(0) rotate(-3deg);
+
+}
+
+
+}
+
+
+
+
+
+/* HATI */
 
 .heart{
+
     position:fixed;
-    font-size:28px;
+
+    font-size:30px;
+
     pointer-events:none;
+
     animation:naik 2s linear forwards;
+
 }
 
+
+
 @keyframes naik{
-    from{
-        opacity:1;
-        transform:translateY(0) scale(1);
-    }
-    to{
-        opacity:0;
-        transform:translateY(-180px) scale(2);
-    }
+
+
+from{
+
+    opacity:1;
+
+    transform:translateY(0) scale(1);
+
 }
+
+
+to{
+
+    opacity:0;
+
+    transform:translateY(-200px) scale(2);
+
+}
+
+
+}
+
+
+
+
+/* BALON */
+
+.balloon{
+
+    position:fixed;
+
+    bottom:-100px;
+
+    font-size:45px;
+
+    animation:terbang 8s linear infinite;
+
+    opacity:.8;
+
+}
+
+
+
+@keyframes terbang{
+
+
+from{
+
+    transform:translateY(0);
+
+}
+
+
+to{
+
+    transform:translateY(-120vh);
+
+}
+
+
+}
+
+
+
 </style>
+
 </head>
+
 
 <body>
 
-<h1>🎂 SELAMAT ULANG TAHUN 🎉</h1>
 
-<p id="kata">Semoga panjang umur ❤️</p>
+<div class="background"></div>
 
-<button onclick="playMusic()">🎵 Putar Lagu</button>
+
+<div class="container">
+
+
+<h1>
+🎂 SELAMAT ULANG TAHUN 🎉
+</h1>
+
+
+
+<p id="kata">
+Semoga panjang umur ❤️
+</p>
+
+
+
+<button onclick="playMusic()">
+🎵 Putar Lagu
+</button>
+
+
 
 <div class="gallery">
-    <img src="1.jpeg" alt="">
-    <img src="2.jpeg" alt="">
-    <img src="3.jpeg" alt="">
-    <img src="4.jpeg" alt="">
+
+<img src="7.jpeg">
+
+<img src="8.jpeg">
+
+<img src="9.jpeg">
+
+<img src="10.jpeg">
+
 </div>
 
+
+
+</div>
+
+
+
 <audio id="music" loop>
-    <source src="music.mp3" type="audio/mpeg">
+
+<source src="music.mp3" type="audio/mpeg">
+
 </audio>
 
+
+
+
+
 <script>
+
+
 function playMusic(){
-    document.getElementById("music").play();
+
+document.getElementById("music").play();
+
 }
 
-const ucapan=[
+
+
+let ucapan=[
+
 "🎂 Selamat Ulang Tahun!",
-"🥳 Semoga Bahagia Selalu!",
-"❤️ Semoga Sehat Selalu!",
-"💸 Semoga Rezekinya Lancar!",
-"😂 Jangan Lupa Traktiran WKWKWK!"
+
+"❤️ Semoga selalu bahagia!",
+
+"🥳 Semoga semua impian tercapai!",
+
+"💰 Semoga rezeki makin lancar!",
+
+"😂 Jangan lupa traktiran wkwkwk!"
+
 ];
+
 
 let i=0;
 
+
 setInterval(()=>{
-    document.getElementById("kata").innerHTML=ucapan[i];
-    i=(i+1)%ucapan.length;
+
+
+document.getElementById("kata").innerHTML=ucapan[i];
+
+
+i++;
+
+
+if(i>=ucapan.length){
+
+i=0;
+
+}
+
+
 },2000);
 
-document.querySelectorAll(".gallery img").forEach(img=>{
-    img.addEventListener("click",e=>{
 
-        for(let i=0;i<10;i++){
 
-            let h=document.createElement("div");
-            h.className="heart";
-            h.innerHTML=["❤️","💖","💕","💗"][Math.floor(Math.random()*4)];
 
-            h.style.left=(e.clientX+(Math.random()*80-40))+"px";
-            h.style.top=(e.clientY+(Math.random()*40-20))+"px";
 
-            document.body.appendChild(h);
 
-            setTimeout(()=>{
-                h.remove();
-            },2000);
+/* HATI SAAT FOTO DIKLIK */
 
-        }
 
-    });
+document.querySelectorAll("img").forEach(img=>{
+
+
+img.onclick=function(e){
+
+
+for(let i=0;i<15;i++){
+
+
+let h=document.createElement("div");
+
+
+h.className="heart";
+
+
+h.innerHTML=["❤️","💖","💕","💗"][Math.floor(Math.random()*4)];
+
+
+h.style.left=e.clientX+(Math.random()*100-50)+"px";
+
+
+h.style.top=e.clientY+(Math.random()*50-25)+"px";
+
+
+document.body.appendChild(h);
+
+
+
+setTimeout(()=>{
+
+h.remove();
+
+},2000);
+
+
+
+}
+
+
+}
+
+
+
 });
+
+
+
+
+
+
+/* BALON */
+
+for(let i=0;i<15;i++){
+
+
+let b=document.createElement("div");
+
+
+b.className="balloon";
+
+
+b.innerHTML="🎈";
+
+
+b.style.left=Math.random()*100+"vw";
+
+
+b.style.animationDelay=Math.random()*8+"s";
+
+
+document.body.appendChild(b);
+
+
+}
+
+
+
 </script>
 
+
 </body>
+
 </html>
