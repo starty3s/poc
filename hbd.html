@@ -5,46 +5,30 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>🤣 Pilihan Sulit WKWK</title>
+<title>🤣 Pilih Orang Spesial</title>
 
 <style>
 
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:"Comic Sans MS",Arial;
-}
-
-
 body{
-
-min-height:100vh;
+margin:0;
+height:100vh;
+overflow:hidden;
+font-family:"Comic Sans MS",Arial;
 text-align:center;
 color:white;
-
-background:
-linear-gradient(135deg,#ff9a9e,#fad0c4,#a18cd1);
-
-overflow:hidden;
-
+background:linear-gradient(135deg,#ff9a9e,#fad0c4,#a18cd1);
 }
 
 
 .container{
-
-padding:30px;
-
+padding-top:40px;
 }
-
 
 
 h1{
 
 font-size:45px;
-
 animation:goyang 1s infinite alternate;
-
 text-shadow:0 0 20px black;
 
 }
@@ -53,39 +37,24 @@ text-shadow:0 0 20px black;
 @keyframes goyang{
 
 from{
-transform:rotate(-5deg);
+transform:rotate(-4deg);
 }
 
 to{
-transform:rotate(5deg);
+transform:rotate(4deg);
 }
 
 }
 
 
 
-p{
+img{
 
-font-size:25px;
-
-margin:20px;
-
-}
-
-
-
-
-.meme{
-
-width:200px;
-height:200px;
-
-object-fit:cover;
-
+width:220px;
+height:220px;
 border-radius:30px;
-
+object-fit:cover;
 border:5px solid white;
-
 box-shadow:0 0 30px black;
 
 animation:loncat 2s infinite;
@@ -93,13 +62,10 @@ animation:loncat 2s infinite;
 }
 
 
-
 @keyframes loncat{
 
 50%{
-
-transform:translateY(-20px) rotate(5deg);
-
+transform:translateY(-15px);
 }
 
 }
@@ -109,31 +75,12 @@ transform:translateY(-20px) rotate(5deg);
 
 button{
 
-padding:15px 40px;
-
-margin:20px;
-
-border:none;
-
+font-size:25px;
+padding:15px 35px;
+border:0;
 border-radius:50px;
-
-font-size:22px;
-
 cursor:pointer;
-
-font-weight:bold;
-
-}
-
-
-
-#jimin{
-
-background:#555;
-
-color:white;
-
-position:absolute;
+margin:20px;
 
 }
 
@@ -141,54 +88,53 @@ position:absolute;
 #funda{
 
 background:#ff1493;
-
 color:white;
 
 }
+
+
+
+#jimin{
+
+background:#333;
+color:white;
+
+position:absolute;
+
+}
+
 
 
 
 #hasil{
 
 display:none;
-
 font-size:30px;
-
 margin-top:30px;
 
 }
 
 
-
-
 a{
 
 display:inline-block;
-
-background:red;
-
-color:white;
-
+margin-top:20px;
 padding:15px 30px;
-
+background:red;
+color:white;
 border-radius:40px;
-
 text-decoration:none;
 
-font-size:22px;
-
-margin-top:20px;
-
 }
+
+
 
 
 
 .emoji{
 
 position:fixed;
-
 font-size:40px;
-
 animation:naik 2s forwards;
 
 }
@@ -199,13 +145,14 @@ animation:naik 2s forwards;
 
 to{
 
-transform:translateY(-200px);
+transform:translateY(-200px) scale(2);
 
 opacity:0;
 
 }
 
 }
+
 
 
 </style>
@@ -220,66 +167,60 @@ opacity:0;
 
 
 <h1>
-🤣 PILIHAN TERAKHIR 🤣
+🤣 PILIH YANG BENAR 🤣
 </h1>
 
 
-<img class="meme"
-src="https://i.imgflip.com/30b1gx.jpg">
+<img src="https://i.imgflip.com/30b1gx.jpg">
 
 
 <p>
-Siapa yang paling cocok jadi orang spesial? 😏
+Siapa yang paling cocok? Jangan salah pilih 😏
 </p>
 
 
-<button id="jimin" onmouseover="kabur()">
-
-💜 Jimin
-
+<button id="funda" onclick="funda()">
+❤️ Kim Funda
 </button>
 
 
-<button id="funda" onclick="pilihFunda()">
-
-❤️ Funda
-
+<button id="jimin" onmouseover="kabur()">
+🤣 Agus Jimin
 </button>
 
 
 
 <div id="hasil">
 
-🤣 WKWKWK KENA PRANK 🤣
-
-<br><br>
-
-Ternyata Jimin cuma umpan 😂
+🎉 WKWKWK BENAR!!
 
 <br>
 
-Pilihan yang benar adalah...
+Kamu memilih Kim Funda 😎
 
 <br>
-
-🔥 FUNDA 🔥
-
-
-<br><br>
-
 
 <a href="https://starty3s.github.io/poc/poc">
-
-🚀 LANJUT KE HADIAH 🎁
-
+🚀 LANJUT KE HADIAH
 </a>
 
-
 </div>
 
 
 </div>
 
+
+
+<!-- AUDIO YOUTUBE -->
+
+<iframe 
+id="youtube"
+width="0"
+height="0"
+src=""
+frameborder="0"
+allow="autoplay">
+</iframe>
 
 
 
@@ -287,50 +228,91 @@ Pilihan yang benar adalah...
 <script>
 
 
-// tombol jimin kabur
+// tombol agus jimin kabur
 
 
 function kabur(){
 
 
-let tombol=document.getElementById("jimin");
+let btn=document.getElementById("jimin");
 
 
-tombol.style.left=
-Math.random()*80+"vw";
+btn.style.left=Math.random()*80+"vw";
 
-
-tombol.style.top=
-Math.random()*80+"vh";
+btn.style.top=Math.random()*80+"vh";
 
 
 }
 
 
 
-// pilih funda
 
 
-function pilihFunda(){
+// klik funda
+
+
+function funda(){
 
 
 document.getElementById("hasil").style.display="block";
 
 
-for(let i=0;i<30;i++){
+ledak();
+
+
+}
+
+
+
+
+
+// setiap klik mouse bunyi youtube
+
+
+document.addEventListener("click",()=>{
+
+
+document.getElementById("youtube").src=
+"https://www.youtube.com/embed/i6TB1XwE4fI?autoplay=1";
+
+
+ledak();
+
+
+});
+
+
+
+
+
+
+// emoji keluar
+
+
+function ledak(){
+
+
+let emoji=[
+"🤣",
+"😂",
+"❤️",
+"🔥",
+"🎉",
+"🥳"
+];
+
+
+for(let i=0;i<15;i++){
 
 
 let e=document.createElement("div");
 
+
 e.className="emoji";
 
-e.innerHTML=[
-"🤣",
-"❤️",
-"🎉",
-"🔥",
-"🥳"
-][Math.floor(Math.random()*5)];
+
+e.innerHTML=
+emoji[Math.floor(Math.random()*emoji.length)];
 
 
 
@@ -340,6 +322,7 @@ e.style.top="70%";
 
 
 document.body.appendChild(e);
+
 
 
 setTimeout(()=>{
@@ -353,35 +336,6 @@ e.remove();
 
 
 }
-
-
-
-// tambahan pesan random
-
-
-let teks=[
-
-"Jimin? Tidak semudah itu 😎",
-
-"WKWKWK tombolnya takut dipilih",
-
-"Funda adalah jawaban kehidupan 😂",
-
-"Jangan menyerah pilih Funda",
-
-"Salam plenger 🤣"
-
-];
-
-
-setInterval(()=>{
-
-
-document.title=
-teks[Math.floor(Math.random()*teks.length)];
-
-
-},2000);
 
 
 
