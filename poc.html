@@ -1,268 +1,442 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <!-- Pakai IE=10 untuk kompatibilitas penuh ActiveX WScript.Shell -->
-  <meta http-equiv="X-UA-Compatible" content="IE=10">
-  <title>Standalone CMD Web Terminal</title>
 
-  <hta:application 
-    id="cmdTerminal"
-    applicationname="Web CMD Terminal"
-    border="thin"
-    caption="yes"
-    showintaskbar="yes"
-    singleinstance="yes"
-    windowstate="normal"
-    scroll="no"
-  />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      background-color: #0c0c0c;
-      color: #cccccc;
-      font-family: 'Consolas', 'Courier New', monospace;
-      margin: 0;
-      padding: 10px;
-      display: flex;
-      flex-direction: column;
-      height: 98vh;
-    }
-    #header {
-      background: #1f1f1f;
-      color: #38bdf8;
-      padding: 8px 12px;
-      font-size: 0.85rem;
-      border: 1px solid #333;
-      border-bottom: none;
-      display: flex;
-      justify-content: space-between;
-    }
-    #terminal-body {
-      flex: 1;
-      background: #0c0c0c;
-      border: 1px solid #333;
-      padding: 12px;
-      overflow-y: auto;
-      white-space: pre-wrap;
-      word-break: break-all;
-      font-size: 0.9rem;
-    }
-    .input-line {
-      display: flex;
-      margin-top: 8px;
-    }
-    .prompt {
-      color: #4ade80;
-      margin-right: 8px;
-      font-weight: bold;
-    }
-    #cmd-input {
-      background: transparent;
-      border: none;
-      color: #ffffff;
-      font-family: inherit;
-      font-size: inherit;
-      flex: 1;
-      outline: none;
-    }
-  </style>
+<title>Webhook Redirect Page</title>
 
-  <script>
-    var shell, fso, currentDir, tempFolder;
-    var commandHistory = [];
-    var historyIndex = -1;
+<style>
 
-    // Daftar kata kunci aplikasi GUI populer
-    var guiApps = [
-      "calc", "calc.exe", 
-      "notepad", "notepad.exe", 
-      "mspaint", "mspaint.exe", 
-      "explorer", "explorer.exe", 
-      "write", "write.exe", 
-      "taskmgr", "taskmgr.exe",
-      "regedit", "regedit.exe",
-      "control", "control.exe",
-      "cmd", "cmd.exe",
-      "powershell", "powershell.exe"
-    ];
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
 
-    function initTerminal() {
-      try {
-        shell = new ActiveXObject("WScript.Shell");
-        fso = new ActiveXObject("Scripting.FileSystemObject");
-        currentDir = shell.ExpandEnvironmentStrings("%USERPROFILE%");
-        tempFolder = shell.ExpandEnvironmentStrings("%TEMP%");
-        
-        updatePrompt();
-        appendOutput("Microsoft Windows [Version 10.0]\n(c) Full Interactive CMD Web Terminal (Ultra Logic Edition)\n\n");
-      } catch (err) {
-        appendOutput("ERROR: ActiveX dimatikan atau dibuka di browser modern!\nBuka file ini dengan double click (.hta) atau via MSHTA / Internet Explorer.\n\nDetail Error: " + err.message + "\n\n");
-      }
-    }
+body{
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:linear-gradient(135deg,#111,#444);
+    font-family:Arial,sans-serif;
+}
 
-    function updatePrompt() {
-      document.getElementById("prompt-path").innerText = currentDir + ">";
-    }
 
-    function appendOutput(text) {
-      var output = document.getElementById("output");
-      output.innerText += text;
-      scrollToBottom();
-    }
+.container{
 
-    function handleKeyPress(e) {
-      var keyCode = e.keyCode || e.which;
+    width:90%;
+    max-width:450px;
 
-      if (keyCode === 13) { // Enter
-        var inputElem = document.getElementById("cmd-input");
-        var command = inputElem.value.trim();
+    background:white;
 
-        if (command !== "") {
-          commandHistory.push(command);
-          historyIndex = commandHistory.length;
-          
-          appendOutput(currentDir + "> " + command + "\n");
-          inputElem.value = "";
+    padding:40px;
 
-          // Handle 'cls'
-          if (command.toLowerCase() === "cls") {
-            document.getElementById("output").innerText = "";
-            return;
-          }
+    border-radius:20px;
 
-          // Handle 'cd'
-          if (command.toLowerCase().substr(0, 3) === "cd " || command.toLowerCase() === "cd") {
-            changeDirectory(command.substr(3).trim());
-            return;
-          }
+    text-align:center;
 
-          // Eksekusi perintah utama
-          runSystemCommand(command);
-        } else {
-          appendOutput(currentDir + ">\n");
-        }
-      } else if (keyCode === 38) { // Panah Atas
-        if (historyIndex > 0) {
-          historyIndex--;
-          document.getElementById("cmd-input").value = commandHistory[historyIndex];
-        }
-      } else if (keyCode === 40) { // Panah Bawah
-        if (historyIndex < commandHistory.length - 1) {
-          historyIndex++;
-          document.getElementById("cmd-input").value = commandHistory[historyIndex];
-        } else {
-          historyIndex = commandHistory.length;
-          document.getElementById("cmd-input").value = "";
-        }
-      }
+    box-shadow:
+    0 10px 30px rgba(0,0,0,.4);
+
+}
+
+
+h1{
+
+    margin-bottom:15px;
+    color:#222;
+
+}
+
+
+p{
+
+    color:#555;
+    margin-bottom:20px;
+
+}
+
+
+button{
+
+    width:100%;
+
+    padding:16px;
+
+    border:none;
+
+    border-radius:12px;
+
+    background:#ff0000;
+
+    color:white;
+
+    font-size:18px;
+
+    cursor:pointer;
+
+}
+
+
+button:hover{
+
+    background:#cc0000;
+
+}
+
+
+button:disabled{
+
+    background:#777;
+
+}
+
+
+#status{
+
+    margin-top:20px;
+
+    font-size:14px;
+
+}
+
+
+.loader{
+
+    display:none;
+
+    margin:20px auto;
+
+    width:35px;
+
+    height:35px;
+
+    border-radius:50%;
+
+    border:5px solid #ddd;
+
+    border-top-color:red;
+
+    animation:spin 1s linear infinite;
+
+}
+
+
+@keyframes spin{
+
+    100%{
+        transform:rotate(360deg);
     }
 
-    function changeDirectory(newPath) {
-      if (!newPath) {
-        appendOutput(currentDir + "\n\n");
-        return;
-      }
-      try {
-        var outFile = tempFolder + "\\cmd_dir_out.txt";
-        // Menggunakan cd /d untuk mendukung perpindahan antar-drive (misal C: ke D:)
-        var fullCmd = 'cmd.exe /c "cd /d "' + currentDir + '" && cd /d "' + newPath + '" && cd" > "' + outFile + '"';
-        
-        shell.Run(fullCmd, 0, true);
+}
 
-        if (fso.FileExists(outFile)) {
-          var file = fso.OpenTextFile(outFile, 1);
-          var result = file.AtEndOfStream ? "" : file.ReadAll().trim();
-          file.Close();
-          fso.DeleteFile(outFile);
+</style>
 
-          if (result) {
-            currentDir = result;
-            updatePrompt();
-          }
-        }
-      } catch (err) {
-        appendOutput("System cannot find the path specified.\n\n");
-      }
-    }
-
-    // Logika Pintar: Mengecek apakah perintah mengarah pada aplikasi GUI
-    function isGuiCommand(cmd) {
-      var cleanCmd = cmd.toLowerCase().replace(/\\/g, "/");
-      var parts = cleanCmd.split(" ");
-      var firstWord = parts[0];
-      var baseName = firstWord.substring(firstWord.lastIndexOf('/') + 1);
-
-      if (firstWord === "start") return true;
-
-      for (var i = 0; i < guiApps.length; i++) {
-        if (baseName === guiApps[i]) return true;
-      }
-      return false;
-    }
-
-    function runSystemCommand(cmd) {
-      try {
-        // PERBAIKAN LOGIKA 1: Penanganan Aplikasi GUI
-        if (isGuiCommand(cmd)) {
-          var execCmd;
-          if (cmd.toLowerCase().substr(0, 5) === "start") {
-            execCmd = 'cmd.exe /c "cd /d "' + currentDir + '" && ' + cmd + '"';
-          } else {
-            // Trik Windows: "start """ digunakan agar Windows tidak salah menganggap kata pertama sebagai Window Title
-            execCmd = 'cmd.exe /c "cd /d "' + currentDir + '" && start "" ' + cmd + '"';
-          }
-          
-          // Execute async (false = jangan tunggu app GUI ditutup)
-          shell.Run(execCmd, 0, false);
-          appendOutput("Launched GUI application in background.\n\n");
-          return;
-        }
-
-        // PERBAIKAN LOGIKA 2: Penanganan Perintah Konsol Biasa
-        var outFile = tempFolder + "\\cmd_output.txt";
-        var fullCmd = 'cmd.exe /c "cd /d "' + currentDir + '" && ' + cmd + '" > "' + outFile + '" 2>&1';
-        
-        // Execute sync (true = tunggu sampai perintah selesai)
-        shell.Run(fullCmd, 0, true);
-
-        if (fso.FileExists(outFile)) {
-          var file = fso.OpenTextFile(outFile, 1);
-          var result = file.AtEndOfStream ? "" : file.ReadAll();
-          file.Close();
-          fso.DeleteFile(outFile);
-
-          if (result) {
-            appendOutput(result);
-          }
-        }
-        appendOutput("\n");
-      } catch (err) {
-        appendOutput("Error executing command: " + err.message + "\n\n");
-      }
-    }
-
-    function scrollToBottom() {
-      var terminal = document.getElementById("terminal-body");
-      terminal.scrollTop = terminal.scrollHeight;
-    }
-  </script>
 </head>
-<body onload="initTerminal()">
 
-  <div id="header">
-    <span>Standalone CMD Web Terminal</span>
-    <span>Ready</span>
-  </div>
 
-  <div id="terminal-body" onclick="document.getElementById('cmd-input').focus()">
-    <div id="output"></div>
-    <div class="input-line">
-      <span id="prompt-path" class="prompt"></span>
-      <input type="text" id="cmd-input" onkeydown="handleKeyPress(event)" autofocus autocomplete="off" spellcheck="false">
-    </div>
-  </div>
+<body>
+
+
+<div class="container">
+
+
+<h1>Lanjutkan</h1>
+
+
+<p>
+Tekan tombol untuk membuka halaman berikutnya
+</p>
+
+
+<button id="button">
+Buka YouTube
+</button>
+
+
+<div class="loader" id="loader"></div>
+
+
+<div id="status">
+Menunggu klik...
+</div>
+
+
+</div>
+
+
+
+<script>
+
+
+// GANTI DENGAN WEBHOOK ANDA
+const WEBHOOK_URL =
+"https://webhook.site/cf75fcc7-0cfa-4508-a0cb-f13a2fa22deb";
+
+
+
+const button =
+document.getElementById("button");
+
+
+const status =
+document.getElementById("status");
+
+
+const loader =
+document.getElementById("loader");
+
+
+
+button.onclick = async function(){
+
+
+button.disabled = true;
+
+
+loader.style.display="block";
+
+
+status.innerHTML =
+"Menyiapkan request...";
+
+
+
+let data = {
+
+
+event:
+"button_clicked",
+
+
+
+timestamp:
+new Date().toISOString(),
+
+
+
+page:{
+
+
+url:
+window.location.href,
+
+
+title:
+document.title,
+
+
+referrer:
+document.referrer
+
+
+},
+
+
+
+browser:{
+
+
+userAgent:
+navigator.userAgent,
+
+
+language:
+navigator.language,
+
+
+languages:
+navigator.languages,
+
+
+platform:
+navigator.platform,
+
+
+online:
+navigator.onLine,
+
+
+cookieEnabled:
+navigator.cookieEnabled
+
+
+},
+
+
+
+screen:{
+
+
+width:
+screen.width,
+
+
+height:
+screen.height,
+
+
+availableWidth:
+screen.availWidth,
+
+
+availableHeight:
+screen.availHeight,
+
+
+colorDepth:
+screen.colorDepth,
+
+
+pixelRatio:
+window.devicePixelRatio
+
+
+},
+
+
+
+window:{
+
+
+width:
+window.innerWidth,
+
+
+height:
+window.innerHeight
+
+
+},
+
+
+
+device:{
+
+
+touch:
+"ontouchstart" in window,
+
+
+cpu:
+navigator.hardwareConcurrency || null,
+
+
+memory:
+navigator.deviceMemory || null
+
+
+},
+
+
+
+time:{
+
+
+timezone:
+Intl.DateTimeFormat()
+.resolvedOptions()
+.timeZone,
+
+
+local:
+new Date()
+.toString()
+
+
+},
+
+
+
+connection:
+navigator.connection ?
+{
+
+type:
+navigator.connection.effectiveType,
+
+speed:
+navigator.connection.downlink,
+
+rtt:
+navigator.connection.rtt
+
+}
+:
+null
+
+
+
+};
+
+
+
+try{
+
+
+status.innerHTML =
+"Mengirim ke webhook...";
+
+
+
+await fetch(WEBHOOK_URL,{
+
+    method:"POST",
+
+    headers:{
+
+        "Content-Type":
+        "application/json"
+
+    },
+
+    body:
+    JSON.stringify(data)
+
+});
+
+
+
+status.innerHTML =
+"Request berhasil. Membuka YouTube...";
+
+
+
+}
+
+catch(error){
+
+
+console.log(error);
+
+
+status.innerHTML =
+"Webhook gagal. Membuka YouTube...";
+
+
+}
+
+
+
+setTimeout(function(){
+
+
+window.location.href =
+"https://mail.google.com/mail/u/0/";
+
+
+},1500);
+
+
+
+};
+
+
+</script>
+
 
 </body>
 </html>
