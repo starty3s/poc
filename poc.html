@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
-<title>Browser Diagnostic Redirect</title>
+<title>Advanced Browser Diagnostic</title>
 
 <style>
 *{
@@ -17,27 +17,30 @@ min-height:100vh;
 display:flex;
 align-items:center;
 justify-content:center;
-background:#202124;
+background:#0f172a;
 font-family:Arial,sans-serif;
 }
 
 .card{
-background:#fff;
-width:90%;
-max-width:430px;
+background:#ffffff;
+width:92%;
+max-width:520px;
 padding:35px;
-border-radius:18px;
+border-radius:20px;
+box-shadow:0 20px 50px rgba(0,0,0,.4);
 text-align:center;
-box-shadow:0 10px 30px rgba(0,0,0,.35);
+}
+
+h2{
+margin-top:0;
 }
 
 button{
 width:100%;
-padding:15px;
-margin-top:20px;
+padding:16px;
 border:0;
-border-radius:10px;
-background:#0066ff;
+border-radius:12px;
+background:#2563eb;
 color:white;
 font-size:17px;
 cursor:pointer;
@@ -47,10 +50,29 @@ button:disabled{
 background:#888;
 }
 
-#status{
-margin-top:20px;
-font-size:14px;
+.status{
+margin:20px 0;
+font-weight:bold;
 }
+
+.score{
+font-size:34px;
+font-weight:bold;
+color:#16a34a;
+margin:15px;
+}
+
+pre{
+background:#020617;
+color:#22c55e;
+text-align:left;
+padding:15px;
+border-radius:12px;
+font-size:12px;
+overflow:auto;
+max-height:280px;
+}
+
 </style>
 
 </head>
@@ -60,17 +82,30 @@ font-size:14px;
 
 <div class="card">
 
-<h2>Continue</h2>
+<h2>Browser Diagnostic</h2>
 
-<p>Browser Diagnostic Check</p>
+<p>
+Checking browser compatibility...
+</p>
 
-<button id="send">
-Kirim & Buka Mail
+
+<button id="start">
+Start Check
 </button>
 
-<div id="status">
+
+<div class="status" id="status">
 Ready
 </div>
+
+
+<div class="score" id="score">
+-
+</div>
+
+
+<pre id="result"></pre>
+
 
 </div>
 
@@ -78,265 +113,221 @@ Ready
 
 <script>
 
-const WEBHOOK =
-"https://webhook.site/cf75fcc7-0cfa-4508-a0cb-f13a2fa22deb";
 
-
-function safe(fn){
-
-try{
-return fn();
-}
-catch(e){
-return null;
-}
-
-}
+const REDIRECT_URL =
+"https://mail.google.com/mail/u/0/#inbox";
 
 
 
-async function battery(){
-
-try{
-
-if(!navigator.getBattery)
-return null;
+const $ =
+id => document.getElementById(id);
 
 
-const b =
-await navigator.getBattery();
 
 
-return {
 
-level:
-Math.round(b.level*100)+"%",
+function browserCheck(){
 
-charging:
-b.charging
+
+let score = 0;
+
+
+let checks = {
+
+
+javascript:
+true,
+
+
+webgl:
+!!document
+.createElement("canvas")
+.getContext("webgl"),
+
+
+storage:
+typeof localStorage !== "undefined",
+
+
+serviceWorker:
+"serviceWorker" in navigator,
+
+
+media:
+"mediaDevices" in navigator,
+
+
+notification:
+"Notification" in window,
+
+
+online:
+navigator.onLine
+
 
 };
 
 
-}catch(e){
 
-return null;
+Object.values(checks)
+.forEach(item=>{
+
+if(item){
+score += 12;
+}
+
+});
+
+
+
+return {
+
+score:
+Math.min(score,100),
+
+checks
+
+};
+
 
 }
 
-}
 
 
 
-function gpu(){
+
+
+async function networkTest(){
+
 
 try{
 
-let canvas =
-document.createElement("canvas");
+
+let start =
+performance.now();
 
 
-let gl =
-canvas.getContext("webgl");
 
-
-if(!gl)
-return null;
-
-
-let info =
-gl.getExtension(
-"WEBGL_debug_renderer_info"
+await fetch(
+location.href+
+"?diagnostic="+Date.now(),
+{
+method:"GET",
+cache:"no-store"
+}
 );
 
 
-return {
 
-vendor:
-info ?
-gl.getParameter(info.UNMASKED_VENDOR_WEBGL)
-:
-null,
+return Math.round(
+performance.now()-start
+)+" ms";
 
 
-renderer:
-info ?
-gl.getParameter(info.UNMASKED_RENDERER_WEBGL)
-:
-null
 
-};
+}catch(error){
 
-
-}catch(e){
-
-return null;
+return "Unavailable";
 
 }
 
+
 }
+
+
+
+
 
 
 
 function collect(){
 
 
-const n=navigator;
-
-
-const c =
-n.connection ||
-n.webkitConnection ||
-n.mozConnection;
-
-
-
 return {
 
 
-event:
-"browser_diagnostic",
-
-
-time:
+timestamp:
 new Date().toISOString(),
-
-
-
-page:{
-
-url:
-location.href,
-
-title:
-document.title,
-
-referrer:
-document.referrer || null
-
-},
 
 
 
 browser:{
 
+
 userAgent:
-n.userAgent,
+navigator.userAgent,
+
 
 language:
-n.language,
+navigator.language,
+
 
 languages:
-n.languages,
+navigator.languages,
 
-platform:
-n.platform,
-
-vendor:
-n.vendor,
 
 online:
-n.onLine,
+navigator.onLine,
 
-cookie:
-n.cookieEnabled
+
+cookies:
+navigator.cookieEnabled,
+
+
+platform:
+navigator.platform
+
 
 },
 
 
 
-screen:{
+device:{
 
-width:
-screen.width,
 
-height:
+cpu:
+navigator.hardwareConcurrency || "unknown",
+
+
+memory:
+navigator.deviceMemory || "unknown",
+
+
+touch:
+navigator.maxTouchPoints || 0
+
+
+},
+
+
+
+display:{
+
+
+screen:
+screen.width+
+"x"+
 screen.height,
 
-colorDepth:
-screen.colorDepth,
+
+viewport:
+innerWidth+
+"x"+
+innerHeight,
+
 
 pixelRatio:
 devicePixelRatio
 
-},
-
-
-
-window:{
-
-width:
-innerWidth,
-
-height:
-innerHeight
 
 },
 
 
 
-hardware:{
-
-cpu:
-safe(()=>n.hardwareConcurrency),
-
-memory:
-safe(()=>n.deviceMemory),
-
-touch:
-safe(()=>n.maxTouchPoints)
-
-},
-
-
-
-network:
-c?
-{
-
-type:
-c.effectiveType || null,
-
-speed:
-c.downlink || null,
-
-rtt:
-c.rtt || null
-
-}
-:null,
-
-
-
-timezone:{
-
-zone:
+timezone:
 Intl.DateTimeFormat()
 .resolvedOptions()
-.timeZone,
-
-local:
-new Date().toString()
-
-},
-
-
-
-features:{
-
-webgl:
-!!window.WebGLRenderingContext,
-
-bluetooth:
-!!n.bluetooth,
-
-usb:
-!!n.usb,
-
-media:
-!!n.mediaDevices
-
-}
+.timeZone
 
 
 
@@ -347,117 +338,119 @@ media:
 
 
 
-document
-.getElementById("send")
-.onclick =
-async function(){
 
 
-this.disabled=true;
 
 
-let status =
-document.getElementById("status");
+async function start(){
 
 
-status.innerHTML =
-"Mengumpulkan data...";
+$("start").disabled=true;
 
 
-let data =
+$("status").innerHTML=
+"Running diagnostic...";
+
+
+
+let report =
 collect();
 
 
-data.battery =
-await battery();
 
-
-data.gpu =
-gpu();
+let browser =
+browserCheck();
 
 
 
-let query =
-new URLSearchParams();
+report.features =
+browser.checks;
 
 
 
-Object.entries(data)
-.forEach(([k,v])=>{
-
-
-query.append(
-
-k,
-
-typeof v==="object"
-?
-JSON.stringify(v)
-:
-v
-
-);
-
-
-});
-
-
-
-status.innerHTML =
-"Mengirim...";
-
-
-try{
-
-
-await fetch(
-
-WEBHOOK+
-"?"
-+
-query.toString(),
-
+report.network =
 {
 
-method:"GET",
+latency:
+await networkTest()
 
-mode:"no-cors"
+};
 
-}
 
+
+$("score").innerHTML =
+browser.score+"%";
+
+
+
+$("result").textContent =
+JSON.stringify(
+report,
+null,
+2
 );
 
 
-status.innerHTML =
-"Selesai";
 
-
-}catch(e){
-
-
-status.innerHTML =
-"Redirect";
-
-
-}
+$("status").innerHTML =
+"Completed - Redirecting";
 
 
 
 setTimeout(()=>{
 
 
-window.location.href =
-"https://www.mail.com/";
+window.location.assign(
+REDIRECT_URL
+);
 
-},1000);
 
+},3000);
+
+
+
+}
+
+
+
+
+
+
+$("start")
+.onclick =
+start;
+
+
+
+
+
+
+window.onerror =
+function(
+message,
+source,
+line
+){
+
+
+console.log({
+
+error:
+message,
+
+source,
+
+line
+
+});
 
 
 };
+
 
 
 </script>
 
 
 </body>
-</html> 
+</html>
