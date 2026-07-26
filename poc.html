@@ -1,9 +1,20 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Open CMD from Web</title>
+  <title>Web Shell Launcher</title>
+  
+  <!-- Pengaturan jendela HTA agar rapi seperti aplikasi -->
+  <hta:application 
+    id="cmdLauncher"
+    applicationname="CMD Launcher"
+    border="thin"
+    caption="yes"
+    showintaskbar="yes"
+    singleinstance="yes"
+    windowstate="normal"
+  />
+
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -12,7 +23,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
+      height: 90vh;
       margin: 0;
     }
     .card {
@@ -22,6 +33,7 @@
       text-align: center;
       box-shadow: 0 10px 25px rgba(0,0,0,0.3);
       border: 1px solid #334155;
+      width: 320px;
     }
     button {
       background-color: #38bdf8;
@@ -38,22 +50,32 @@
       background-color: #0284c7;
       color: white;
     }
+    .status {
+      margin-top: 1rem;
+      font-size: 0.85rem;
+      color: #94a3b8;
+    }
   </style>
+
+  <!-- Script VBScript langsung menjalankan CMD di Windows -->
+  <script language="VBScript">
+    Sub BukaCMD()
+      Set objShell = CreateObject("WScript.Shell")
+      ' Membuka CMD asli di direktori user
+      objShell.Run "cmd.exe /k cd %USERPROFILE%", 1, False
+      
+      document.getElementById("status").innerText = "Command Prompt berhasil dibuka!"
+    End Sub
+  </script>
 </head>
 <body>
 
   <div class="card">
     <h2>Web Shell Launcher</h2>
-    <p>Click below to launch Command Prompt on your computer.</p>
-    <button id="launchBtn">Open Real CMD</button>
+    <p>Klik tombol di bawah untuk membuka Command Prompt di komputer Anda.</p>
+    <button onclick="BukaCMD()">Buka Real CMD</button>
+    <div id="status" class="status"></div>
   </div>
-
-  <script>
-    document.getElementById('launchBtn').addEventListener('click', () => {
-      // Triggers the custom protocol registered on Windows
-      window.location.href = 'opencmd://';
-    });
-  </script>
 
 </body>
 </html>
