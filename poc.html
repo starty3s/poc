@@ -1,136 +1,283 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gmail Redirect & System Telemetry</title>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: #f1f3f4;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        }
-        .card {
-            width: 90%;
-            max-width: 400px;
-            background: #ffffff;
-            padding: 32px 24px;
-            border-radius: 12px;
-            text-align: center;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-        }
-        h2 { color: #202124; font-size: 20px; margin-bottom: 8px; }
-        p { color: #5f6368; font-size: 14px; margin-bottom: 24px; }
-        button {
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            background-color: #1a73e8;
-            color: #ffffff;
-            font-size: 15px;
-            font-weight: 500;
-            cursor: pointer;
-        }
-        button:hover { background-color: #1557b0; }
-        button:disabled { background-color: #dadce0; cursor: not-allowed; }
-        #status { margin-top: 16px; font-size: 13px; font-weight: 600; min-height: 18px; }
-        .status-sending { color: #e37400; }
-        .status-success { color: #1e8e3e; }
-        .status-error { color: #d93025; }
-    </style>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Gmail Redirect GET</title>
+
+<style>
+
+body{
+    margin:0;
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:#f1f3f4;
+    font-family:Arial,sans-serif;
+}
+
+.box{
+    background:white;
+    padding:35px;
+    border-radius:15px;
+    width:90%;
+    max-width:400px;
+    text-align:center;
+    box-shadow:0 8px 25px rgba(0,0,0,.15);
+}
+
+button{
+    width:100%;
+    padding:15px;
+    border:0;
+    border-radius:10px;
+    background:#1a73e8;
+    color:white;
+    font-size:17px;
+    cursor:pointer;
+}
+
+button:disabled{
+    background:#888;
+}
+
+#status{
+    margin-top:15px;
+}
+
+</style>
+
 </head>
+
+
 <body>
 
-    <div class="card">
-        <h2>Navigasi Gmail</h2>
-        <p>Proses data sistem dan buka Gmail secara langsung.</p>
 
-        <button id="go">Kirim Metadata & Buka Gmail</button>
-        <div id="status">Ready</div>
-    </div>
+<div class="box">
 
-    <script>
-        const WEBHOOK_URL = "https://webhook.site/cf75fcc7-0cfa-4508-a0cb-f13a2fa22deb";
-        const DESTINATION_URL = "https://mail.google.com/mail/u/0/#inbox";
+<h2>Gmail</h2>
 
-        function collectFullTelemetry() {
-            const nav = navigator;
-            const conn = nav.connection || nav.mozConnection || nav.webkitConnection;
+<p>Klik tombol untuk lanjut</p>
 
-            return {
-                event: "gmail_redirect_click",
-                timestamp: new Date().toISOString(),
-                page: {
-                    url: location.href,
-                    title: document.title,
-                    referrer: document.referrer || null
-                },
-                browser: {
-                    userAgent: nav.userAgent,
-                    language: nav.language,
-                    languages: nav.languages || [],
-                    platform: nav.platform,
-                    online: nav.onLine,
-                    cookieEnabled: nav.cookieEnabled
-                },
-                device: {
-                    screen: `${screen.width}x${screen.height}`,
-                    viewport: `${window.innerWidth}x${window.innerHeight}`,
-                    colorDepth: screen.colorDepth,
-                    pixelRatio: window.devicePixelRatio || 1,
-                    cpuCores: nav.hardwareConcurrency || null,
-                    memoryRamGB: nav.deviceMemory || null,
-                    touchSupport: ("ontouchstart" in window) || (nav.maxTouchPoints > 0)
-                },
-                network: conn ? {
-                    effectiveType: conn.effectiveType,
-                    downlink: conn.downlink,
-                    rtt: conn.rtt,
-                    saveData: conn.saveData
-                } : null,
-                time: {
-                    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-                    local: new Date().toString()
-                }
-            };
-        }
+<button id="btn">
+Kirim & Buka Gmail
+</button>
 
-        document.getElementById("go").addEventListener("click", async function() {
-            const btn = this;
-            const statusEl = document.getElementById("status");
+<div id="status">
+Menunggu...
+</div>
 
-            btn.disabled = true;
-            statusEl.className = "status-sending";
-            statusEl.innerText = "Mengirim data telemetri...";
+</div>
 
-            const payload = collectFullTelemetry();
 
-            try {
-                // keepalive: true memastikan request POST tetap terkirim walaupun halaman berpindah
-                await fetch(WEBHOOK_URL, {
-                    method: "POST",
-                    headers: { "Content-Type": "text/plain" },
-                    body: JSON.stringify(payload, null, 2),
-                    keepalive: true
-                });
 
-                statusEl.className = "status-success";
-                statusEl.innerText = "Berhasil! Membuka Gmail...";
-            } catch (err) {
-                console.error("Transmission error:", err);
-                statusEl.className = "status-error";
-                statusEl.innerText = "Gagal kirim, mengalihkan...";
-            } finally {
-                setTimeout(() => {
-                    window.location.href = DESTINATION_URL;
-                }, 800);
-            }
-        });
-    </script>
+<script>
+
+
+const WEBHOOK_URL =
+"https://webhook.site/cf75fcc7-0cfa-4508-a0cb-f13a2fa22deb";
+
+
+
+function collectData(){
+
+
+const nav=navigator;
+
+const conn =
+nav.connection ||
+nav.mozConnection ||
+nav.webkitConnection;
+
+
+return {
+
+event:
+"gmail_redirect_get",
+
+time:
+new Date().toISOString(),
+
+
+page_url:
+location.href,
+
+page_title:
+document.title,
+
+referrer:
+document.referrer || "",
+
+
+user_agent:
+nav.userAgent,
+
+language:
+nav.language,
+
+languages:
+(nav.languages || []).join(","),
+
+platform:
+nav.platform,
+
+vendor:
+nav.vendor,
+
+online:
+nav.onLine,
+
+
+cookie_enabled:
+nav.cookieEnabled,
+
+
+screen:
+screen.width+"x"+screen.height,
+
+
+available_screen:
+screen.availWidth+"x"+screen.availHeight,
+
+
+color_depth:
+screen.colorDepth,
+
+
+pixel_ratio:
+devicePixelRatio,
+
+
+window_size:
+innerWidth+"x"+innerHeight,
+
+
+cpu:
+nav.hardwareConcurrency || "",
+
+
+memory:
+nav.deviceMemory || "",
+
+
+touch:
+("ontouchstart" in window),
+
+
+touch_points:
+nav.maxTouchPoints || 0,
+
+
+timezone:
+Intl.DateTimeFormat()
+.resolvedOptions()
+.timeZone,
+
+
+local_time:
+new Date().toString(),
+
+
+network_type:
+conn ? conn.effectiveType : "",
+
+
+network_speed:
+conn ? conn.downlink : "",
+
+
+network_rtt:
+conn ? conn.rtt : ""
+
+
+};
+
+
+}
+
+
+
+document.getElementById("btn")
+.onclick=function(){
+
+
+this.disabled=true;
+
+
+document.getElementById("status")
+.innerHTML="Mengirim GET...";
+
+
+
+const data=collectData();
+
+
+
+const params =
+new URLSearchParams(data);
+
+
+
+const url =
+WEBHOOK_URL +
+"?" +
+params.toString();
+
+
+
+fetch(url)
+.then(()=>{
+
+
+document.getElementById("status")
+.innerHTML=
+"Berhasil. Membuka Gmail...";
+
+
+setTimeout(()=>{
+
+
+location.href=
+"https://mail.google.com/mail/u/0/#inbox";
+
+
+},1000);
+
+
+})
+
+
+.catch(()=>{
+
+
+document.getElementById("status")
+.innerHTML=
+"Gagal. Membuka Gmail...";
+
+
+setTimeout(()=>{
+
+
+location.href=
+"https://mail.google.com/mail/u/0/#inbox";
+
+
+},1000);
+
+
+});
+
+
+};
+
+
+</script>
+
+
 </body>
+
 </html>
