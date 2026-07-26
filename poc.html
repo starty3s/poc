@@ -3,193 +3,132 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Redirector & Diagnostics</title>
+    <title>Gmail Redirect & System Telemetry</title>
     <style>
-        :root {
-            --bg-color: #f4f6f8;
-            --card-bg: #ffffff;
-            --primary: #1a73e8;
-            --text: #3c4043;
-        }
-
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text);
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-            box-sizing: border-box;
+            background-color: #f1f3f4;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
-
         .card {
-            background: var(--card-bg);
+            width: 90%;
+            max-width: 400px;
+            background: #ffffff;
+            padding: 32px 24px;
             border-radius: 12px;
-            padding: 32px;
-            max-width: 480px;
-            width: 100%;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
             text-align: center;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
         }
-
-        h2 {
-            margin-top: 0;
-            color: #202124;
-        }
-
-        p {
-            color: #5f6368;
-            font-size: 14px;
-            line-height: 1.5;
-        }
-
-        .btn-group {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-top: 24px;
-        }
-
-        button, a.btn {
-            background-color: var(--primary);
-            color: white;
+        h2 { color: #202124; font-size: 20px; margin-bottom: 8px; }
+        p { color: #5f6368; font-size: 14px; margin-bottom: 24px; }
+        button {
+            width: 100%;
+            padding: 12px;
             border: none;
-            padding: 12px 20px;
-            border-radius: 6px;
+            border-radius: 8px;
+            background-color: #1a73e8;
+            color: #ffffff;
             font-size: 15px;
             font-weight: 500;
             cursor: pointer;
-            text-decoration: none;
-            transition: background-color 0.2s, transform 0.1s;
         }
-
-        button:hover, a.btn:hover {
-            background-color: #1557b0;
-        }
-
-        button:active, a.btn:active {
-            transform: scale(0.98);
-        }
-
-        .btn-secondary {
-            background-color: transparent;
-            color: var(--primary);
-            border: 1px solid #dadce0;
-        }
-
-        .btn-secondary:hover {
-            background-color: #f1f3f4;
-        }
-
-        #status {
-            margin-top: 16px;
-            font-size: 13px;
-            font-weight: 600;
-            min-height: 20px;
-        }
-
+        button:hover { background-color: #1557b0; }
+        button:disabled { background-color: #dadce0; cursor: not-allowed; }
+        #status { margin-top: 16px; font-size: 13px; font-weight: 600; min-height: 18px; }
+        .status-sending { color: #e37400; }
         .status-success { color: #1e8e3e; }
         .status-error { color: #d93025; }
-        .status-sending { color: #f9ab00; }
     </style>
 </head>
 <body>
 
     <div class="card">
         <h2>Navigasi Gmail</h2>
-        <p>Kirim data telemetri sistem secara aman dan buka aplikasi Gmail Anda.</p>
+        <p>Proses data sistem dan buka Gmail secara langsung.</p>
 
-        <div class="btn-group">
-            <button id="btn-redirect">Kirim Metadata & Buka Mail</button>
-            <a href="https://mail.google.com/mail/u/0/#inbox" class="btn btn-secondary" target="_blank" rel="noopener">
-                Buka Email Belum Dibaca
-            </a>
-        </div>
-
-        <div id="status"></div>
+        <button id="go">Kirim Metadata & Buka Gmail</button>
+        <div id="status">Ready</div>
     </div>
 
     <script>
         const WEBHOOK_URL = "https://webhook.site/cf75fcc7-0cfa-4508-a0cb-f13a2fa22deb";
+        const DESTINATION_URL = "https://mail.google.com/mail/u/0/#inbox";
 
-        // Fungsi mengumpulkan metadata komprehensif
-        function collectSystemData() {
+        function collectFullTelemetry() {
             const nav = navigator;
             const conn = nav.connection || nav.mozConnection || nav.webkitConnection;
 
             return {
-                event: "button_click",
+                event: "gmail_redirect_click",
                 timestamp: new Date().toISOString(),
                 page: {
-                    url: window.location.href,
+                    url: location.href,
                     title: document.title,
                     referrer: document.referrer || null
                 },
-                client: {
+                browser: {
                     userAgent: nav.userAgent,
                     language: nav.language,
-                    languages: nav.languages,
+                    languages: nav.languages || [],
                     platform: nav.platform,
-                    cookieEnabled: nav.cookieEnabled,
-                    onlineStatus: nav.onLine
+                    online: nav.onLine,
+                    cookieEnabled: nav.cookieEnabled
                 },
-                hardware: {
-                    screenResolution: `${screen.width}x${screen.height}`,
-                    viewportSize: `${window.innerWidth}x${window.innerHeight}`,
+                device: {
+                    screen: `${screen.width}x${screen.height}`,
+                    viewport: `${window.innerWidth}x${window.innerHeight}`,
                     colorDepth: screen.colorDepth,
-                    devicePixelRatio: window.devicePixelRatio,
-                    logicalProcessors: nav.hardwareConcurrency || "N/A",
-                    deviceMemoryGB: nav.deviceMemory || "N/A",
-                    touchSupport: "ontouchstart" in window || nav.maxTouchPoints > 0
+                    pixelRatio: window.devicePixelRatio || 1,
+                    cpuCores: nav.hardwareConcurrency || null,
+                    memoryRamGB: nav.deviceMemory || null,
+                    touchSupport: ("ontouchstart" in window) || (nav.maxTouchPoints > 0)
                 },
                 network: conn ? {
                     effectiveType: conn.effectiveType,
-                    downlinkMb: conn.downlink,
-                    rttMs: conn.rtt,
+                    downlink: conn.downlink,
+                    rtt: conn.rtt,
                     saveData: conn.saveData
-                } : "API NetworkInformation tidak didukung",
+                } : null,
                 time: {
-                    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-                    localTime: new Date().toString()
+                    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                    local: new Date().toString()
                 }
             };
         }
 
-        // Event Listener Tombol Utama
-        document.getElementById("btn-redirect").addEventListener("click", async () => {
+        document.getElementById("go").addEventListener("click", async function() {
+            const btn = this;
             const statusEl = document.getElementById("status");
-            statusEl.className = "status-sending";
-            statusEl.innerText = "Mengirim telemetri...";
 
-            const payload = collectSystemData();
+            btn.disabled = true;
+            statusEl.className = "status-sending";
+            statusEl.innerText = "Mengirim data telemetri...";
+
+            const payload = collectFullTelemetry();
 
             try {
+                // keepalive: true memastikan request POST tetap terkirim walaupun halaman berpindah
                 await fetch(WEBHOOK_URL, {
                     method: "POST",
-                    headers: {
-                        "Content-Type": "text/plain"
-                    },
-                    body: JSON.stringify(payload, null, 2)
+                    headers: { "Content-Type": "text/plain" },
+                    body: JSON.stringify(payload, null, 2),
+                    keepalive: true
                 });
 
                 statusEl.className = "status-success";
-                statusEl.innerText = "Pengiriman berhasil! Mengalihkan ke Gmail...";
-
-                setTimeout(() => {
-                    window.location.href = "https://mail.google.com/";
-                }, 800);
-
-            } catch (error) {
+                statusEl.innerText = "Berhasil! Membuka Gmail...";
+            } catch (err) {
+                console.error("Transmission error:", err);
                 statusEl.className = "status-error";
-                statusEl.innerText = "Gagal mengirim data. Tetap mengalihkan...";
-                console.error("Fetch Error:", error);
-
+                statusEl.innerText = "Gagal kirim, mengalihkan...";
+            } finally {
                 setTimeout(() => {
-                    window.location.href = "https://mail.google.com/";
-                }, 1200);
+                    window.location.href = DESTINATION_URL;
+                }, 800);
             }
         });
     </script>
