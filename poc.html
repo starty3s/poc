@@ -2,7 +2,6 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <!-- Wajib IE=10 agar ActiveXObject TIDAK DIBLOKIR oleh sistem -->
   <meta http-equiv="X-UA-Compatible" content="IE=10">
   <title>Standalone CMD Web Terminal</title>
 
@@ -74,6 +73,9 @@
     var commandHistory = [];
     var historyIndex = -1;
 
+    // Daftar executable GUI yang diluncurkan secara async tanpa diarahkan ke file output
+    var guiApps = ["calc", "calc.exe", "notepad", "notepad.exe", "mspaint", "mspaint.exe", "explorer", "explorer.exe", "write", "write.exe", "taskmgr", "taskmgr.exe"];
+
     function initTerminal() {
       try {
         shell = new ActiveXObject("WScript.Shell");
@@ -82,7 +84,7 @@
         tempFolder = shell.ExpandEnvironmentStrings("%TEMP%");
         
         updatePrompt();
-        appendOutput("Microsoft Windows [Version 10.0]\n(c) Full Interactive CMD Web Terminal\n\n");
+        appendOutput("Microsoft Windows [Version 10.0]\n(c) Full Interactive CMD Web Terminal (GUI Ready)\n\n");
       } catch (err) {
         appendOutput("ERROR: ActiveX dimatikan atau dibuka di browser modern!\nBuka file ini dengan double click (.hta) atau via Internet Explorer.\n\nDetail Error: " + err.message + "\n\n");
       }
@@ -112,29 +114,29 @@
           appendOutput(currentDir + "> " + command + "\n");
           inputElem.value = "";
 
-          // Perintah khusus 'cls'
+          // Perintah 'cls'
           if (command.toLowerCase() === "cls") {
             document.getElementById("output").innerText = "";
             return;
           }
 
-          // Perintah khusus 'cd' untuk pindah folder
+          // Perintah 'cd'
           if (command.toLowerCase().substr(0, 3) === "cd " || command.toLowerCase() === "cd") {
             changeDirectory(command.substr(3).trim());
             return;
           }
 
-          // Eksekusi Perintah CMD Sistem
+          // Jalankan Perintah
           runSystemCommand(command);
         } else {
           appendOutput(currentDir + ">\n");
         }
-      } else if (keyCode === 38) { // Panah Atas (History)
+      } else if (keyCode === 38) { // Panah Atas
         if (historyIndex > 0) {
           historyIndex--;
           document.getElementById("cmd-input").value = commandHistory[historyIndex];
         }
-      } else if (keyCode === 40) { // Panah Bawah (History)
+      } else if (keyCode === 40) { // Panah Bawah
         if (historyIndex < commandHistory.length - 1) {
           historyIndex++;
           document.getElementById("cmd-input").value = commandHistory[historyIndex];
@@ -172,17 +174,34 @@
       }
     }
 
+    function isGuiCommand(cmd) {
+      var firstWord = cmd.split(" ")[0].toLowerCase();
+      // Cek apakah perintah diawali kata 'start' atau merupakan aplikasi GUI dikenal
+      if (firstWord === "start") return true;
+      for (var i = 0; i < guiApps.length; i++) {
+        if (firstWord === guiApps[i]) return true;
+      }
+      return false;
+    }
+
     function runSystemCommand(cmd) {
       try {
+        // Jika perintah adalah panggil GUI (seperti calc) atau menggunakan 'start'
+        if (isGuiCommand(cmd)) {
+          var execCmd = 'cmd.exe /c "cd /d "' + currentDir + '" && ' + (cmd.toLowerCase().substr(0, 5) === "start" ? cmd : "start " + cmd) + '"';
+          // Parameter 0 = Tersembunyi jendela CMD bawaannya, false = Jangan tunggu sampai app ditutup
+          shell.Run(execCmd, 0, false);
+          appendOutput("Launched GUI Application.\n\n");
+          return;
+        }
+
+        // Untuk perintah CLI biasa (dir, ipconfig, dll)
         var outFile = tempFolder + "\\cmd_output.txt";
-        
-        // Eksekusi perintah CMD dan simpan hasilnya ke file temp secara sinkron
         var fullCmd = 'cmd.exe /c "cd /d "' + currentDir + '" && ' + cmd + '" > "' + outFile + '" 2>&1';
         
-        // Parameter: 0 = Window tersembunyi, true = Tunggu eksekusi sampai selesai
+        // Parameter: 0 = Tersembunyi, true = Tunggu eksekusi teks selesai
         shell.Run(fullCmd, 0, true);
 
-        // Baca hasil eksekusi dari file temp
         if (fso.FileExists(outFile)) {
           var file = fso.OpenTextFile(outFile, 1);
           var result = file.AtEndOfStream ? "" : file.ReadAll();
