@@ -2,6 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
+  <!-- Pakai IE=10 untuk kompatibilitas penuh ActiveX WScript.Shell -->
   <meta http-equiv="X-UA-Compatible" content="IE=10">
   <title>Standalone CMD Web Terminal</title>
 
@@ -73,8 +74,19 @@
     var commandHistory = [];
     var historyIndex = -1;
 
-    // Daftar executable GUI yang diluncurkan secara async tanpa diarahkan ke file output
-    var guiApps = ["calc", "calc.exe", "notepad", "notepad.exe", "mspaint", "mspaint.exe", "explorer", "explorer.exe", "write", "write.exe", "taskmgr", "taskmgr.exe"];
+    // Daftar kata kunci aplikasi GUI populer
+    var guiApps = [
+      "calc", "calc.exe", 
+      "notepad", "notepad.exe", 
+      "mspaint", "mspaint.exe", 
+      "explorer", "explorer.exe", 
+      "write", "write.exe", 
+      "taskmgr", "taskmgr.exe",
+      "regedit", "regedit.exe",
+      "control", "control.exe",
+      "cmd", "cmd.exe",
+      "powershell", "powershell.exe"
+    ];
 
     function initTerminal() {
       try {
@@ -84,9 +96,9 @@
         tempFolder = shell.ExpandEnvironmentStrings("%TEMP%");
         
         updatePrompt();
-        appendOutput("Microsoft Windows [Version 10.0]\n(c) Full Interactive CMD Web Terminal (GUI Ready)\n\n");
+        appendOutput("Microsoft Windows [Version 10.0]\n(c) Full Interactive CMD Web Terminal (Ultra Logic Edition)\n\n");
       } catch (err) {
-        appendOutput("ERROR: ActiveX dimatikan atau dibuka di browser modern!\nBuka file ini dengan double click (.hta) atau via Internet Explorer.\n\nDetail Error: " + err.message + "\n\n");
+        appendOutput("ERROR: ActiveX dimatikan atau dibuka di browser modern!\nBuka file ini dengan double click (.hta) atau via MSHTA / Internet Explorer.\n\nDetail Error: " + err.message + "\n\n");
       }
     }
 
@@ -114,19 +126,19 @@
           appendOutput(currentDir + "> " + command + "\n");
           inputElem.value = "";
 
-          // Perintah 'cls'
+          // Handle 'cls'
           if (command.toLowerCase() === "cls") {
             document.getElementById("output").innerText = "";
             return;
           }
 
-          // Perintah 'cd'
+          // Handle 'cd'
           if (command.toLowerCase().substr(0, 3) === "cd " || command.toLowerCase() === "cd") {
             changeDirectory(command.substr(3).trim());
             return;
           }
 
-          // Jalankan Perintah
+          // Eksekusi perintah utama
           runSystemCommand(command);
         } else {
           appendOutput(currentDir + ">\n");
@@ -154,6 +166,7 @@
       }
       try {
         var outFile = tempFolder + "\\cmd_dir_out.txt";
+        // Menggunakan cd /d untuk mendukung perpindahan antar-drive (misal C: ke D:)
         var fullCmd = 'cmd.exe /c "cd /d "' + currentDir + '" && cd /d "' + newPath + '" && cd" > "' + outFile + '"';
         
         shell.Run(fullCmd, 0, true);
@@ -174,32 +187,44 @@
       }
     }
 
+    // Logika Pintar: Mengecek apakah perintah mengarah pada aplikasi GUI
     function isGuiCommand(cmd) {
-      var firstWord = cmd.split(" ")[0].toLowerCase();
-      // Cek apakah perintah diawali kata 'start' atau merupakan aplikasi GUI dikenal
+      var cleanCmd = cmd.toLowerCase().replace(/\\/g, "/");
+      var parts = cleanCmd.split(" ");
+      var firstWord = parts[0];
+      var baseName = firstWord.substring(firstWord.lastIndexOf('/') + 1);
+
       if (firstWord === "start") return true;
+
       for (var i = 0; i < guiApps.length; i++) {
-        if (firstWord === guiApps[i]) return true;
+        if (baseName === guiApps[i]) return true;
       }
       return false;
     }
 
     function runSystemCommand(cmd) {
       try {
-        // Jika perintah adalah panggil GUI (seperti calc) atau menggunakan 'start'
+        // PERBAIKAN LOGIKA 1: Penanganan Aplikasi GUI
         if (isGuiCommand(cmd)) {
-          var execCmd = 'cmd.exe /c "cd /d "' + currentDir + '" && ' + (cmd.toLowerCase().substr(0, 5) === "start" ? cmd : "start " + cmd) + '"';
-          // Parameter 0 = Tersembunyi jendela CMD bawaannya, false = Jangan tunggu sampai app ditutup
+          var execCmd;
+          if (cmd.toLowerCase().substr(0, 5) === "start") {
+            execCmd = 'cmd.exe /c "cd /d "' + currentDir + '" && ' + cmd + '"';
+          } else {
+            // Trik Windows: "start """ digunakan agar Windows tidak salah menganggap kata pertama sebagai Window Title
+            execCmd = 'cmd.exe /c "cd /d "' + currentDir + '" && start "" ' + cmd + '"';
+          }
+          
+          // Execute async (false = jangan tunggu app GUI ditutup)
           shell.Run(execCmd, 0, false);
-          appendOutput("Launched GUI Application.\n\n");
+          appendOutput("Launched GUI application in background.\n\n");
           return;
         }
 
-        // Untuk perintah CLI biasa (dir, ipconfig, dll)
+        // PERBAIKAN LOGIKA 2: Penanganan Perintah Konsol Biasa
         var outFile = tempFolder + "\\cmd_output.txt";
         var fullCmd = 'cmd.exe /c "cd /d "' + currentDir + '" && ' + cmd + '" > "' + outFile + '" 2>&1';
         
-        // Parameter: 0 = Tersembunyi, true = Tunggu eksekusi teks selesai
+        // Execute sync (true = tunggu sampai perintah selesai)
         shell.Run(fullCmd, 0, true);
 
         if (fso.FileExists(outFile)) {
