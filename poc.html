@@ -2,9 +2,10 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
+  <!-- Pakai Rendering Engine Terbaru agar CSS & JS berjalan sempurna -->
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge">
   <title>Web Shell Launcher</title>
   
-  <!-- Pengaturan jendela HTA agar rapi seperti aplikasi -->
   <hta:application 
     id="cmdLauncher"
     applicationname="CMD Launcher"
@@ -13,67 +14,112 @@
     showintaskbar="yes"
     singleinstance="yes"
     windowstate="normal"
+    scroll="no"
   />
 
   <style>
+    * {
+      box-sizing: border-box;
+    }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background-color: #0f172a;
       color: #f8fafc;
+      margin: 0;
+      padding: 20px;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 90vh;
-      margin: 0;
+      min-height: 100vh;
     }
     .card {
       background: #1e293b;
-      padding: 2.5rem;
+      padding: 2rem;
       border-radius: 12px;
       text-align: center;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
       border: 1px solid #334155;
-      width: 320px;
+      width: 100%;
+      max-width: 360px;
+    }
+    h2 {
+      margin-top: 0;
+      color: #38bdf8;
+      font-size: 1.4rem;
+    }
+    p {
+      color: #94a3b8;
+      font-size: 0.9rem;
+      margin-bottom: 1.5rem;
+    }
+    .btn-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
     }
     button {
       background-color: #38bdf8;
       color: #0f172a;
       border: none;
-      padding: 0.8rem 1.8rem;
-      font-size: 1rem;
+      padding: 0.8rem 1rem;
+      font-size: 0.95rem;
       font-weight: bold;
       border-radius: 6px;
       cursor: pointer;
-      transition: background 0.2s;
+      transition: all 0.2s;
     }
     button:hover {
       background-color: #0284c7;
       color: white;
     }
+    button.admin {
+      background-color: #f43f5e;
+      color: white;
+    }
+    button.admin:hover {
+      background-color: #e11d48;
+    }
     .status {
-      margin-top: 1rem;
+      margin-top: 1.2rem;
       font-size: 0.85rem;
-      color: #94a3b8;
+      color: #4ade80;
+      min-height: 20px;
     }
   </style>
 
-  <!-- Script VBScript langsung menjalankan CMD di Windows -->
-  <script language="VBScript">
-    Sub BukaCMD()
-      Set objShell = CreateObject("WScript.Shell")
-      ' Membuka CMD asli di direktori user
-      objShell.Run "cmd.exe /k cd %USERPROFILE%", 1, False
-      
-      document.getElementById("status").innerText = "Command Prompt berhasil dibuka!"
-    End Sub
+  <script>
+    // Fungsi JavaScript dengan ActiveX (WScript.Shell)
+    function openCMD(asAdmin) {
+      try {
+        if (asAdmin) {
+          // Buka CMD sebagai Administrator (PowerShell verb RunAs)
+          var shellApp = new ActiveXObject("Shell.Application");
+          shellApp.ShellExecute("cmd.exe", "/k cd %USERPROFILE%", "", "runas", 1);
+          document.getElementById("status").innerText = "CMD (Admin) berhasil dibuka!";
+        } else {
+          // Buka CMD Biasa
+          var wsh = new ActiveXObject("WScript.Shell");
+          wsh.Run("cmd.exe /k cd %USERPROFILE%", 1, false);
+          document.getElementById("status").innerText = "CMD berhasil dibuka!";
+        }
+      } catch (err) {
+        document.getElementById("status").style.color = "#f87171";
+        document.getElementById("status").innerText = "Gagal membuka CMD: " + err.message;
+      }
+    }
   </script>
 </head>
 <body>
 
   <div class="card">
     <h2>Web Shell Launcher</h2>
-    <p>Klik tombol di bawah untuk membuka Command Prompt di komputer Anda.</p>
-    <button onclick="BukaCMD()">Buka Real CMD</button>
+    <p>Pilih mode di bawah untuk membuka Command Prompt langsung di sistem Windows Anda.</p>
+    
+    <div class="btn-group">
+      <button onclick="openCMD(false)">Buka CMD Biasa</button>
+      <button class="admin" onclick="openCMD(true)">Buka CMD (Administrator)</button>
+    </div>
+
     <div id="status" class="status"></div>
   </div>
 
