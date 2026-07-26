@@ -2,8 +2,9 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=Edge">
-  <title>Windows CMD Web Terminal</title>
+  <!-- Wajib IE=10 agar ActiveXObject TIDAK DIBLOKIR oleh sistem -->
+  <meta http-equiv="X-UA-Compatible" content="IE=10">
+  <title>Standalone CMD Web Terminal</title>
 
   <hta:application 
     id="cmdTerminal"
@@ -13,6 +14,7 @@
     showintaskbar="yes"
     singleinstance="yes"
     windowstate="normal"
+    scroll="no"
   />
 
   <style>
@@ -54,6 +56,7 @@
     .prompt {
       color: #4ade80;
       margin-right: 8px;
+      font-weight: bold;
     }
     #cmd-input {
       background: transparent;
@@ -67,14 +70,22 @@
   </style>
 
   <script>
-    var shell = new ActiveXObject("WScript.Shell");
-    var currentDir = shell.ExpandEnvironmentStrings("%USERPROFILE%");
+    var shell, fso, currentDir, tempFolder;
     var commandHistory = [];
     var historyIndex = -1;
 
     function initTerminal() {
-      updatePrompt();
-      appendOutput("Microsoft Windows [Version 10.0]\n(c) Web CMD Terminal (Standalone HTA Edition)\n\n");
+      try {
+        shell = new ActiveXObject("WScript.Shell");
+        fso = new ActiveXObject("Scripting.FileSystemObject");
+        currentDir = shell.ExpandEnvironmentStrings("%USERPROFILE%");
+        tempFolder = shell.ExpandEnvironmentStrings("%TEMP%");
+        
+        updatePrompt();
+        appendOutput("Microsoft Windows [Version 10.0]\n(c) Full Interactive CMD Web Terminal\n\n");
+      } catch (err) {
+        appendOutput("ERROR: ActiveX dimatikan atau dibuka di browser modern!\nBuka file ini dengan double click (.hta) atau via Internet Explorer.\n\nDetail Error: " + err.message + "\n\n");
+      }
     }
 
     function updatePrompt() {
@@ -88,7 +99,9 @@
     }
 
     function handleKeyPress(e) {
-      if (e.keyCode === 13) { // Enter
+      var keyCode = e.keyCode || e.which;
+
+      if (keyCode === 13) { // Enter
         var inputElem = document.getElementById("cmd-input");
         var command = inputElem.value.trim();
 
@@ -99,29 +112,29 @@
           appendOutput(currentDir + "> " + command + "\n");
           inputElem.value = "";
 
-          // Handle perintah 'cls'
+          // Perintah khusus 'cls'
           if (command.toLowerCase() === "cls") {
             document.getElementById("output").innerText = "";
             return;
           }
 
-          // Handle perintah 'cd' secara internal agar path tetap tersimpan
+          // Perintah khusus 'cd' untuk pindah folder
           if (command.toLowerCase().substr(0, 3) === "cd " || command.toLowerCase() === "cd") {
             changeDirectory(command.substr(3).trim());
             return;
           }
 
-          // Jalankan perintah via CMD / PowerShell di background
+          // Eksekusi Perintah CMD Sistem
           runSystemCommand(command);
         } else {
           appendOutput(currentDir + ">\n");
         }
-      } else if (e.keyCode === 38) { // Panah Atas (History)
+      } else if (keyCode === 38) { // Panah Atas (History)
         if (historyIndex > 0) {
           historyIndex--;
           document.getElementById("cmd-input").value = commandHistory[historyIndex];
         }
-      } else if (e.keyCode === 40) { // Panah Bawah (History)
+      } else if (keyCode === 40) { // Panah Bawah (History)
         if (historyIndex < commandHistory.length - 1) {
           historyIndex++;
           document.getElementById("cmd-input").value = commandHistory[historyIndex];
@@ -138,11 +151,21 @@
         return;
       }
       try {
-        var exec = shell.Exec('cmd.exe /c "cd /d "' + currentDir + '" && cd /d "' + newPath + '" && cd"');
-        var result = exec.StdOut.ReadAll().trim();
-        if (result) {
-          currentDir = result;
-          updatePrompt();
+        var outFile = tempFolder + "\\cmd_dir_out.txt";
+        var fullCmd = 'cmd.exe /c "cd /d "' + currentDir + '" && cd /d "' + newPath + '" && cd" > "' + outFile + '"';
+        
+        shell.Run(fullCmd, 0, true);
+
+        if (fso.FileExists(outFile)) {
+          var file = fso.OpenTextFile(outFile, 1);
+          var result = file.AtEndOfStream ? "" : file.ReadAll().trim();
+          file.Close();
+          fso.DeleteFile(outFile);
+
+          if (result) {
+            currentDir = result;
+            updatePrompt();
+          }
         }
       } catch (err) {
         appendOutput("System cannot find the path specified.\n\n");
@@ -151,14 +174,25 @@
 
     function runSystemCommand(cmd) {
       try {
-        // Eksekusi CMD dari direktori aktif
-        var exec = shell.Exec('cmd.exe /c "cd /d "' + currentDir + '" && ' + cmd + '"');
+        var outFile = tempFolder + "\\cmd_output.txt";
         
-        var stdout = exec.StdOut.ReadAll();
-        var stderr = exec.StdErr.ReadAll();
+        // Eksekusi perintah CMD dan simpan hasilnya ke file temp secara sinkron
+        var fullCmd = 'cmd.exe /c "cd /d "' + currentDir + '" && ' + cmd + '" > "' + outFile + '" 2>&1';
+        
+        // Parameter: 0 = Window tersembunyi, true = Tunggu eksekusi sampai selesai
+        shell.Run(fullCmd, 0, true);
 
-        if (stdout) appendOutput(stdout);
-        if (stderr) appendOutput(stderr);
+        // Baca hasil eksekusi dari file temp
+        if (fso.FileExists(outFile)) {
+          var file = fso.OpenTextFile(outFile, 1);
+          var result = file.AtEndOfStream ? "" : file.ReadAll();
+          file.Close();
+          fso.DeleteFile(outFile);
+
+          if (result) {
+            appendOutput(result);
+          }
+        }
         appendOutput("\n");
       } catch (err) {
         appendOutput("Error executing command: " + err.message + "\n\n");
