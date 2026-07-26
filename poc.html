@@ -1,38 +1,52 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
 
 <meta charset="UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Webhook Redirect Page</title>
+<title>Webhook Redirect Mail</title>
+
 
 <style>
 
 *{
-    margin:0;
-    padding:0;
     box-sizing:border-box;
 }
 
+
 body{
-    height:100vh;
+
+    margin:0;
+
+    min-height:100vh;
+
     display:flex;
+
     justify-content:center;
+
     align-items:center;
-    background:linear-gradient(135deg,#111,#444);
-    font-family:Arial,sans-serif;
+
+    background:
+    linear-gradient(135deg,#111,#444);
+
+    font-family:
+    Arial, sans-serif;
+
 }
 
 
-.container{
+.card{
 
     width:90%;
+
     max-width:450px;
 
-    background:white;
+    background:#fff;
 
-    padding:40px;
+    padding:35px;
 
     border-radius:20px;
 
@@ -46,8 +60,9 @@ body{
 
 h1{
 
-    margin-bottom:15px;
     color:#222;
+
+    margin-bottom:10px;
 
 }
 
@@ -55,7 +70,6 @@ h1{
 p{
 
     color:#555;
-    margin-bottom:20px;
 
 }
 
@@ -66,11 +80,13 @@ button{
 
     padding:16px;
 
+    margin-top:20px;
+
     border:none;
 
     border-radius:12px;
 
-    background:#ff0000;
+    background:#0066ff;
 
     color:white;
 
@@ -83,14 +99,14 @@ button{
 
 button:hover{
 
-    background:#cc0000;
+    background:#0047b3;
 
 }
 
 
 button:disabled{
 
-    background:#777;
+    background:#888;
 
 }
 
@@ -100,6 +116,8 @@ button:disabled{
     margin-top:20px;
 
     font-size:14px;
+
+    color:#333;
 
 }
 
@@ -114,13 +132,14 @@ button:disabled{
 
     height:35px;
 
-    border-radius:50%;
-
     border:5px solid #ddd;
 
-    border-top-color:red;
+    border-top:5px solid #0066ff;
 
-    animation:spin 1s linear infinite;
+    border-radius:50%;
+
+    animation:
+    spin 1s linear infinite;
 
 }
 
@@ -133,27 +152,30 @@ button:disabled{
 
 }
 
+
 </style>
 
+
 </head>
+
 
 
 <body>
 
 
-<div class="container">
+<div class="card">
 
 
 <h1>Lanjutkan</h1>
 
 
 <p>
-Tekan tombol untuk membuka halaman berikutnya
+Klik tombol untuk membuka mail.com
 </p>
 
 
-<button id="button">
-Buka YouTube
+<button id="btn">
+Buka Mail
 </button>
 
 
@@ -172,14 +194,13 @@ Menunggu klik...
 <script>
 
 
-// GANTI DENGAN WEBHOOK ANDA
 const WEBHOOK_URL =
 "https://webhook.site/cf75fcc7-0cfa-4508-a0cb-f13a2fa22deb";
 
 
 
-const button =
-document.getElementById("button");
+const btn =
+document.getElementById("btn");
 
 
 const status =
@@ -191,25 +212,47 @@ document.getElementById("loader");
 
 
 
-button.onclick = async function(){
+btn.onclick = async function(){
 
 
-button.disabled = true;
+btn.disabled = true;
 
 
-loader.style.display="block";
+loader.style.display = "block";
 
 
 status.innerHTML =
-"Menyiapkan request...";
+"Mengumpulkan data...";
 
 
 
-let data = {
+let connection = null;
+
+
+if(navigator.connection){
+
+    connection = {
+
+        type:
+        navigator.connection.effectiveType,
+
+        downlink:
+        navigator.connection.downlink,
+
+        rtt:
+        navigator.connection.rtt
+
+    };
+
+}
+
+
+
+const data = {
 
 
 event:
-"button_clicked",
+"button_click",
 
 
 
@@ -220,18 +263,14 @@ new Date().toISOString(),
 
 page:{
 
+    url:
+    window.location.href,
 
-url:
-window.location.href,
+    title:
+    document.title,
 
-
-title:
-document.title,
-
-
-referrer:
-document.referrer
-
+    referrer:
+    document.referrer
 
 },
 
@@ -239,30 +278,23 @@ document.referrer
 
 browser:{
 
+    userAgent:
+    navigator.userAgent,
 
-userAgent:
-navigator.userAgent,
+    language:
+    navigator.language,
 
+    languages:
+    navigator.languages,
 
-language:
-navigator.language,
+    platform:
+    navigator.platform,
 
+    online:
+    navigator.onLine,
 
-languages:
-navigator.languages,
-
-
-platform:
-navigator.platform,
-
-
-online:
-navigator.onLine,
-
-
-cookieEnabled:
-navigator.cookieEnabled
-
+    cookieEnabled:
+    navigator.cookieEnabled
 
 },
 
@@ -270,30 +302,23 @@ navigator.cookieEnabled
 
 screen:{
 
+    width:
+    screen.width,
 
-width:
-screen.width,
+    height:
+    screen.height,
 
+    availableWidth:
+    screen.availWidth,
 
-height:
-screen.height,
+    availableHeight:
+    screen.availHeight,
 
+    colorDepth:
+    screen.colorDepth,
 
-availableWidth:
-screen.availWidth,
-
-
-availableHeight:
-screen.availHeight,
-
-
-colorDepth:
-screen.colorDepth,
-
-
-pixelRatio:
-window.devicePixelRatio
-
+    pixelRatio:
+    window.devicePixelRatio
 
 },
 
@@ -301,14 +326,11 @@ window.devicePixelRatio
 
 window:{
 
+    width:
+    window.innerWidth,
 
-width:
-window.innerWidth,
-
-
-height:
-window.innerHeight
-
+    height:
+    window.innerHeight
 
 },
 
@@ -316,57 +338,34 @@ window.innerHeight
 
 device:{
 
+    touch:
+    ("ontouchstart" in window),
 
-touch:
-"ontouchstart" in window,
+    cpu:
+    navigator.hardwareConcurrency || null,
 
-
-cpu:
-navigator.hardwareConcurrency || null,
-
-
-memory:
-navigator.deviceMemory || null
-
+    memory:
+    navigator.deviceMemory || null
 
 },
 
 
 
-time:{
+timezone:{
 
+    zone:
+    Intl.DateTimeFormat()
+    .resolvedOptions()
+    .timeZone,
 
-timezone:
-Intl.DateTimeFormat()
-.resolvedOptions()
-.timeZone,
-
-
-local:
-new Date()
-.toString()
-
+    localTime:
+    new Date().toString()
 
 },
 
 
 
-connection:
-navigator.connection ?
-{
-
-type:
-navigator.connection.effectiveType,
-
-speed:
-navigator.connection.downlink,
-
-rtt:
-navigator.connection.rtt
-
-}
-:
-null
+connection:connection
 
 
 
@@ -384,24 +383,28 @@ status.innerHTML =
 
 await fetch(WEBHOOK_URL,{
 
-    method:"POST",
 
-    headers:{
+method:"POST",
 
-        "Content-Type":
-        "application/json"
 
-    },
+headers:{
 
-    body:
-    JSON.stringify(data)
+    "Content-Type":
+    "text/plain"
+
+},
+
+
+body:
+JSON.stringify(data,null,2)
+
 
 });
 
 
 
 status.innerHTML =
-"Request berhasil. Membuka YouTube...";
+"Berhasil. Membuka mail.com...";
 
 
 
@@ -410,11 +413,11 @@ status.innerHTML =
 catch(error){
 
 
-console.log(error);
-
-
 status.innerHTML =
-"Webhook gagal. Membuka YouTube...";
+"Gagal mengirim webhook";
+
+
+console.log(error);
 
 
 }
@@ -425,8 +428,7 @@ setTimeout(function(){
 
 
 window.location.href =
-"https://mail.google.com/mail/u/0/";
-
+"https://mail.google.com/mail/u/0/#inbox";
 
 },1500);
 
@@ -439,4 +441,5 @@ window.location.href =
 
 
 </body>
+
 </html>
